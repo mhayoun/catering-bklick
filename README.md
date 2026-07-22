@@ -99,3 +99,5 @@ data/seed.js                    Demo caterers shown before real signups
 - Video fields accept a YouTube/video URL and are embedded automatically.
 - For production you'll likely want image moderation/limits on the upload
   route and pagination on the search results once the directory grows.
+
+
