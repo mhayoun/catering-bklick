@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '../../../components/LanguageProvider';
 import { Logo } from '../../../components/Logo';
+import { ProposalModal } from '../../../components/ProposalModal';
 import { pickLocalized, toArrayField } from '../../../lib/localized';
 
 export default function CatererProfilePage({ params }) {
   const { dict, locale } = useLanguage();
   const [caterer, setCaterer] = useState(undefined);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const [proposalOpen, setProposalOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/caterers/${params.id}`)
@@ -60,6 +62,16 @@ export default function CatererProfilePage({ params }) {
           {toArrayField(caterer, 'kashrutLevels', 'kashrut').map((k) => dict.kashrut[k]).join(' + ')}
         </span>
       </header>
+
+      {caterer.whatsapp && (
+        <button
+          type="button"
+          onClick={() => setProposalOpen(true)}
+          className="bg-orange text-cream font-display font-bold px-5 py-3 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring inline-flex items-center gap-2"
+        >
+          💬 {dict.proposal.cta}
+        </button>
+      )}
 
       {caterer.photos?.length > 0 && (
         <section className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -234,6 +246,10 @@ export default function CatererProfilePage({ params }) {
           )}
         </div>
       </section>
+
+      {proposalOpen && caterer.whatsapp && (
+        <ProposalModal caterer={caterer} onClose={() => setProposalOpen(false)} />
+      )}
     </div>
   );
 }
