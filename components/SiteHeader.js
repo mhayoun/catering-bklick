@@ -31,6 +31,11 @@ export function SiteHeader() {
               {dict.nav.dashboard}
             </Link>
           )}
+          {session?.user?.isAdmin && (
+            <Link href="/admin" className="hover:text-paprika focus-ring rounded">
+              {dict.nav.admin}
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">

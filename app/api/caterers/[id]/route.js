@@ -2,10 +2,19 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import { getCaterer, upsertCaterer, deleteCaterer } from '../../../../lib/store';
+import { isAdminEmail } from '../../../../lib/admin';
 
 export async function GET(_request, { params }) {
   const caterer = await getCaterer(params.id);
   if (!caterer) return NextResponse.json({ error: 'not found' }, { status: 404 });
+
+  if (caterer.status !== 'approved') {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email;
+    const allowed = email && (email === caterer.ownerEmail || isAdminEmail(email));
+    if (!allowed) return NextResponse.json({ error: 'not found' }, { status: 404 });
+  }
+
   return NextResponse.json({ caterer });
 }
 

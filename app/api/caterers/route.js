@@ -19,9 +19,9 @@ export async function GET(request) {
   };
 
   const results = await searchCaterers(filters);
-  // Only ever show published listings in public search.
-  const published = results.filter((c) => c.published !== false);
-  return NextResponse.json({ results: published });
+  // Public search only ever shows admin-approved listings.
+  const approved = results.filter((c) => c.status === 'approved');
+  return NextResponse.json({ results: approved });
 }
 
 export async function POST(request) {

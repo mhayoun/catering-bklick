@@ -35,8 +35,7 @@ const BLANK = {
   instagram: '',
   facebook: '',
   photos: [],
-  videos: [],
-  published: true
+  videos: []
 };
 
 export function CatererForm({ initial, catererId }) {
@@ -109,6 +108,9 @@ export function CatererForm({ initial, catererId }) {
       <div>
         <h1 className="font-display font-extrabold text-2xl text-eggplant">{dict.form.title}</h1>
         <p className="text-ink/70 mt-1">{dict.form.subtitle}</p>
+        <p className="text-sm text-paprikaDark bg-paprika/10 border-2 border-paprika/40 rounded-blob px-3 py-2 mt-3">
+          {dict.form.moderationNotice}
+        </p>
       </div>
 
       {error && <p className="bg-paprika/10 border-2 border-paprika text-paprikaDark rounded-blob p-3">{error}</p>}

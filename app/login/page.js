@@ -1,23 +1,52 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { signIn, getProviders } from 'next-auth/react';
 import { useLanguage } from '../../components/LanguageProvider';
 import { Logo } from '../../components/Logo';
 
 export default function LoginPage() {
   const { dict } = useLanguage();
+  const [providers, setProviders] = useState(null);
+
+  useEffect(() => {
+    getProviders().then(setProviders);
+  }, []);
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 text-center space-y-6">
       <Logo className="h-20 w-20 mx-auto" />
       <h1 className="font-display font-extrabold text-2xl text-eggplant">{dict.auth.loginTitle}</h1>
       <p className="text-ink/70">{dict.auth.loginSubtitle}</p>
-      <button
-        onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-        className="bg-paprika text-cream font-display font-bold px-6 py-3 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring inline-flex items-center gap-2"
-      >
-        <GoogleG /> {dict.auth.googleLogin}
-      </button>
+
+      <div className="flex flex-col items-center gap-3">
+        {providers?.google && (
+          <button
+            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+            className="bg-paprika text-cream font-display font-bold px-6 py-3 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring inline-flex items-center gap-2"
+          >
+            <GoogleG /> {dict.auth.googleLogin}
+          </button>
+        )}
+
+        {providers?.['dev-demo'] && (
+          <div className="border-2 border-dashed border-eggplant/40 rounded-blob p-4 text-start w-full">
+            <p className="text-xs font-semibold text-eggplant/70 mb-2">
+              ⚠️ Dev-only fallback - no Google OAuth configured yet. Never available in production.
+            </p>
+            <button
+              onClick={() => signIn('dev-demo', { email: 'demo@example.com', callbackUrl: '/dashboard' })}
+              className="bg-zaatar text-cream font-display font-bold px-5 py-2.5 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring w-full"
+            >
+              Continue as Demo Owner
+            </button>
+          </div>
+        )}
+
+        {providers && !providers.google && !providers['dev-demo'] && (
+          <p className="text-sm text-paprikaDark">No sign-in provider is configured.</p>
+        )}
+      </div>
     </div>
   );
 }

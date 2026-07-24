@@ -33,6 +33,29 @@ npm run dev
 
 Open http://localhost:3000.
 
+### Local development quick-start (no Google OAuth yet)
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+Then edit `.env.local` and set at minimum:
+```
+NEXTAUTH_SECRET=any-random-string   # openssl rand -base64 32
+NEXTAUTH_URL=http://localhost:3000
+```
+
+Without `NEXTAUTH_SECRET`/`NEXTAUTH_URL` set, NextAuth logs warnings (harmless
+in dev, but set them to silence them and to make sessions work reliably).
+
+If `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are **not** set, the app
+automatically enables a **dev-only "Continue as Demo Owner" button** on the
+`/login` page so you can test sign-in, the dashboard, and the registration
+form right away. This fallback is gated on `NODE_ENV !== 'production'` and
+disappears the moment Google credentials are configured, so it can never
+leak into a real deployment.
+
 ### Running without any cloud services configured
 
 The app is designed to work out of the box for local development/demo:
@@ -40,8 +63,8 @@ The app is designed to work out of the box for local development/demo:
 - **No Vercel KV configured?** `lib/store.js` automatically falls back to an
   in-memory store seeded with 3 demo caterers (`data/seed.js`). Great for
   trying the UI, but data resets when the dev server restarts.
-- **No Google OAuth configured?** Public search and profile pages work fine;
-  only sign-in / registration will fail until you add credentials.
+- **No Google OAuth configured?** Use the dev-only demo login above to test
+  sign-in and registration locally.
 - **No Blob token configured?** Photo upload in the registration form will
   show an error, but everything else still works — you can still list a
   caterer without uploading images.
@@ -99,5 +122,3 @@ data/seed.js                    Demo caterers shown before real signups
 - Video fields accept a YouTube/video URL and are embedded automatically.
 - For production you'll likely want image moderation/limits on the upload
   route and pagination on the search results once the directory grows.
-
-

@@ -46,6 +46,8 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      <p className="text-sm text-ink/60 -mt-2">{dict.dashboard.moderationNote}</p>
+
       {caterers.length === 0 && (
         <p className="bg-turmericLight/60 border-2 border-eggplant/30 rounded-blob p-6 text-center text-ink/70">
           {dict.dashboard.empty}
@@ -54,10 +56,18 @@ export default function DashboardPage() {
 
       <div className="space-y-3">
         {caterers.map((c) => (
-          <div key={c.id} className="bg-white border-4 border-eggplant rounded-blob p-4 flex items-center justify-between gap-3">
+          <div key={c.id} className="bg-white border-4 border-eggplant rounded-blob p-4 flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <p className="font-display font-bold text-eggplant">{c.businessName}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-display font-bold text-eggplant">{c.businessName}</p>
+                <StatusBadge status={c.status} dict={dict} />
+              </div>
               <p className="text-sm text-ink/60">{c.city}</p>
+              {c.status === 'rejected' && c.rejectionReason && (
+                <p className="text-sm text-paprikaDark mt-1">
+                  <strong>{dict.dashboard.rejectionReason}:</strong> {c.rejectionReason}
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <Link href={`/caterer/${c.id}`} className="text-sm text-zaatar font-semibold hover:underline focus-ring rounded">
@@ -74,5 +84,17 @@ export default function DashboardPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+function StatusBadge({ status, dict }) {
+  const map = {
+    pending_review: { label: dict.dashboard.statusPending, cls: 'bg-turmericLight text-eggplant' },
+    approved: { label: dict.dashboard.statusApproved, cls: 'bg-zaatar text-cream' },
+    rejected: { label: dict.dashboard.statusRejected, cls: 'bg-paprika text-cream' }
+  };
+  const conf = map[status] || map.pending_review;
+  return (
+    <span className={`text-xs font-display font-bold px-2 py-1 rounded-full ${conf.cls}`}>{conf.label}</span>
   );
 }
