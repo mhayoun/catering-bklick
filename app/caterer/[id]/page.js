@@ -9,12 +9,27 @@ import { pickLocalized, toArrayField } from '../../../lib/localized';
 export default function CatererProfilePage({ params }) {
   const { dict, locale } = useLanguage();
   const [caterer, setCaterer] = useState(undefined);
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
 
   useEffect(() => {
     fetch(`/api/caterers/${params.id}`)
       .then((r) => r.json())
       .then((data) => setCaterer(data.caterer || null));
   }, [params.id]);
+
+  const photoCount = caterer?.photos?.length || 0;
+
+  useEffect(() => {
+    if (lightboxIndex < 0) return;
+
+    function onKeyDown(e) {
+      if (e.key === 'Escape') setLightboxIndex(-1);
+      if (e.key === 'ArrowRight') setLightboxIndex((i) => (i + 1) % photoCount);
+      if (e.key === 'ArrowLeft') setLightboxIndex((i) => (i - 1 + photoCount) % photoCount);
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [lightboxIndex, photoCount]);
 
   if (caterer === undefined) {
     return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
@@ -49,15 +64,81 @@ export default function CatererProfilePage({ params }) {
       {caterer.photos?.length > 0 && (
         <section className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {caterer.photos.map((src, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <button
               key={i}
-              src={src}
-              alt={`${caterer.businessName} ${i + 1}`}
-              className="w-full h-40 object-cover rounded-blob border-4 border-teal"
-            />
+              type="button"
+              onClick={() => setLightboxIndex(i)}
+              className="focus-ring rounded-blob"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt={`${caterer.businessName} ${i + 1}`}
+                className="w-full h-40 object-cover rounded-blob border-4 border-teal cursor-pointer hover:opacity-90 transition-opacity"
+              />
+            </button>
           ))}
         </section>
+      )}
+
+      {lightboxIndex >= 0 && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-ink/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxIndex(-1)}
+        >
+          <button
+            type="button"
+            aria-label={dict.profile.galleryClose}
+            onClick={() => setLightboxIndex(-1)}
+            className="absolute top-4 end-4 h-10 w-10 rounded-full bg-cream/10 text-cream text-2xl leading-none flex items-center justify-center hover:bg-cream/20 focus-ring"
+          >
+            ×
+          </button>
+
+          {photoCount > 1 && (
+            <button
+              type="button"
+              aria-label={dict.profile.galleryPrev}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((i) => (i - 1 + photoCount) % photoCount);
+              }}
+              className="absolute start-2 sm:start-6 h-11 w-11 rounded-full bg-cream/10 text-cream text-2xl leading-none flex items-center justify-center hover:bg-cream/20 focus-ring"
+            >
+              ‹
+            </button>
+          )}
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={caterer.photos[lightboxIndex]}
+            alt={`${caterer.businessName} ${lightboxIndex + 1}`}
+            className="max-h-[85vh] max-w-full object-contain rounded-blob"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {photoCount > 1 && (
+            <button
+              type="button"
+              aria-label={dict.profile.galleryNext}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((i) => (i + 1) % photoCount);
+              }}
+              className="absolute end-2 sm:end-6 h-11 w-11 rounded-full bg-cream/10 text-cream text-2xl leading-none flex items-center justify-center hover:bg-cream/20 focus-ring"
+            >
+              ›
+            </button>
+          )}
+
+          {photoCount > 1 && (
+            <span dir="ltr" className="absolute bottom-4 start-1/2 -translate-x-1/2 text-cream/80 text-sm font-display">
+              {lightboxIndex + 1} / {photoCount}
+            </span>
+          )}
+        </div>
       )}
 
       <section>
