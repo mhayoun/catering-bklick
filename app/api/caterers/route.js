@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import { searchCaterers, upsertCaterer } from '../../../lib/store';
-import { autoTranslate } from '../../../lib/translate';
+import { fillLocalizedGaps } from '../../../lib/translate';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -37,10 +37,11 @@ export async function POST(request) {
     return NextResponse.json({ error: 'missing required fields' }, { status: 400 });
   }
 
-  const description = await autoTranslate(body.description, body.descriptionLang);
+  const description = await fillLocalizedGaps(body.description);
+  const city = await fillLocalizedGaps(body.city);
 
   const record = await upsertCaterer(
-    { ...body, description, id: undefined, ownerEmail: session.user.email },
+    { ...body, description, city, id: undefined, ownerEmail: session.user.email },
     session.user.email
   );
 

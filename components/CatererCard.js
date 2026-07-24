@@ -39,7 +39,7 @@ export function CatererCard({ caterer }) {
         </div>
         <p className="text-sm text-ink/70 line-clamp-2">{pickLocalized(caterer.description, locale)}</p>
         <div className="flex items-center justify-between text-sm font-body text-eggplant/80 pt-1">
-          <span>{caterer.city}</span>
+          <span>{pickLocalized(caterer.city, locale)}</span>
           <span>{t('card.guestsUpTo', { n: caterer.maxGuests })}</span>
         </div>
         {caterer.priceFrom && (

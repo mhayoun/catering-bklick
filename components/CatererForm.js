@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from './LanguageProvider';
 import { CheckboxGroup } from './CheckboxGroup';
-import { pickLocalized } from '../lib/localized';
+import { toLocalizedDraft } from '../lib/localized';
 import {
   DISTRICTS,
   KASHRUT_LEVELS,
@@ -12,14 +12,15 @@ import {
   EVENT_TYPES,
   MENU_CATEGORIES,
   BEVERAGE_TYPES,
-  ADDITIONAL_SERVICES
+  ADDITIONAL_SERVICES,
+  LOCALES
 } from '../lib/constants';
 
 const BLANK = {
   businessName: '',
-  description: '',
+  description: { he: '', en: '', fr: '' },
   districts: [],
-  city: '',
+  city: { he: '', en: '', fr: '' },
   address: '',
   kashrutLevels: [],
   cateringTypes: [],
@@ -44,7 +45,8 @@ export function CatererForm({ initial, catererId }) {
   const router = useRouter();
   const [form, setForm] = useState(() => {
     const merged = { ...BLANK, ...initial };
-    merged.description = pickLocalized(initial?.description, locale);
+    merged.description = toLocalizedDraft(initial?.description, locale);
+    merged.city = toLocalizedDraft(initial?.city, locale);
     // Backward-compat: older records stored these as single values.
     if (!initial?.districts && initial?.district) merged.districts = [initial.district];
     if (!initial?.kashrutLevels && initial?.kashrut) merged.kashrutLevels = [initial.kashrut];
@@ -55,10 +57,58 @@ export function CatererForm({ initial, catererId }) {
   const [uploading, setUploading] = useState(false);
   const [videoDraft, setVideoDraft] = useState('');
   const [error, setError] = useState('');
+  const [translating, setTranslating] = useState({});
 
   function set(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
+
+  function setLocalized(key, text) {
+    setForm((prev) => ({ ...prev, [key]: { ...prev[key], [locale]: text } }));
+  }
+
+  // Live in-form translation preview: when the owner switches the active
+  // language and a description/city field is blank for it, fill it in from
+  // whichever language they already typed - so switching to Hebrew shows a
+  // Hebrew translation instead of an empty box. Never overwrites text that's
+  // already there (typed or previously translated).
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fillGap(key) {
+      const value = form[key];
+      if (value[locale]?.trim()) return;
+      const sourceLocale = LOCALES.find((l) => value[l]?.trim());
+      if (!sourceLocale) return;
+
+      setTranslating((prev) => ({ ...prev, [key]: true }));
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: value[sourceLocale], source: sourceLocale, target: locale })
+        });
+        const data = await res.json();
+        if (!cancelled && res.ok && data.translated) {
+          setForm((prev) =>
+            prev[key][locale]?.trim() ? prev : { ...prev, [key]: { ...prev[key], [locale]: data.translated } }
+          );
+        }
+      } catch {
+        // Ignore - the owner can just type the translation manually.
+      } finally {
+        if (!cancelled) setTranslating((prev) => ({ ...prev, [key]: false }));
+      }
+    }
+
+    fillGap('description');
+    fillGap('city');
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   async function handleFileUpload(e) {
     const files = Array.from(e.target.files || []);
@@ -109,7 +159,7 @@ export function CatererForm({ initial, catererId }) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, descriptionLang: locale })
+        body: JSON.stringify(form)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'save failed');
@@ -136,12 +186,19 @@ export function CatererForm({ initial, catererId }) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <TextField label={dict.form.businessName} value={form.businessName} onChange={(v) => set('businessName', v)} required />
-        <TextField label={dict.form.city} value={form.city} onChange={(v) => set('city', v)} required />
+        <div>
+          <TextField label={dict.form.city} value={form.city[locale]} onChange={(v) => setLocalized('city', v)} required />
+          <p className="text-xs text-zaatar font-semibold mt-1">
+            {translating.city ? `⏳ ${dict.form.translating}` : `✨ ${dict.form.cityAutoTranslate}`}
+          </p>
+        </div>
       </div>
 
       <div>
-        <TextArea label={dict.form.description} value={form.description} onChange={(v) => set('description', v)} />
-        <p className="text-xs text-zaatar font-semibold mt-1">✨ {dict.form.descriptionAutoTranslate}</p>
+        <TextArea label={dict.form.description} value={form.description[locale]} onChange={(v) => setLocalized('description', v)} />
+        <p className="text-xs text-zaatar font-semibold mt-1">
+          {translating.description ? `⏳ ${dict.form.translating}` : `✨ ${dict.form.descriptionAutoTranslate}`}
+        </p>
       </div>
 
       <TextField label={dict.form.address} value={form.address} onChange={(v) => set('address', v)} />

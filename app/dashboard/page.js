@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '../../components/LanguageProvider';
+import { pickLocalized } from '../../lib/localized';
 
 export default function DashboardPage() {
-  const { dict } = useLanguage();
+  const { dict, locale } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   const [caterers, setCaterers] = useState(null);
@@ -62,7 +63,7 @@ export default function DashboardPage() {
                 <p className="font-display font-bold text-eggplant">{c.businessName}</p>
                 <StatusBadge status={c.status} dict={dict} />
               </div>
-              <p className="text-sm text-ink/60">{c.city}</p>
+              <p className="text-sm text-ink/60">{pickLocalized(c.city, locale)}</p>
               {c.status === 'rejected' && c.rejectionReason && (
                 <p className="text-sm text-paprikaDark mt-1">
                   <strong>{dict.dashboard.rejectionReason}:</strong> {c.rejectionReason}

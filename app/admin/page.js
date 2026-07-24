@@ -84,7 +84,7 @@ export default function AdminPage() {
               <div>
                 <p className="font-display font-bold text-lg text-eggplant">{c.businessName}</p>
                 <p className="text-sm text-ink/60">
-                  {c.city} · {dict.admin.submittedBy}: {c.ownerEmail}
+                  {pickLocalized(c.city, locale)} · {dict.admin.submittedBy}: {c.ownerEmail}
                 </p>
               </div>
               <Link href={`/caterer/${c.id}`} className="text-sm text-zaatar font-semibold hover:underline focus-ring rounded whitespace-nowrap">

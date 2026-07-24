@@ -37,7 +37,7 @@ export default function CatererProfilePage({ params }) {
       <header className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div>
           <h1 className="font-display font-extrabold text-3xl text-eggplant">{caterer.businessName}</h1>
-          <p className="text-ink/70 mt-1">{caterer.city}</p>
+          <p className="text-ink/70 mt-1">{pickLocalized(caterer.city, locale)}</p>
         </div>
         <span className="bg-zaatar text-cream font-display font-bold px-3 py-1.5 rounded-full text-sm">
           {toArrayField(caterer, 'cateringTypes', 'cateringType').map((ct) => dict.cateringType[ct]).join(' + ')}
