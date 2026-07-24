@@ -158,7 +158,9 @@ export default function CatererProfilePage({ params }) {
 }
 
 function toEmbedUrl(url) {
-  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([\w-]+)/);
+  const ytMatch = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/))([\w-]+)/
+  );
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
   return url;
 }

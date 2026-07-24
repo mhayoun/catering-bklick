@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "clean-kv": "node --env-file=.env.local scripts/clean-kv.js"
   },
   "dependencies": {
     "next": "14.2.35",
