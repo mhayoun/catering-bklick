@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import { searchCaterers, upsertCaterer } from '../../../lib/store';
+import { autoTranslate } from '../../../lib/translate';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -32,12 +33,14 @@ export async function POST(request) {
 
   const body = await request.json();
 
-  if (!body.businessName || !body.district || !body.cateringType) {
+  if (!body.businessName || !body.districts?.length || !body.cateringTypes?.length) {
     return NextResponse.json({ error: 'missing required fields' }, { status: 400 });
   }
 
+  const description = await autoTranslate(body.description, body.descriptionLang);
+
   const record = await upsertCaterer(
-    { ...body, id: undefined, ownerEmail: session.user.email },
+    { ...body, description, id: undefined, ownerEmail: session.user.email },
     session.user.email
   );
 

@@ -69,6 +69,28 @@ The app is designed to work out of the box for local development/demo:
   show an error, but everything else still works — you can still list a
   caterer without uploading images.
 
+## Auto-translated descriptions
+
+The "short description" field is stored as `{ he, en, fr }` and is
+**automatically translated** on save:
+
+- The owner types the description once, in whichever language their UI is
+  currently set to.
+- On save, `lib/translate.js` translates it into the other two languages
+  and stores all three - no extra fields, no manual retyping.
+- Works with **zero configuration** out of the box via the free
+  [MyMemory](https://mymemory.translated.net/) API. For higher quality or
+  volume, set `GOOGLE_TRANSLATE_API_KEY` and Google Cloud Translation is
+  used automatically instead.
+- Editing the description in the same language it was last saved in and
+  re-saving without changes skips re-translation (no wasted API calls);
+  editing the text re-triggers translation for that language's edit.
+- Search, cards, profile pages, and the admin review screen all read the
+  right language automatically via `lib/localized.js`'s `pickLocalized()`.
+- Translation quality is "good enough for a directory listing," not
+  professional-grade - business owners can still see all three versions
+  and there's room to add a manual-edit-per-language UI later if needed.
+
 ## Deploying to Vercel
 
 1. Push this project to a GitHub repo and import it in Vercel.

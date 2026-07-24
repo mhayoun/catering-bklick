@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import { getCaterer, upsertCaterer, deleteCaterer } from '../../../../lib/store';
 import { isAdminEmail } from '../../../../lib/admin';
+import { autoTranslate } from '../../../../lib/translate';
 
 export async function GET(_request, { params }) {
   const caterer = await getCaterer(params.id);
@@ -31,8 +32,17 @@ export async function PUT(request, { params }) {
   }
 
   const body = await request.json();
+
+  let description = existing.description;
+  if (typeof body.description === 'string') {
+    const lang = ['he', 'en', 'fr'].includes(body.descriptionLang) ? body.descriptionLang : 'he';
+    const previousTextForLang = existing.description?.[lang];
+    const unchanged = previousTextForLang === body.description;
+    description = unchanged ? existing.description : await autoTranslate(body.description, lang);
+  }
+
   const record = await upsertCaterer(
-    { ...existing, ...body, id: params.id, ownerEmail: existing.ownerEmail },
+    { ...existing, ...body, description, id: params.id, ownerEmail: existing.ownerEmail },
     session.user.email
   );
   return NextResponse.json({ caterer: record });

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from './LanguageProvider';
 import { CheckboxGroup } from './CheckboxGroup';
+import { pickLocalized } from '../lib/localized';
 import {
   DISTRICTS,
   KASHRUT_LEVELS,
@@ -17,11 +18,11 @@ import {
 const BLANK = {
   businessName: '',
   description: '',
-  district: '',
+  districts: [],
   city: '',
   address: '',
-  kashrut: '',
-  cateringType: '',
+  kashrutLevels: [],
+  cateringTypes: [],
   maxGuests: '',
   priceFrom: '',
   eventTypes: [],
@@ -39,9 +40,17 @@ const BLANK = {
 };
 
 export function CatererForm({ initial, catererId }) {
-  const { dict } = useLanguage();
+  const { dict, locale } = useLanguage();
   const router = useRouter();
-  const [form, setForm] = useState({ ...BLANK, ...initial });
+  const [form, setForm] = useState(() => {
+    const merged = { ...BLANK, ...initial };
+    merged.description = pickLocalized(initial?.description, locale);
+    // Backward-compat: older records stored these as single values.
+    if (!initial?.districts && initial?.district) merged.districts = [initial.district];
+    if (!initial?.kashrutLevels && initial?.kashrut) merged.kashrutLevels = [initial.kashrut];
+    if (!initial?.cateringTypes && initial?.cateringType) merged.cateringTypes = [initial.cateringType];
+    return merged;
+  });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [videoDraft, setVideoDraft] = useState('');
@@ -82,15 +91,25 @@ export function CatererForm({ initial, catererId }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setSaving(true);
     setError('');
+
+    if (form.districts.length === 0) {
+      setError(dict.form.districtsRequired);
+      return;
+    }
+    if (form.cateringTypes.length === 0) {
+      setError(dict.form.cateringTypesRequired);
+      return;
+    }
+
+    setSaving(true);
     try {
       const url = catererId ? `/api/caterers/${catererId}` : '/api/caterers';
       const method = catererId ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify({ ...form, descriptionLang: locale })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'save failed');
@@ -120,37 +139,34 @@ export function CatererForm({ initial, catererId }) {
         <TextField label={dict.form.city} value={form.city} onChange={(v) => set('city', v)} required />
       </div>
 
-      <TextArea label={dict.form.description} value={form.description} onChange={(v) => set('description', v)} />
+      <div>
+        <TextArea label={dict.form.description} value={form.description} onChange={(v) => set('description', v)} />
+        <p className="text-xs text-zaatar font-semibold mt-1">✨ {dict.form.descriptionAutoTranslate}</p>
+      </div>
 
       <TextField label={dict.form.address} value={form.address} onChange={(v) => set('address', v)} />
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <SelectField label={dict.form.district} value={form.district} onChange={(v) => set('district', v)} required>
-          {DISTRICTS.map((d) => (
-            <option key={d} value={d}>{dict.districts[d]}</option>
-          ))}
-        </SelectField>
+      <div className="grid sm:grid-cols-3 gap-6">
+        <FieldBlock label={dict.form.districts}>
+          <CheckboxGroup name={dict.form.districts} options={DISTRICTS} labels={dict.districts} values={form.districts} onChange={(v) => set('districts', v)} />
+        </FieldBlock>
 
-        <SelectField label={dict.form.kashrut} value={form.kashrut} onChange={(v) => set('kashrut', v)}>
-          {KASHRUT_LEVELS.map((k) => (
-            <option key={k} value={k}>{dict.kashrut[k]}</option>
-          ))}
-        </SelectField>
+        <FieldBlock label={dict.form.kashrutLevels}>
+          <CheckboxGroup name={dict.form.kashrutLevels} options={KASHRUT_LEVELS} labels={dict.kashrut} values={form.kashrutLevels} onChange={(v) => set('kashrutLevels', v)} />
+        </FieldBlock>
 
-        <SelectField label={dict.form.cateringType} value={form.cateringType} onChange={(v) => set('cateringType', v)} required>
-          {CATERING_TYPES.map((c) => (
-            <option key={c} value={c}>{dict.cateringType[c]}</option>
-          ))}
-        </SelectField>
-
-        <TextField
-          label={dict.form.maxGuests}
-          type="number"
-          value={form.maxGuests}
-          onChange={(v) => set('maxGuests', v)}
-          required
-        />
+        <FieldBlock label={dict.form.cateringTypes}>
+          <CheckboxGroup name={dict.form.cateringTypes} options={CATERING_TYPES} labels={dict.cateringType} values={form.cateringTypes} onChange={(v) => set('cateringTypes', v)} />
+        </FieldBlock>
       </div>
+
+      <TextField
+        label={dict.form.maxGuests}
+        type="number"
+        value={form.maxGuests}
+        onChange={(v) => set('maxGuests', v)}
+        required
+      />
 
       <FieldBlock label={dict.form.eventTypes}>
         <CheckboxGroup name={dict.form.eventTypes} options={EVENT_TYPES} labels={dict.eventTypes} values={form.eventTypes} onChange={(v) => set('eventTypes', v)} />
@@ -249,23 +265,6 @@ function TextArea({ label, value, onChange }) {
         rows={3}
         className="w-full rounded-blob border-2 border-eggplant/40 px-4 py-2 bg-cream focus-ring"
       />
-    </label>
-  );
-}
-
-function SelectField({ label, value, onChange, children, required }) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-display font-semibold text-eggplant">{label}</span>
-      <select
-        required={required}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-full border-2 border-eggplant/40 px-4 py-2 bg-cream focus-ring"
-      >
-        <option value="">—</option>
-        {children}
-      </select>
     </label>
   );
 }

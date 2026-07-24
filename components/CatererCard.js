@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { useLanguage } from './LanguageProvider';
+import { pickLocalized, toArrayField } from '../lib/localized';
 
 export function CatererCard({ caterer }) {
-  const { dict, t } = useLanguage();
+  const { dict, t, locale } = useLanguage();
   const photo = caterer.photos?.[0];
+  const cateringTypes = toArrayField(caterer, 'cateringTypes', 'cateringType');
 
   return (
     <Link
@@ -27,11 +29,15 @@ export function CatererCard({ caterer }) {
           <h3 className="font-display font-bold text-lg text-eggplant group-hover:text-paprika">
             {caterer.businessName}
           </h3>
-          <span className="text-xs font-display font-bold bg-zaatar text-cream px-2 py-1 rounded-full whitespace-nowrap">
-            {dict.cateringType[caterer.cateringType]}
+          <span className="flex gap-1 shrink-0">
+            {cateringTypes.map((ct) => (
+              <span key={ct} className="text-xs font-display font-bold bg-zaatar text-cream px-2 py-1 rounded-full whitespace-nowrap">
+                {dict.cateringType[ct]}
+              </span>
+            ))}
           </span>
         </div>
-        <p className="text-sm text-ink/70 line-clamp-2">{caterer.description}</p>
+        <p className="text-sm text-ink/70 line-clamp-2">{pickLocalized(caterer.description, locale)}</p>
         <div className="flex items-center justify-between text-sm font-body text-eggplant/80 pt-1">
           <span>{caterer.city}</span>
           <span>{t('card.guestsUpTo', { n: caterer.maxGuests })}</span>

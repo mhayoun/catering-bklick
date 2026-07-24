@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '../../../components/LanguageProvider';
 import { Logo } from '../../../components/Logo';
+import { pickLocalized, toArrayField } from '../../../lib/localized';
 
 export default function CatererProfilePage({ params }) {
-  const { dict } = useLanguage();
+  const { dict, locale } = useLanguage();
   const [caterer, setCaterer] = useState(undefined);
 
   useEffect(() => {
@@ -39,7 +40,9 @@ export default function CatererProfilePage({ params }) {
           <p className="text-ink/70 mt-1">{caterer.city}</p>
         </div>
         <span className="bg-zaatar text-cream font-display font-bold px-3 py-1.5 rounded-full text-sm">
-          {dict.cateringType[caterer.cateringType]} · {dict.kashrut[caterer.kashrut]}
+          {toArrayField(caterer, 'cateringTypes', 'cateringType').map((ct) => dict.cateringType[ct]).join(' + ')}
+          {' · '}
+          {toArrayField(caterer, 'kashrutLevels', 'kashrut').map((k) => dict.kashrut[k]).join(' + ')}
         </span>
       </header>
 
@@ -59,7 +62,7 @@ export default function CatererProfilePage({ params }) {
 
       <section>
         <h2 className="font-display font-bold text-xl text-eggplant mb-2">{dict.profile.about}</h2>
-        <p className="text-ink/80">{caterer.description}</p>
+        <p className="text-ink/80">{pickLocalized(caterer.description, locale)}</p>
       </section>
 
       <section>
