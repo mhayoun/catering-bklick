@@ -137,6 +137,7 @@ data/seed.js                    Demo caterers shown before real signups
 
 ## Notes & next steps
 
+
 - Kashrut levels, districts, event types, menu categories, beverage types
   and additional services all live in `lib/constants.js` — add or rename
   options there and both the search filters and the registration form pick
