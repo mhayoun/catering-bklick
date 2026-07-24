@@ -32,16 +32,16 @@ export default function DashboardPage() {
   }
 
   if (status === 'loading' || caterers === null) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-eggplant">…</div>;
+    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
   }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display font-extrabold text-2xl text-eggplant">{dict.dashboard.title}</h1>
+        <h1 className="font-display font-extrabold text-2xl text-teal">{dict.dashboard.title}</h1>
         <Link
           href="/dashboard/new"
-          className="bg-paprika text-cream font-display font-bold px-4 py-2 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring"
+          className="bg-orange text-cream font-display font-bold px-4 py-2 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring"
         >
           {dict.dashboard.addNew}
         </Link>
@@ -50,34 +50,34 @@ export default function DashboardPage() {
       <p className="text-sm text-ink/60 -mt-2">{dict.dashboard.moderationNote}</p>
 
       {caterers.length === 0 && (
-        <p className="bg-turmericLight/60 border-2 border-eggplant/30 rounded-blob p-6 text-center text-ink/70">
+        <p className="bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center text-ink/70">
           {dict.dashboard.empty}
         </p>
       )}
 
       <div className="space-y-3">
         {caterers.map((c) => (
-          <div key={c.id} className="bg-white border-4 border-eggplant rounded-blob p-4 flex items-center justify-between gap-3 flex-wrap">
+          <div key={c.id} className="bg-white border-4 border-teal rounded-blob p-4 flex items-center justify-between gap-3 flex-wrap">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-display font-bold text-eggplant">{c.businessName}</p>
+                <p className="font-display font-bold text-teal">{c.businessName}</p>
                 <StatusBadge status={c.status} dict={dict} />
               </div>
               <p className="text-sm text-ink/60">{pickLocalized(c.city, locale)}</p>
               {c.status === 'rejected' && c.rejectionReason && (
-                <p className="text-sm text-paprikaDark mt-1">
+                <p className="text-sm text-orangeDark mt-1">
                   <strong>{dict.dashboard.rejectionReason}:</strong> {c.rejectionReason}
                 </p>
               )}
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <Link href={`/caterer/${c.id}`} className="text-sm text-zaatar font-semibold hover:underline focus-ring rounded">
+              <Link href={`/caterer/${c.id}`} className="text-sm text-tealGreen font-semibold hover:underline focus-ring rounded">
                 {dict.card.viewProfile}
               </Link>
-              <Link href={`/dashboard/${c.id}/edit`} className="text-sm text-paprika font-semibold hover:underline focus-ring rounded">
+              <Link href={`/dashboard/${c.id}/edit`} className="text-sm text-orange font-semibold hover:underline focus-ring rounded">
                 {dict.dashboard.edit}
               </Link>
-              <button onClick={() => handleDelete(c.id)} className="text-sm text-paprikaDark font-semibold hover:underline focus-ring rounded">
+              <button onClick={() => handleDelete(c.id)} className="text-sm text-orangeDark font-semibold hover:underline focus-ring rounded">
                 {dict.dashboard.delete}
               </button>
             </div>
@@ -90,9 +90,9 @@ export default function DashboardPage() {
 
 function StatusBadge({ status, dict }) {
   const map = {
-    pending_review: { label: dict.dashboard.statusPending, cls: 'bg-turmericLight text-eggplant' },
-    approved: { label: dict.dashboard.statusApproved, cls: 'bg-zaatar text-cream' },
-    rejected: { label: dict.dashboard.statusRejected, cls: 'bg-paprika text-cream' }
+    pending_review: { label: dict.dashboard.statusPending, cls: 'bg-limeLight text-teal' },
+    approved: { label: dict.dashboard.statusApproved, cls: 'bg-tealGreen text-cream' },
+    rejected: { label: dict.dashboard.statusRejected, cls: 'bg-orange text-cream' }
   };
   const conf = map[status] || map.pending_review;
   return (

@@ -58,22 +58,22 @@ export default function HomePage() {
 
   return (
     <div>
-      <section className="bg-eggplant text-cream">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10 flex flex-col sm:flex-row items-center gap-6">
+      <section className="bg-teal text-cream">
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-start">
           <Logo className="h-16 w-16 sm:h-20 sm:w-20 shrink-0" />
-          <div className="text-center sm:text-start flex-1">
-            <h1 className="font-display font-extrabold text-2xl sm:text-3xl leading-tight">{dict.hero.title}</h1>
-            <p className="mt-1 text-turmericLight/90 max-w-2xl">{dict.hero.subtitle}</p>
+          <div className="flex-1">
+            <h1 className="font-display font-extrabold text-2xl sm:text-4xl leading-tight">{dict.hero.title}</h1>
+            <p className="mt-2 text-limeLight/90 max-w-2xl">{dict.hero.subtitle}</p>
           </div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-4 pb-6">
+        <div className="mx-auto max-w-6xl px-4 pb-8">
           <input
             type="text"
             value={filters.keyword}
             onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
             placeholder={dict.search.keyword}
-            className="w-full rounded-full border-0 px-5 py-3 bg-cream text-ink placeholder:text-ink/50 focus-ring text-base"
+            className="w-full rounded-full border-0 px-5 py-3.5 bg-cream text-ink placeholder:text-ink/50 focus-ring text-base shadow-card"
           />
         </div>
       </section>
@@ -86,12 +86,12 @@ export default function HomePage() {
         />
 
         <section className="flex-1 min-w-0">
-          <p className="font-display font-semibold text-eggplant mb-4">
+          <p className="font-display font-semibold text-teal mb-4">
             {loading ? '…' : t('search.resultsCount', { n: results.length })}
           </p>
 
           {!loading && results.length === 0 && (
-            <p className="text-ink/70 bg-turmericLight/60 border-2 border-eggplant/30 rounded-blob p-6 text-center">
+            <p className="text-ink/70 bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center">
               {dict.search.noResults}
             </p>
           )}

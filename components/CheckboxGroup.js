@@ -16,8 +16,8 @@ export function CheckboxGroup({ options, labels, values, onChange, name }) {
             aria-pressed={active}
             className={`px-3 py-1.5 rounded-full text-sm font-body border-2 focus-ring transition-colors ${
               active
-                ? 'bg-zaatar text-cream border-zaatar'
-                : 'bg-cream text-eggplant border-eggplant/40 hover:border-eggplant'
+                ? 'bg-tealGreen text-cream border-tealGreen'
+                : 'bg-cream text-teal border-teal/40 hover:border-teal'
             }`}
           >
             {labels[opt]}

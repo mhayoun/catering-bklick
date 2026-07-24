@@ -173,22 +173,22 @@ export function CatererForm({ initial, catererId }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 bg-white/70 border-4 border-eggplant rounded-blob p-6 sm:p-8">
+    <form onSubmit={handleSubmit} className="space-y-8 bg-white/70 border-4 border-teal rounded-blob p-6 sm:p-8">
       <div>
-        <h1 className="font-display font-extrabold text-2xl text-eggplant">{dict.form.title}</h1>
+        <h1 className="font-display font-extrabold text-2xl text-teal">{dict.form.title}</h1>
         <p className="text-ink/70 mt-1">{dict.form.subtitle}</p>
-        <p className="text-sm text-paprikaDark bg-paprika/10 border-2 border-paprika/40 rounded-blob px-3 py-2 mt-3">
+        <p className="text-sm text-orangeDark bg-orange/10 border-2 border-orange/40 rounded-blob px-3 py-2 mt-3">
           {dict.form.moderationNotice}
         </p>
       </div>
 
-      {error && <p className="bg-paprika/10 border-2 border-paprika text-paprikaDark rounded-blob p-3">{error}</p>}
+      {error && <p className="bg-orange/10 border-2 border-orange text-orangeDark rounded-blob p-3">{error}</p>}
 
       <div className="grid sm:grid-cols-2 gap-4">
         <TextField label={dict.form.businessName} value={form.businessName} onChange={(v) => set('businessName', v)} required />
         <div>
           <TextField label={dict.form.city} value={form.city[locale]} onChange={(v) => setLocalized('city', v)} required />
-          <p className="text-xs text-zaatar font-semibold mt-1">
+          <p className="text-xs text-tealGreen font-semibold mt-1">
             {translating.city ? `⏳ ${dict.form.translating}` : `✨ ${dict.form.cityAutoTranslate}`}
           </p>
         </div>
@@ -196,7 +196,7 @@ export function CatererForm({ initial, catererId }) {
 
       <div>
         <TextArea label={dict.form.description} value={form.description[locale]} onChange={(v) => setLocalized('description', v)} />
-        <p className="text-xs text-zaatar font-semibold mt-1">
+        <p className="text-xs text-tealGreen font-semibold mt-1">
           {translating.description ? `⏳ ${dict.form.translating}` : `✨ ${dict.form.descriptionAutoTranslate}`}
         </p>
       </div>
@@ -258,7 +258,7 @@ export function CatererForm({ initial, catererId }) {
         <div className="flex flex-wrap gap-2 mt-2">
           {form.photos.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={src} alt="" className="h-16 w-16 object-cover rounded-lg border-2 border-eggplant/40" />
+            <img key={i} src={src} alt="" className="h-16 w-16 object-cover rounded-lg border-2 border-teal/40" />
           ))}
         </div>
       </FieldBlock>
@@ -270,9 +270,9 @@ export function CatererForm({ initial, catererId }) {
             value={videoDraft}
             onChange={(e) => setVideoDraft(e.target.value)}
             placeholder="https://youtube.com/watch?v=..."
-            className="flex-1 rounded-full border-2 border-eggplant/40 px-4 py-2 bg-cream focus-ring"
+            className="flex-1 rounded-full border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
           />
-          <button type="button" onClick={addVideo} className="bg-zaatar text-cream px-4 py-2 rounded-full font-display font-semibold focus-ring">
+          <button type="button" onClick={addVideo} className="bg-tealGreen text-cream px-4 py-2 rounded-full font-display font-semibold focus-ring">
             {dict.form.addVideoLink}
           </button>
         </div>
@@ -285,11 +285,11 @@ export function CatererForm({ initial, catererId }) {
         <button
           type="submit"
           disabled={saving}
-          className="bg-paprika text-cream font-display font-bold px-6 py-2.5 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring disabled:opacity-60"
+          className="bg-orange text-cream font-display font-bold px-6 py-2.5 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring disabled:opacity-60"
         >
           {saving ? dict.form.saving : dict.form.save}
         </button>
-        <button type="button" onClick={() => router.push('/dashboard')} className="text-eggplant font-display font-semibold px-4 py-2.5 hover:text-paprika focus-ring rounded">
+        <button type="button" onClick={() => router.push('/dashboard')} className="text-teal font-display font-semibold px-4 py-2.5 hover:text-orange focus-ring rounded">
           {dict.form.cancel}
         </button>
       </div>
@@ -300,13 +300,13 @@ export function CatererForm({ initial, catererId }) {
 function TextField({ label, value, onChange, type = 'text', required }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-display font-semibold text-eggplant">{label}</span>
+      <span className="text-sm font-display font-semibold text-teal">{label}</span>
       <input
         type={type}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-full border-2 border-eggplant/40 px-4 py-2 bg-cream focus-ring"
+        className="w-full rounded-full border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
       />
     </label>
   );
@@ -315,12 +315,12 @@ function TextField({ label, value, onChange, type = 'text', required }) {
 function TextArea({ label, value, onChange }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-display font-semibold text-eggplant">{label}</span>
+      <span className="text-sm font-display font-semibold text-teal">{label}</span>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={3}
-        className="w-full rounded-blob border-2 border-eggplant/40 px-4 py-2 bg-cream focus-ring"
+        className="w-full rounded-blob border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
       />
     </label>
   );
@@ -329,7 +329,7 @@ function TextArea({ label, value, onChange }) {
 function FieldBlock({ label, children }) {
   return (
     <div className="space-y-2">
-      <p className="font-display font-bold text-eggplant">{label}</p>
+      <p className="font-display font-bold text-teal">{label}</p>
       {children}
     </div>
   );

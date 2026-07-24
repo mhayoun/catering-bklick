@@ -21,10 +21,10 @@ export default function EditCatererPage({ params }) {
   }, [params.id]);
 
   if (status !== 'authenticated' || initial === undefined) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-eggplant">…</div>;
+    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
   }
   if (initial === null) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-eggplant">404</div>;
+    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">404</div>;
   }
 
   return (

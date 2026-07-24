@@ -28,14 +28,14 @@ export default function AdminPage() {
   }, [session]);
 
   if (status === 'loading' || (status === 'authenticated' && session?.user?.isAdmin === undefined)) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-eggplant">…</div>;
+    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
   }
 
   if (status === 'authenticated' && !session?.user?.isAdmin) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center space-y-4">
         <Logo className="h-16 w-16 mx-auto" />
-        <p className="text-eggplant font-display font-semibold">{dict.admin.notAuthorized}</p>
+        <p className="text-teal font-display font-semibold">{dict.admin.notAuthorized}</p>
       </div>
     );
   }
@@ -61,33 +61,33 @@ export default function AdminPage() {
   }
 
   if (pending === null) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-eggplant">…</div>;
+    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
   }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 space-y-6">
       <div>
-        <h1 className="font-display font-extrabold text-2xl text-eggplant">{dict.admin.title}</h1>
+        <h1 className="font-display font-extrabold text-2xl text-teal">{dict.admin.title}</h1>
         <p className="text-ink/70 mt-1">{dict.admin.subtitle}</p>
       </div>
 
       {pending.length === 0 && (
-        <p className="bg-turmericLight/60 border-2 border-eggplant/30 rounded-blob p-6 text-center text-ink/70">
+        <p className="bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center text-ink/70">
           {dict.admin.empty}
         </p>
       )}
 
       <div className="space-y-4">
         {pending.map((c) => (
-          <div key={c.id} className="bg-white border-4 border-eggplant rounded-blob p-5 space-y-3">
+          <div key={c.id} className="bg-white border-4 border-teal rounded-blob p-5 space-y-3">
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
-                <p className="font-display font-bold text-lg text-eggplant">{c.businessName}</p>
+                <p className="font-display font-bold text-lg text-teal">{c.businessName}</p>
                 <p className="text-sm text-ink/60">
                   {pickLocalized(c.city, locale)} · {dict.admin.submittedBy}: {c.ownerEmail}
                 </p>
               </div>
-              <Link href={`/caterer/${c.id}`} className="text-sm text-zaatar font-semibold hover:underline focus-ring rounded whitespace-nowrap">
+              <Link href={`/caterer/${c.id}`} className="text-sm text-tealGreen font-semibold hover:underline focus-ring rounded whitespace-nowrap">
                 {dict.admin.viewFullProfile}
               </Link>
             </div>
@@ -102,14 +102,14 @@ export default function AdminPage() {
               <button
                 onClick={() => review(c.id, 'approve')}
                 disabled={busyId === c.id}
-                className="bg-zaatar text-cream font-display font-bold px-5 py-2 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring disabled:opacity-60"
+                className="bg-tealGreen text-cream font-display font-bold px-5 py-2 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring disabled:opacity-60"
               >
                 {dict.admin.approve}
               </button>
               <button
                 onClick={() => review(c.id, 'reject')}
                 disabled={busyId === c.id}
-                className="bg-paprika text-cream font-display font-bold px-5 py-2 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring disabled:opacity-60"
+                className="bg-orange text-cream font-display font-bold px-5 py-2 rounded-blob shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring disabled:opacity-60"
               >
                 {dict.admin.reject}
               </button>

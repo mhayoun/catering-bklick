@@ -8,15 +8,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        cream: '#FFF8EC',
-        paprika: '#C1440E',
-        paprikaDark: '#9A350A',
-        eggplant: '#3E2145',
-        eggplantLight: '#5A3363',
-        zaatar: '#6E7A4F',
-        turmeric: '#E4A93A',
-        turmericLight: '#F3D08A',
-        ink: '#241A21'
+        cream: '#F7FAF8',
+        orange: '#E8622C',
+        orangeDark: '#B94E20',
+        teal: '#0E4F52',
+        tealLight: '#137075',
+        tealGreen: '#25786B',
+        lime: '#C7D92C',
+        limeLight: '#EAF2C9',
+        ink: '#1B2A2B'
       },
       fontFamily: {
         display: ['var(--font-rubik)', 'sans-serif'],
@@ -26,8 +26,8 @@ module.exports = {
         blob: '2rem 1rem 2rem 1rem'
       },
       boxShadow: {
-        card: '0 6px 0 0 rgba(62,33,69,0.12)',
-        cardHover: '0 10px 0 0 rgba(62,33,69,0.16)'
+        card: '0 4px 14px 0 rgba(14,79,82,0.12)',
+        cardHover: '0 12px 28px 0 rgba(14,79,82,0.18)'
       }
     }
   },

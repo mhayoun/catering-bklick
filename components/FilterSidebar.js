@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useLanguage } from './LanguageProvider';
 import {
   DISTRICTS,
@@ -14,6 +15,7 @@ import {
 
 export function FilterSidebar({ filters, setFilters, onReset }) {
   const { dict } = useLanguage();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   function toggle(key, value) {
     setFilters((prev) => {
@@ -40,15 +42,41 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
 
   return (
     <aside className="w-full lg:w-72 shrink-0">
-      <div className="lg:sticky lg:top-24 bg-white border-2 border-eggplant/20 rounded-2xl divide-y divide-eggplant/10 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 bg-eggplant text-cream">
+      <button
+        type="button"
+        onClick={() => setMobileOpen((v) => !v)}
+        aria-expanded={mobileOpen}
+        className="lg:hidden w-full flex items-center justify-between px-4 py-3 bg-teal text-cream rounded-2xl font-display font-bold focus-ring"
+      >
+        <span>
+          {dict.search.title}
+          {activeCount > 0 && <span className="ms-2 bg-orange text-cream text-xs rounded-full px-2 py-0.5">{activeCount}</span>}
+        </span>
+        <span className={`transition-transform ${mobileOpen ? 'rotate-180' : ''}`}>⌄</span>
+      </button>
+
+      <div
+        className={`lg:sticky lg:top-24 mt-2 lg:mt-0 bg-white border-2 border-teal/20 rounded-2xl divide-y divide-teal/10 overflow-hidden ${
+          mobileOpen ? 'block' : 'hidden'
+        } lg:block`}
+      >
+        <div className="hidden lg:flex items-center justify-between px-4 py-3 bg-teal text-cream">
           <h2 className="font-display font-bold">{dict.search.title}</h2>
           {activeCount > 0 && (
-            <button onClick={onReset} className="text-xs font-semibold underline decoration-turmericLight hover:text-turmericLight focus-ring rounded">
+            <button onClick={onReset} className="text-xs font-semibold underline decoration-limeLight hover:text-limeLight focus-ring rounded">
               {dict.search.reset} ({activeCount})
             </button>
           )}
         </div>
+
+        {activeCount > 0 && (
+          <button
+            onClick={onReset}
+            className="lg:hidden w-full text-start px-4 py-2 text-xs font-semibold text-orange underline focus-ring"
+          >
+            {dict.search.reset} ({activeCount})
+          </button>
+        )}
 
         <FilterSection title={dict.search.location} defaultOpen>
           <CheckList options={DISTRICTS} labels={dict.districts} values={filters.districts} onToggle={(v) => toggle('districts', v)} />
@@ -69,13 +97,13 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
         <FilterSection title={dict.search.guests}>
           <div className="space-y-1.5">
             {GUEST_COUNT_BRACKETS.map((g) => (
-              <label key={g.id} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-eggplant">
+              <label key={g.id} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-teal">
                 <input
                   type="radio"
                   name="guests"
                   checked={String(filters.minGuests) === String(g.max)}
                   onChange={() => setGuests(String(g.max))}
-                  className="accent-paprika h-4 w-4"
+                  className="accent-orange h-4 w-4"
                 />
                 {dict.guestBrackets[g.id]}
               </label>
@@ -102,9 +130,9 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
 function FilterSection({ title, children, defaultOpen = false }) {
   return (
     <details open={defaultOpen} className="group px-4 py-3">
-      <summary className="flex items-center justify-between cursor-pointer list-none font-display font-semibold text-eggplant py-1 focus-ring rounded">
+      <summary className="flex items-center justify-between cursor-pointer list-none font-display font-semibold text-teal py-1 focus-ring rounded">
         {title}
-        <span className="text-eggplant/50 transition-transform group-open:rotate-180">⌄</span>
+        <span className="text-teal/50 transition-transform group-open:rotate-180">⌄</span>
       </summary>
       <div className="mt-2">{children}</div>
     </details>
@@ -115,12 +143,12 @@ function CheckList({ options, labels, values, onToggle }) {
   return (
     <div className="space-y-1.5">
       {options.map((opt) => (
-        <label key={opt} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-eggplant">
+        <label key={opt} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-teal">
           <input
             type="checkbox"
             checked={values.includes(opt)}
             onChange={() => onToggle(opt)}
-            className="accent-paprika h-4 w-4 rounded"
+            className="accent-orange h-4 w-4 rounded"
           />
           {labels[opt]}
         </label>

@@ -7,16 +7,16 @@ html {
 }
 
 body {
-  background-color: #FFF8EC;
-  color: #241A21;
+  background-color: #F7FAF8;
+  color: #1B2A2B;
 }
 
 ::selection {
-  background-color: #F3D08A;
+  background-color: #EAF2C9;
 }
 
 .focus-ring:focus-visible {
-  outline: 3px solid #C1440E;
+  outline: 3px solid #E8622C;
   outline-offset: 2px;
 }
 
