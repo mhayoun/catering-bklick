@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## What this is
+## What this is for
 
 קייטרינג בקליק — a trilingual (Hebrew/English/French) catering search & directory
 platform for Israel, built with Next.js 14 (App Router). Customers search caterers
