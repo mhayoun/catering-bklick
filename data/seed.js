@@ -27,9 +27,17 @@ export const seedCaterers = [
     facebook: 'https://facebook.com/shulchanorech',
     photos: [
       'https://images.unsplash.com/photo-1555244162-803834f70033?w=1200',
-      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200'
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200',
+      'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200',
+      'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=1200',
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200'
     ],
-    videos: [],
+    videos: [
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://youtu.be/9bZkp7q19f0',
+      'https://www.youtube.com/shorts/kJQP7kiw5Fk'
+    ],
     status: 'approved',
     reviewedBy: 'joetiger05@gmail.com',
     reviewedAt: '2026-01-01T00:00:00.000Z',
@@ -63,9 +71,16 @@ export const seedCaterers = [
     facebook: '',
     photos: [
       'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=1200',
-      'https://images.unsplash.com/photo-1544025162-d76694265947?w=1200'
+      'https://images.unsplash.com/photo-1544025162-d76694265947?w=1200',
+      'https://images.unsplash.com/photo-1555243896-c709bfa0b564?w=1200',
+      'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=1200',
+      'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1200',
+      'https://images.unsplash.com/photo-1522336572468-97b06e8ef143?w=1200'
     ],
-    videos: [],
+    videos: [
+      'https://www.youtube.com/watch?v=jNQXAC9IVRw',
+      'https://youtu.be/3JZ_D3ELwOQ'
+    ],
     status: 'approved',
     reviewedBy: 'joetiger05@gmail.com',
     reviewedAt: '2026-01-01T00:00:00.000Z',
@@ -98,9 +113,322 @@ export const seedCaterers = [
     instagram: '',
     facebook: 'https://facebook.com/tzafontaim',
     photos: [
+      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200',
+      'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1200',
+      'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=1200',
+      'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=1200',
+      'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=1200',
+      'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=9bZkp7q19f0',
+      'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+      'https://youtu.be/kJQP7kiw5Fk'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-mitbach-hadarom',
+    businessName: 'מטבח הדרום',
+    ownerEmail: 'demo@example.com',
+    description: {
+      he: 'קייטרינג בשרי במחירים הוגנים לבר/בת מצווה ואזכרות, עם ניסיון של למעלה מ-15 שנה בנגב.',
+      en: 'Fair-priced meat catering for bar/bat mitzvahs and memorial gatherings, with over 15 years of experience in the Negev.',
+      fr: "Traiteur viande à prix justes pour bar/bat mitsva et commémorations, avec plus de 15 ans d'expérience dans le Néguev."
+    },
+    districts: ['south'],
+    city: 'באר שבע',
+    address: 'רחוב התקווה 8, באר שבע',
+    kashrutLevels: ['badatz'],
+    cateringTypes: ['meat'],
+    maxGuests: 350,
+    priceFrom: 120,
+    eventTypes: ['bar_mitzvah', 'memorial', 'celebration'],
+    menuCategories: ['salads', 'meat', 'main_courses', 'desserts'],
+    beverageTypes: ['non_alcoholic'],
+    services: ['free_delivery', 'setup_teardown'],
+    phone: '+972-8-5553344',
+    whatsapp: '+972533344556',
+    email: 'info@mitbachhadarom.example',
+    website: 'https://mitbachhadarom.example',
+    instagram: 'https://instagram.com/mitbach_hadarom',
+    facebook: 'https://facebook.com/mitbachhadarom',
+    photos: [
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200',
+      'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1200',
+      'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=1200',
+      'https://images.unsplash.com/photo-1478144592103-25e218a04891?w=1200',
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200',
+      'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=3JZ_D3ELwOQ',
+      'https://youtu.be/jNQXAC9IVRw'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-gan-eden',
+    businessName: 'גן עדן קייטרינג',
+    ownerEmail: 'demo@example.com',
+    description: {
+      he: 'קייטרינג חלבי איכותי לאירוסין ושבתות חתן, עם דגש על עיצוב שולחן מפואר.',
+      en: 'Premium dairy catering for engagement parties and Shabbat Chatan, with a focus on elegant table design.',
+      fr: 'Traiteur lacté haut de gamme pour fiançailles et Shabbat Hatan, avec un accent sur un dressage de table élégant.'
+    },
+    districts: ['haifa'],
+    city: 'חיפה',
+    address: 'שדרות הנשיא 22, חיפה',
+    kashrutLevels: ['mehadrin'],
+    cateringTypes: ['dairy'],
+    maxGuests: 250,
+    priceFrom: 130,
+    eventTypes: ['engagement', 'shabbat_chatan', 'celebration'],
+    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages'],
+    beverageTypes: ['alcoholic', 'non_alcoholic'],
+    services: ['elegant_tableware', 'waiter_staff'],
+    phone: '+972-4-5556677',
+    whatsapp: '+972546677889',
+    email: 'contact@ganeden-catering.example',
+    website: 'https://ganeden-catering.example',
+    instagram: 'https://instagram.com/gan_eden_catering',
+    facebook: '',
+    photos: [
+      'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200',
+      'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=1200',
+      'https://images.unsplash.com/photo-1544025162-d76694265947?w=1200',
+      'https://images.unsplash.com/photo-1555243896-c709bfa0b564?w=1200',
+      'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=1200',
+      'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      'https://www.youtube.com/shorts/9bZkp7q19f0'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-taamei-yerushalayim',
+    businessName: 'טעמי ירושלים',
+    ownerEmail: 'demo@example.com',
+    description: {
+      he: 'קייטרינג בשרי מהדרין לבריתות ושמחות משפחתיות ברחבי ירושלים ויהודה ושומרון.',
+      en: 'Mehadrin meat catering for brit milah ceremonies and family celebrations across Jerusalem and Judea and Samaria.',
+      fr: 'Traiteur viande mehadrin pour brit mila et fêtes familiales dans la région de Jérusalem et de Judée-Samarie.'
+    },
+    districts: ['jerusalem', 'judea_samaria'],
+    city: 'ירושלים',
+    address: 'רחוב עזה 3, ירושלים',
+    kashrutLevels: ['mehadrin', 'badatz'],
+    cateringTypes: ['meat'],
+    maxGuests: 400,
+    priceFrom: 160,
+    eventTypes: ['brit', 'celebration', 'bar_mitzvah'],
+    menuCategories: ['salads', 'meat', 'main_courses', 'desserts', 'beverages'],
+    beverageTypes: ['non_alcoholic'],
+    services: ['elegant_tableware', 'free_delivery', 'setup_teardown'],
+    phone: '+972-2-5552233',
+    whatsapp: '+972522334455',
+    email: 'info@taamei-yerushalayim.example',
+    website: '',
+    instagram: 'https://instagram.com/taamei_yerushalayim',
+    facebook: 'https://facebook.com/taameiyerushalayim',
+    photos: [
+      'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200',
+      'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=1200',
+      'https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?w=1200',
+      'https://images.unsplash.com/photo-1522336572468-97b06e8ef143?w=1200',
+      'https://images.unsplash.com/photo-1555244162-803834f70033?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://youtu.be/3JZ_D3ELwOQ',
+      'https://www.youtube.com/shorts/jNQXAC9IVRw'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-mitbach-ruti',
+    businessName: 'המטבח החלבי של רותי',
+    ownerEmail: 'demo@example.com',
+    description: {
+      he: 'קייטרינג חלבי ביתי וחמים, מתאים לבר/בת מצווה ומסיבות משפחתיות קטנות ואינטימיות.',
+      en: 'Warm, homestyle dairy catering, perfect for bar/bat mitzvahs and small, intimate family gatherings.',
+      fr: 'Traiteur lacté chaleureux et familial, idéal pour bar/bat mitsva et petites réceptions familiales intimes.'
+    },
+    districts: ['telaviv', 'center'],
+    city: 'רמת גן',
+    address: 'רחוב ביאליק 9, רמת גן',
+    kashrutLevels: ['rabbanut', 'none'],
+    cateringTypes: ['dairy'],
+    maxGuests: 120,
+    priceFrom: 85,
+    eventTypes: ['bar_mitzvah', 'celebration'],
+    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages'],
+    beverageTypes: ['non_alcoholic'],
+    services: ['setup_teardown'],
+    phone: '+972-3-5554455',
+    whatsapp: '+972544455667',
+    email: 'ruti@mitbach-ruti.example',
+    website: 'https://mitbach-ruti.example',
+    instagram: 'https://instagram.com/mitbach_ruti',
+    facebook: 'https://facebook.com/mitbachruti',
+    photos: [
+      'https://images.unsplash.com/photo-1544025162-d76694265947?w=1200',
+      'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200',
+      'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1200',
+      'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=1200',
+      'https://images.unsplash.com/photo-1555243896-c709bfa0b564?w=1200',
+      'https://images.unsplash.com/photo-1522336572468-97b06e8ef143?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=9bZkp7q19f0',
+      'https://youtu.be/kJQP7kiw5Fk'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-iruei-hakerem',
+    businessName: 'אירועי הכרם',
+    ownerEmail: 'demo@example.com',
+    description: {
+      he: 'קייטרינג בשרי וחלבי משולב לאירוסין וחגיגות משפחתיות גדולות, כולל תחנת בישול חיה.',
+      en: 'Combined meat and dairy catering for engagement parties and large family celebrations, including a live cooking station.',
+      fr: "Traiteur viande et lacté combiné pour fiançailles et grandes fêtes familiales, avec un stand de cuisine en direct."
+    },
+    districts: ['center'],
+    city: 'ראשון לציון',
+    address: 'שדרות משה דיין 14, ראשון לציון',
+    kashrutLevels: ['rabbanut'],
+    cateringTypes: ['meat', 'dairy'],
+    maxGuests: 600,
+    priceFrom: 175,
+    eventTypes: ['engagement', 'celebration', 'bar_mitzvah'],
+    menuCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts', 'beverages'],
+    beverageTypes: ['alcoholic', 'non_alcoholic'],
+    services: ['live_cooking_station', 'elegant_tableware', 'waiter_staff', 'sound_system'],
+    phone: '+972-3-5557788',
+    whatsapp: '+972567788990',
+    email: 'events@iruei-hakerem.example',
+    website: 'https://iruei-hakerem.example',
+    instagram: 'https://instagram.com/iruei_hakerem',
+    facebook: 'https://facebook.com/irueihakerem',
+    photos: [
+      'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1200',
+      'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=1200',
+      'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=1200',
+      'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=1200',
+      'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1200',
       'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200'
     ],
-    videos: [],
+    videos: [
+      'https://www.youtube.com/watch?v=jNQXAC9IVRw',
+      'https://www.youtube.com/shorts/3JZ_D3ELwOQ',
+      'https://youtu.be/dQw4w9WgXcQ'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-shef-habayit',
+    businessName: 'שף הבית',
+    ownerEmail: 'demo@example.com',
+    description: {
+      he: 'קייטרינג בשרי בהשגחת בד"ץ לבר/בת מצווה ואזכרות, פועלים בדרום ובמרכז.',
+      en: 'Badatz-supervised meat catering for bar/bat mitzvahs and memorial gatherings, serving the South and Center districts.',
+      fr: "Traiteur viande sous supervision Badatz pour bar/bat mitsva et commémorations, dans le Sud et le Centre."
+    },
+    districts: ['south', 'center'],
+    city: 'אשדוד',
+    address: 'רחוב הגעתון 5, אשדוד',
+    kashrutLevels: ['badatz'],
+    cateringTypes: ['meat'],
+    maxGuests: 300,
+    priceFrom: 140,
+    eventTypes: ['bar_mitzvah', 'memorial'],
+    menuCategories: ['salads', 'meat', 'main_courses', 'beverages'],
+    beverageTypes: ['non_alcoholic'],
+    services: ['free_delivery', 'setup_teardown', 'sound_system'],
+    phone: '+972-8-5558899',
+    whatsapp: '+972588899001',
+    email: 'info@shef-habayit.example',
+    website: '',
+    instagram: '',
+    facebook: 'https://facebook.com/shefhabayit',
+    photos: [
+      'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1200',
+      'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=1200',
+      'https://images.unsplash.com/photo-1478144592103-25e218a04891?w=1200',
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200',
+      'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200',
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=3JZ_D3ELwOQ',
+      'https://youtu.be/9bZkp7q19f0'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-catering-hagalil',
+    businessName: 'קייטרינג הגליל',
+    ownerEmail: 'demo@example.com',
+    description: {
+      he: 'קייטרינג חלבי מהדרין לשבתות חתן וחגיגות משפחתיות בגליל ובחיפה, עם תפריט דגים עשיר.',
+      en: 'Mehadrin dairy catering for Shabbat Chatan and family celebrations across the Galilee and Haifa, with a rich fish menu.',
+      fr: "Traiteur lacté mehadrin pour Shabbat Hatan et fêtes familiales en Galilée et à Haïfa, avec un menu de poisson riche."
+    },
+    districts: ['north', 'haifa'],
+    city: 'נהריה',
+    address: 'שדרות הגעתון 30, נהריה',
+    kashrutLevels: ['mehadrin'],
+    cateringTypes: ['dairy'],
+    maxGuests: 220,
+    priceFrom: 110,
+    eventTypes: ['shabbat_chatan', 'celebration', 'engagement'],
+    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages'],
+    beverageTypes: ['non_alcoholic'],
+    services: ['elegant_tableware', 'free_delivery'],
+    phone: '+972-4-5550011',
+    whatsapp: '+972500011223',
+    email: 'shalom@catering-hagalil.example',
+    website: 'https://catering-hagalil.example',
+    instagram: 'https://instagram.com/catering_hagalil',
+    facebook: 'https://facebook.com/cateringhagalil',
+    photos: [
+      'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=1200',
+      'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=1200',
+      'https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=1200',
+      'https://images.unsplash.com/photo-1544025162-d76694265947?w=1200',
+      'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1200',
+      'https://images.unsplash.com/photo-1522336572468-97b06e8ef143?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      'https://youtu.be/jNQXAC9IVRw',
+      'https://www.youtube.com/shorts/dQw4w9WgXcQ'
+    ],
     status: 'approved',
     reviewedBy: 'joetiger05@gmail.com',
     reviewedAt: '2026-01-01T00:00:00.000Z',
