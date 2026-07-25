@@ -20,7 +20,7 @@ export const seedCaterers = [
     beverageTypes: ['alcoholic', 'non_alcoholic'],
     services: ['elegant_tableware', 'free_delivery', 'waiter_staff'],
     phone: '+972-3-5551234',
-    whatsapp: '+972501234567',
+    whatsapp: '+972545665417',
     email: 'info@shulchan-orech.example',
     website: 'https://shulchan-orech.example',
     instagram: 'https://instagram.com/shulchan_orech',
