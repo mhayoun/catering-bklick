@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from './LanguageProvider';
 import { CheckboxGroup } from './CheckboxGroup';
@@ -460,17 +460,19 @@ export function CatererForm({ initial, catererId }) {
 
           <div>
             <p className="text-sm font-display font-semibold text-teal mb-2">{dict.form.packages.addons}</p>
-            <div className="space-y-2">
-              {commonAddons.map((addon) => (
-                <div key={addon.id} className="grid sm:grid-cols-[3fr,auto,5rem,auto] gap-2 items-end">
-                  <TextField
-                    label={dict.form.packages.addonName}
-                    value={addon.name[locale]}
-                    onChange={(v) => updateCommonAddon(addon.id, { name: { ...addon.name, [locale]: v } })}
-                  />
-                  <label className="block space-y-1.5">
-                    <span className="text-sm font-display font-semibold text-teal">{dict.form.packages.addonPriceType}</span>
+            {commonAddons.length > 0 && (
+              <div className="grid gap-2 sm:grid-cols-[3fr,auto,5rem,auto] items-center">
+                <AddonsHeaderRow d={dict.form.packages} />
+                {commonAddons.map((addon) => (
+                  <Fragment key={addon.id}>
+                    <TextField
+                      label={dict.form.packages.addonName}
+                      hideLabel
+                      value={addon.name[locale]}
+                      onChange={(v) => updateCommonAddon(addon.id, { name: { ...addon.name, [locale]: v } })}
+                    />
                     <select
+                      aria-label={dict.form.packages.addonPriceType}
                       value={addon.priceType}
                       onChange={(e) => updateCommonAddon(addon.id, { priceType: e.target.value })}
                       className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
@@ -481,23 +483,25 @@ export function CatererForm({ initial, catererId }) {
                         </option>
                       ))}
                     </select>
-                  </label>
-                  <TextField
-                    label={dict.form.packages.addonAmount}
-                    type="number"
-                    value={addon.amount}
-                    onChange={(v) => updateCommonAddon(addon.id, { amount: v })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeCommonAddon(addon.id)}
-                    className="text-orangeDark text-sm font-semibold underline focus-ring rounded h-fit"
-                  >
-                    {dict.form.packages.removeAddon}
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <TextField
+                      label={dict.form.packages.addonAmount}
+                      hideLabel
+                      type="number"
+                      value={addon.amount}
+                      onChange={(v) => updateCommonAddon(addon.id, { amount: v })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeCommonAddon(addon.id)}
+                      aria-label={dict.form.packages.removeAddon}
+                      className="text-red-600 hover:text-red-700 font-bold text-lg leading-none focus-ring rounded h-fit px-1"
+                    >
+                      ×
+                    </button>
+                  </Fragment>
+                ))}
+              </div>
+            )}
             <button
               type="button"
               onClick={addCommonAddon}
@@ -612,15 +616,16 @@ export function CatererForm({ initial, catererId }) {
   );
 }
 
-function TextField({ label, value, onChange, type = 'text', required }) {
+function TextField({ label, value, onChange, type = 'text', required, hideLabel }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-display font-semibold text-teal">{label}</span>
+      {!hideLabel && <span className="text-sm font-display font-semibold text-teal">{label}</span>}
       <input
         type={type}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        aria-label={hideLabel ? label : undefined}
         className="w-full rounded-full border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
       />
     </label>
@@ -725,43 +730,46 @@ function PackageEditor({
 
       <div>
         <p className="text-sm font-display font-semibold text-teal mb-2">{d.addons}</p>
-        <div className="space-y-2">
-          {pkg.addons.map((addon, addonIndex) => {
-            if (commonAddonIds.includes(addon.id)) return null;
-            return (
-            <div key={addon.id} className="grid sm:grid-cols-[3fr,auto,5rem,auto] gap-2 items-end">
-              <TextField label={d.addonName} value={addon.name[locale]} onChange={(v) => onAddonNameChange(addonIndex, v)} />
-              <label className="block space-y-1.5">
-                <span className="text-sm font-display font-semibold text-teal">{d.addonPriceType}</span>
-                <select
-                  value={addon.priceType}
-                  onChange={(e) => onAddonFieldChange(addonIndex, { priceType: e.target.value })}
-                  className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
-                >
-                  {ADDON_PRICE_TYPES.map((pt) => (
-                    <option key={pt} value={pt}>
-                      {pt === 'per_guest' ? d.priceTypePerGuest : d.priceTypeFlat}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <TextField
-                label={d.addonAmount}
-                type="number"
-                value={addon.amount}
-                onChange={(v) => onAddonFieldChange(addonIndex, { amount: v })}
-              />
-              <button
-                type="button"
-                onClick={() => onRemoveAddon(addonIndex)}
-                className="text-orangeDark text-sm font-semibold underline focus-ring rounded h-fit"
-              >
-                {d.removeAddon}
-              </button>
-            </div>
-            );
-          })}
-        </div>
+        {pkg.addons.some((a) => !commonAddonIds.includes(a.id)) && (
+          <div className="grid gap-2 sm:grid-cols-[3fr,auto,5rem,auto] items-center">
+            <AddonsHeaderRow d={d} />
+            {pkg.addons.map((addon, addonIndex) => {
+              if (commonAddonIds.includes(addon.id)) return null;
+              return (
+                <Fragment key={addon.id}>
+                  <TextField label={d.addonName} hideLabel value={addon.name[locale]} onChange={(v) => onAddonNameChange(addonIndex, v)} />
+                  <select
+                    aria-label={d.addonPriceType}
+                    value={addon.priceType}
+                    onChange={(e) => onAddonFieldChange(addonIndex, { priceType: e.target.value })}
+                    className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
+                  >
+                    {ADDON_PRICE_TYPES.map((pt) => (
+                      <option key={pt} value={pt}>
+                        {pt === 'per_guest' ? d.priceTypePerGuest : d.priceTypeFlat}
+                      </option>
+                    ))}
+                  </select>
+                  <TextField
+                    label={d.addonAmount}
+                    hideLabel
+                    type="number"
+                    value={addon.amount}
+                    onChange={(v) => onAddonFieldChange(addonIndex, { amount: v })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onRemoveAddon(addonIndex)}
+                    aria-label={d.removeAddon}
+                    className="text-red-600 hover:text-red-700 font-bold text-lg leading-none focus-ring rounded h-fit px-1"
+                  >
+                    ×
+                  </button>
+                </Fragment>
+              );
+            })}
+          </div>
+        )}
         <button
           type="button"
           onClick={onAddAddon}
@@ -771,6 +779,17 @@ function PackageEditor({
         </button>
       </div>
     </div>
+  );
+}
+
+function AddonsHeaderRow({ d }) {
+  return (
+    <>
+      <span className="hidden sm:block text-sm font-display font-semibold text-teal">{d.addonName}</span>
+      <span className="hidden sm:block text-sm font-display font-semibold text-teal">{d.addonPriceType}</span>
+      <span className="hidden sm:block text-sm font-display font-semibold text-teal">{d.addonAmount}</span>
+      <span className="hidden sm:block" />
+    </>
   );
 }
 

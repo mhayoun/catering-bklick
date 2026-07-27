@@ -514,6 +514,13 @@ export const seedCaterers = [
         categoryLimits: { salads: 8, starters: 2, hot_sides: 3, breads: 2 },
         addons: [
           { id: 'salmon-platter', name: { he: '50 קציצות דגים סלמון ברוטב מזרחי', en: '50 salmon fishballs in Mizrahi sauce', fr: '50 boulettes de saumon sauce orientale' }, priceType: 'flat', amount: 250 },
+          { id: 'cigars-platter', name: { he: 'סיגרים גסטרונום ענק', en: 'Giant gastronom cigars platter', fr: 'Plateau géant de cigares gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'pastel-platter', name: { he: 'פסטלים גסטרונום ענק', en: 'Giant gastronom pastels platter', fr: 'Plateau géant de pastels gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'kubeh-platter', name: { he: 'קובה בורגול גסטרונום ענק', en: 'Giant bulgur kubbeh platter', fr: 'Plateau géant de kebbé au boulgour' }, priceType: 'flat', amount: 150 },
+          { id: 'meat-head-platter', name: { he: 'בשר ראש בסגנון מזרחי ענק', en: 'Giant Mizrahi-style head meat platter', fr: 'Plateau géant de viande de tête à l\'orientale' }, priceType: 'flat', amount: 450 },
+          { id: 'khoresh-sabzi-platter', name: { he: 'חורשט סבזי עם בשר ענק', en: 'Giant khoresh sabzi with meat platter', fr: 'Plateau géant de khoresh sabzi à la viande' }, priceType: 'flat', amount: 350 },
+          { id: 'chips-platter', name: { he: "צ'יפס גסטרונום ענק", en: 'Giant gastronom chips platter', fr: 'Plateau géant de frites gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'mini-schnitzel-platter', name: { he: 'שניצלונים גסטרונום ענק', en: 'Giant gastronom mini schnitzels platter', fr: 'Plateau géant de mini escalopes gastronomes' }, priceType: 'flat', amount: 250 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
         ]
       },
@@ -525,7 +532,14 @@ export const seedCaterers = [
         includedCategories: ['salads', 'main_courses', 'hot_sides', 'breads'],
         categoryLimits: { salads: 8, main_courses: 3, hot_sides: 3, breads: 2 },
         addons: [
+          { id: 'salmon-platter', name: { he: '50 קציצות דגים סלמון ברוטב מזרחי', en: '50 salmon fishballs in Mizrahi sauce', fr: '50 boulettes de saumon sauce orientale' }, priceType: 'flat', amount: 250 },
           { id: 'cigars-platter', name: { he: 'סיגרים גסטרונום ענק', en: 'Giant gastronom cigars platter', fr: 'Plateau géant de cigares gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'pastel-platter', name: { he: 'פסטלים גסטרונום ענק', en: 'Giant gastronom pastels platter', fr: 'Plateau géant de pastels gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'kubeh-platter', name: { he: 'קובה בורגול גסטרונום ענק', en: 'Giant bulgur kubbeh platter', fr: 'Plateau géant de kebbé au boulgour' }, priceType: 'flat', amount: 150 },
+          { id: 'meat-head-platter', name: { he: 'בשר ראש בסגנון מזרחי ענק', en: 'Giant Mizrahi-style head meat platter', fr: 'Plateau géant de viande de tête à l\'orientale' }, priceType: 'flat', amount: 450 },
+          { id: 'khoresh-sabzi-platter', name: { he: 'חורשט סבזי עם בשר ענק', en: 'Giant khoresh sabzi with meat platter', fr: 'Plateau géant de khoresh sabzi à la viande' }, priceType: 'flat', amount: 350 },
+          { id: 'chips-platter', name: { he: "צ'יפס גסטרונום ענק", en: 'Giant gastronom chips platter', fr: 'Plateau géant de frites gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'mini-schnitzel-platter', name: { he: 'שניצלונים גסטרונום ענק', en: 'Giant gastronom mini schnitzels platter', fr: 'Plateau géant de mini escalopes gastronomes' }, priceType: 'flat', amount: 250 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
         ]
       },
@@ -537,7 +551,14 @@ export const seedCaterers = [
         includedCategories: ['salads', 'starters', 'main_courses', 'hot_sides', 'breads'],
         categoryLimits: { salads: 8, starters: 2, main_courses: 3, hot_sides: 3, breads: 2 },
         addons: [
+          { id: 'salmon-platter', name: { he: '50 קציצות דגים סלמון ברוטב מזרחי', en: '50 salmon fishballs in Mizrahi sauce', fr: '50 boulettes de saumon sauce orientale' }, priceType: 'flat', amount: 250 },
+          { id: 'cigars-platter', name: { he: 'סיגרים גסטרונום ענק', en: 'Giant gastronom cigars platter', fr: 'Plateau géant de cigares gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'pastel-platter', name: { he: 'פסטלים גסטרונום ענק', en: 'Giant gastronom pastels platter', fr: 'Plateau géant de pastels gastronomes' }, priceType: 'flat', amount: 150 },
           { id: 'kubeh-platter', name: { he: 'קובה בורגול גסטרונום ענק', en: 'Giant bulgur kubbeh platter', fr: 'Plateau géant de kebbé au boulgour' }, priceType: 'flat', amount: 150 },
+          { id: 'meat-head-platter', name: { he: 'בשר ראש בסגנון מזרחי ענק', en: 'Giant Mizrahi-style head meat platter', fr: 'Plateau géant de viande de tête à l\'orientale' }, priceType: 'flat', amount: 450 },
+          { id: 'khoresh-sabzi-platter', name: { he: 'חורשט סבזי עם בשר ענק', en: 'Giant khoresh sabzi with meat platter', fr: 'Plateau géant de khoresh sabzi à la viande' }, priceType: 'flat', amount: 350 },
+          { id: 'chips-platter', name: { he: "צ'יפס גסטרונום ענק", en: 'Giant gastronom chips platter', fr: 'Plateau géant de frites gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'mini-schnitzel-platter', name: { he: 'שניצלונים גסטרונום ענק', en: 'Giant gastronom mini schnitzels platter', fr: 'Plateau géant de mini escalopes gastronomes' }, priceType: 'flat', amount: 250 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
         ]
       },
@@ -549,7 +570,14 @@ export const seedCaterers = [
         includedCategories: ['salads', 'starters', 'main_courses', 'hot_sides', 'breads'],
         categoryLimits: { salads: 8, starters: 2, main_courses: 3, hot_sides: 3, breads: 2 },
         addons: [
+          { id: 'salmon-platter', name: { he: '50 קציצות דגים סלמון ברוטב מזרחי', en: '50 salmon fishballs in Mizrahi sauce', fr: '50 boulettes de saumon sauce orientale' }, priceType: 'flat', amount: 250 },
+          { id: 'cigars-platter', name: { he: 'סיגרים גסטרונום ענק', en: 'Giant gastronom cigars platter', fr: 'Plateau géant de cigares gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'pastel-platter', name: { he: 'פסטלים גסטרונום ענק', en: 'Giant gastronom pastels platter', fr: 'Plateau géant de pastels gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'kubeh-platter', name: { he: 'קובה בורגול גסטרונום ענק', en: 'Giant bulgur kubbeh platter', fr: 'Plateau géant de kebbé au boulgour' }, priceType: 'flat', amount: 150 },
           { id: 'meat-head-platter', name: { he: 'בשר ראש בסגנון מזרחי ענק', en: 'Giant Mizrahi-style head meat platter', fr: 'Plateau géant de viande de tête à l\'orientale' }, priceType: 'flat', amount: 450 },
+          { id: 'khoresh-sabzi-platter', name: { he: 'חורשט סבזי עם בשר ענק', en: 'Giant khoresh sabzi with meat platter', fr: 'Plateau géant de khoresh sabzi à la viande' }, priceType: 'flat', amount: 350 },
+          { id: 'chips-platter', name: { he: "צ'יפס גסטרונום ענק", en: 'Giant gastronom chips platter', fr: 'Plateau géant de frites gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'mini-schnitzel-platter', name: { he: 'שניצלונים גסטרונום ענק', en: 'Giant gastronom mini schnitzels platter', fr: 'Plateau géant de mini escalopes gastronomes' }, priceType: 'flat', amount: 250 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
         ]
       }
