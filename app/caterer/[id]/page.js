@@ -258,6 +258,21 @@ export default function CatererProfilePage({ params }) {
 function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
   const d = dict.profile.packages;
   const cheapest = cheapestPackageEstimate(caterer, guestCount);
+  const packages = caterer.packages;
+
+  // Only worth extracting "common to all" when there's more than one package to compare.
+  const comparable = packages.length > 1;
+
+  // Minimum guest count, when every package shares the same one.
+  const minGuestsValues = packages.map((p) => Number(p.minGuests) || 0);
+  const commonMinGuests =
+    comparable && minGuestsValues[0] > 0 && minGuestsValues.every((v) => v === minGuestsValues[0]) ? minGuestsValues[0] : null;
+
+  // Add-ons (matched by id) present with a real price in every package.
+  const addonIdSets = packages.map((p) => new Set((p.addons || []).filter((a) => Number(a?.amount)).map((a) => a.id)));
+  const commonAddonIds = comparable && addonIdSets.length > 0 ? [...addonIdSets[0]].filter((id) => addonIdSets.every((s) => s.has(id))) : [];
+  const commonAddons = commonAddonIds.map((id) => packages[0].addons.find((a) => a.id === id)).filter(Boolean);
+  const commonBilledGuests = Math.max(Number(guestCount) || 0, commonMinGuests || 0);
 
   return (
     <section>
@@ -293,7 +308,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
               </div>
 
               <p className="text-sm text-ink/70">₪{pkg.pricePerGuest} {d.perGuest}</p>
-              {pkg.minGuests && <p className="text-xs text-ink/50">{d.minGuestsNote.replace('{n}', pkg.minGuests)}</p>}
+              {!commonMinGuests && pkg.minGuests && <p className="text-xs text-ink/50">{d.minGuestsNote.replace('{n}', pkg.minGuests)}</p>}
 
               {pkg.includedCategories?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -311,24 +326,55 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                     ₪{Math.round(estimate.total).toLocaleString()} <span className="text-sm font-body font-normal text-ink/60">{d.estimatedTotal}</span>
                   </p>
                   {estimate.belowMinimum && <p className="text-xs text-orangeDark mt-1">{d.belowMinimum}</p>}
-                  {estimate.availableAddons.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
-                      <ul className="text-xs text-ink/60 space-y-0.5">
-                        {estimate.availableAddons.map((addon) => (
-                          <li key={addon.id}>
-                            + {pickLocalized(addon.name, locale)}: ₪{Math.round(addon.estimatedAmount).toLocaleString()}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                </div>
+              )}
+
+              {pkg.addons?.some((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)) && (
+                <div className="pt-2 border-t-2 border-teal/10">
+                  <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
+                  <ul className="text-xs text-ink/60 space-y-0.5">
+                    {pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)).map((addon) => {
+                      const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
+                      return (
+                        <li key={addon.id}>
+                          + {pickLocalized(addon.name, locale)}: ₪{Number(addon.amount).toLocaleString()}
+                          {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
+                          {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               )}
             </div>
           );
         })}
       </div>
+
+      {(commonMinGuests || commonAddons.length > 0) && (
+        <div className="mt-4 border-4 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-2">
+          <p className="font-display font-semibold text-teal text-sm">{d.commonToAll}</p>
+          {commonMinGuests && <p className="text-xs text-ink/60">{d.minGuestsNote.replace('{n}', commonMinGuests)}</p>}
+          {commonAddons.length > 0 && (
+            <div>
+              <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
+              <ul className="text-xs text-ink/60 space-y-0.5">
+                {commonAddons.map((addon) => {
+                  const estimatedAmount =
+                    addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
+                  return (
+                    <li key={addon.id}>
+                      + {pickLocalized(addon.name, locale)}: ₪{Number(addon.amount).toLocaleString()}
+                      {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
+                      {commonBilledGuests > 0 && ` — ₪${Math.round(estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

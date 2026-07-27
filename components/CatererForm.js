@@ -205,6 +205,14 @@ export function CatererForm({ initial, catererId }) {
     setVideoDraft('');
   }
 
+  function removePhoto(index) {
+    set('photos', form.photos.filter((_, i) => i !== index));
+  }
+
+  function removeVideo(index) {
+    set('videos', form.videos.filter((_, i) => i !== index));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
@@ -348,8 +356,18 @@ export function CatererForm({ initial, catererId }) {
         {uploading && <p className="text-sm text-ink/60 mt-1">{dict.form.saving}</p>}
         <div className="flex flex-wrap gap-2 mt-2">
           {form.photos.map((src, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={src} alt="" className="h-16 w-16 object-cover rounded-lg border-2 border-teal/40" />
+            <div key={i} className="relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt="" className="h-16 w-16 object-cover rounded-lg border-2 border-teal/40" />
+              <button
+                type="button"
+                onClick={() => removePhoto(i)}
+                aria-label={dict.form.removePhoto}
+                className="absolute -top-2 -end-2 h-5 w-5 rounded-full bg-orangeDark text-cream text-xs leading-none flex items-center justify-center focus-ring"
+              >
+                ×
+              </button>
+            </div>
           ))}
         </div>
       </FieldBlock>
@@ -367,8 +385,19 @@ export function CatererForm({ initial, catererId }) {
             {dict.form.addVideoLink}
           </button>
         </div>
-        <ul className="mt-2 text-sm text-ink/70 list-disc ps-5">
-          {form.videos.map((v, i) => <li key={i}>{v}</li>)}
+        <ul className="mt-2 text-sm text-ink/70 space-y-1">
+          {form.videos.map((v, i) => (
+            <li key={i} className="flex items-center gap-2">
+              <span className="truncate">{v}</span>
+              <button
+                type="button"
+                onClick={() => removeVideo(i)}
+                className="text-orangeDark font-semibold hover:underline focus-ring rounded shrink-0"
+              >
+                {dict.form.removeVideoLink}
+              </button>
+            </li>
+          ))}
         </ul>
       </FieldBlock>
 
