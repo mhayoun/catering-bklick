@@ -510,7 +510,8 @@ export const seedCaterers = [
         name: { he: 'אגדת הדגים', en: 'Fish Legend', fr: 'Légende du poisson' },
         pricePerGuest: 48,
         minGuests: 30,
-        includedCategories: ['salads', 'starters', 'main_courses'],
+        includedCategories: ['salads', 'starters', 'hot_sides', 'breads'],
+        categoryLimits: { salads: 8, starters: 2, hot_sides: 3, breads: 2 },
         addons: [
           { id: 'salmon-platter', name: { he: '50 קציצות דגים סלמון ברוטב מזרחי', en: '50 salmon fishballs in Mizrahi sauce', fr: '50 boulettes de saumon sauce orientale' }, priceType: 'flat', amount: 250 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
@@ -521,7 +522,8 @@ export const seedCaterers = [
         name: { he: 'אגדת הבשרים', en: 'Meat Legend', fr: 'Légende de la viande' },
         pricePerGuest: 55,
         minGuests: 30,
-        includedCategories: ['salads', 'starters', 'main_courses'],
+        includedCategories: ['salads', 'main_courses', 'hot_sides', 'breads'],
+        categoryLimits: { salads: 8, main_courses: 3, hot_sides: 3, breads: 2 },
         addons: [
           { id: 'cigars-platter', name: { he: 'סיגרים גסטרונום ענק', en: 'Giant gastronom cigars platter', fr: 'Plateau géant de cigares gastronomes' }, priceType: 'flat', amount: 150 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
@@ -532,7 +534,8 @@ export const seedCaterers = [
         name: { he: 'האגדה המושלמת', en: 'The Perfect Legend', fr: 'La Légende parfaite' },
         pricePerGuest: 70,
         minGuests: 30,
-        includedCategories: ['salads', 'starters', 'main_courses'],
+        includedCategories: ['salads', 'starters', 'main_courses', 'hot_sides', 'breads'],
+        categoryLimits: { salads: 8, starters: 2, main_courses: 3, hot_sides: 3, breads: 2 },
         addons: [
           { id: 'kubeh-platter', name: { he: 'קובה בורגול גסטרונום ענק', en: 'Giant bulgur kubbeh platter', fr: 'Plateau géant de kebbé au boulgour' }, priceType: 'flat', amount: 150 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
@@ -543,7 +546,8 @@ export const seedCaterers = [
         name: { he: 'אגדת השבת (כולל חמין וסעודה שלישית)', en: 'Shabbat Legend (includes cholent & third meal)', fr: "Légende du Shabbat (avec hamin et troisième repas)" },
         pricePerGuest: 148,
         minGuests: 30,
-        includedCategories: ['salads', 'starters', 'main_courses'],
+        includedCategories: ['salads', 'starters', 'main_courses', 'hot_sides', 'breads'],
+        categoryLimits: { salads: 8, starters: 2, main_courses: 3, hot_sides: 3, breads: 2 },
         addons: [
           { id: 'meat-head-platter', name: { he: 'בשר ראש בסגנון מזרחי ענק', en: 'Giant Mizrahi-style head meat platter', fr: 'Plateau géant de viande de tête à l\'orientale' }, priceType: 'flat', amount: 450 },
           { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
@@ -551,7 +555,7 @@ export const seedCaterers = [
       }
     ],
     eventTypes: ['shabbat_chatan', 'celebration', 'bar_mitzvah', 'engagement'],
-    menuCategories: ['salads', 'starters', 'main_courses', 'desserts', 'beverages_non_alcoholic', 'beverages_alcoholic'],
+    menuCategories: ['salads', 'starters', 'main_courses', 'hot_sides', 'breads', 'desserts', 'beverages_non_alcoholic', 'beverages_alcoholic'],
     services: ['elegant_tableware', 'waiter_staff', 'free_delivery'],
     phone: '+972-8-5552299',
     whatsapp: '+972502233889',

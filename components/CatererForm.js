@@ -27,6 +27,7 @@ function blankPackage() {
     pricePerGuest: '',
     minGuests: '',
     includedCategories: [],
+    categoryLimits: {},
     addons: []
   };
 }
@@ -56,7 +57,13 @@ const BLANK = {
   facebook: '',
   photos: [],
   videos: [],
-  packages: []
+  packages: [],
+  // "Common to all formulas" template - defined once and applied to every package.
+  // Not sent to the server (see handleSubmit): it's fully redundant with what's
+  // already folded into each package's own includedCategories/categoryLimits/addons.
+  commonCategories: [],
+  commonCategoryLimits: {},
+  commonAddons: []
 };
 
 export function CatererForm({ initial, catererId }) {
@@ -80,6 +87,29 @@ export function CatererForm({ initial, catererId }) {
         name: toLocalizedDraft(addon.name, locale)
       }))
     }));
+
+    // Older records don't store a "common" template - infer one, once, from
+    // whatever's already identical across every existing package.
+    const categorySets = merged.packages.map((p) => new Set(p.includedCategories || []));
+    merged.commonCategories =
+      merged.packages.length > 1 && categorySets.length > 0
+        ? [...categorySets[0]].filter((cat) => categorySets.every((s) => s.has(cat)))
+        : [];
+    merged.commonCategoryLimits = Object.fromEntries(
+      merged.commonCategories
+        .map((cat) => {
+          const values = merged.packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
+          return values.every((v) => v === values[0]) ? [cat, values[0]] : null;
+        })
+        .filter(Boolean)
+    );
+    const addonIdSets = merged.packages.map((p) => new Set((p.addons || []).map((a) => a.id)));
+    const commonAddonIds =
+      merged.packages.length > 1 && addonIdSets.length > 0
+        ? [...addonIdSets[0]].filter((id) => addonIdSets.every((s) => s.has(id)))
+        : [];
+    merged.commonAddons = commonAddonIds.map((id) => merged.packages[0].addons.find((a) => a.id === id)).filter(Boolean);
+
     return merged;
   });
   const [saving, setSaving] = useState(false);
@@ -97,7 +127,18 @@ export function CatererForm({ initial, catererId }) {
   }
 
   function addPackage() {
-    setForm((prev) => ({ ...prev, packages: [...prev.packages, blankPackage()] }));
+    setForm((prev) => ({
+      ...prev,
+      packages: [
+        ...prev.packages,
+        {
+          ...blankPackage(),
+          includedCategories: [...prev.commonCategories],
+          categoryLimits: { ...prev.commonCategoryLimits },
+          addons: prev.commonAddons.map((addon) => ({ ...addon }))
+        }
+      ]
+    }));
   }
 
   function removePackage(pkgIndex) {
@@ -131,6 +172,67 @@ export function CatererForm({ initial, catererId }) {
 
   function setAddonName(pkgIndex, addonIndex, text) {
     updateAddon(pkgIndex, addonIndex, { name: { ...form.packages[pkgIndex].addons[addonIndex].name, [locale]: text } });
+  }
+
+  // Bulk helpers below apply a single edit to every package at once, so a
+  // menu category or add-on that's the same across all formulas only needs
+  // to be defined/edited in one place instead of per-package.
+
+  function toggleCommonCategory(cat) {
+    setForm((prev) => {
+      const isCommon = prev.commonCategories.includes(cat);
+      const { [cat]: _removedCommonLimit, ...restCommonLimits } = prev.commonCategoryLimits || {};
+      return {
+        ...prev,
+        commonCategories: isCommon ? prev.commonCategories.filter((c) => c !== cat) : [...prev.commonCategories, cat],
+        commonCategoryLimits: isCommon ? restCommonLimits : prev.commonCategoryLimits,
+        packages: prev.packages.map((pkg) => {
+          if (isCommon) {
+            const { [cat]: _removed, ...restLimits } = pkg.categoryLimits || {};
+            return { ...pkg, includedCategories: pkg.includedCategories.filter((c) => c !== cat), categoryLimits: restLimits };
+          }
+          return pkg.includedCategories.includes(cat) ? pkg : { ...pkg, includedCategories: [...pkg.includedCategories, cat] };
+        })
+      };
+    });
+  }
+
+  function setCommonCategoryLimit(cat, value) {
+    setForm((prev) => ({
+      ...prev,
+      commonCategoryLimits: { ...prev.commonCategoryLimits, [cat]: value },
+      packages: prev.packages.map((pkg) =>
+        pkg.includedCategories.includes(cat) ? { ...pkg, categoryLimits: { ...pkg.categoryLimits, [cat]: value } } : pkg
+      )
+    }));
+  }
+
+  function addCommonAddon() {
+    const addon = blankAddon();
+    setForm((prev) => ({
+      ...prev,
+      commonAddons: [...prev.commonAddons, addon],
+      packages: prev.packages.map((pkg) => ({ ...pkg, addons: [...pkg.addons, { ...addon }] }))
+    }));
+  }
+
+  function removeCommonAddon(id) {
+    setForm((prev) => ({
+      ...prev,
+      commonAddons: prev.commonAddons.filter((a) => a.id !== id),
+      packages: prev.packages.map((pkg) => ({ ...pkg, addons: pkg.addons.filter((a) => a.id !== id) }))
+    }));
+  }
+
+  function updateCommonAddon(id, patch) {
+    setForm((prev) => ({
+      ...prev,
+      commonAddons: prev.commonAddons.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+      packages: prev.packages.map((pkg) => ({
+        ...pkg,
+        addons: pkg.addons.map((a) => (a.id === id ? { ...a, ...patch } : a))
+      }))
+    }));
   }
 
   // Live in-form translation preview: when the owner switches the active
@@ -230,10 +332,14 @@ export function CatererForm({ initial, catererId }) {
     try {
       const url = catererId ? `/api/caterers/${catererId}` : '/api/caterers';
       const method = catererId ? 'PUT' : 'POST';
+      // commonCategories/commonCategoryLimits/commonAddons are an editor-only
+      // convenience - everything they represent is already folded into each
+      // package's own includedCategories/categoryLimits/addons.
+      const { commonCategories, commonCategoryLimits, commonAddons, ...payload } = form;
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'save failed');
@@ -245,6 +351,11 @@ export function CatererForm({ initial, catererId }) {
       setSaving(false);
     }
   }
+
+  const commonCategories = form.commonCategories;
+  const commonCategoryLimit = (cat) => form.commonCategoryLimits?.[cat] ?? null;
+  const commonAddons = form.commonAddons;
+  const commonAddonIds = form.commonAddons.map((a) => a.id);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 bg-white/70 border-4 border-teal rounded-blob p-6 sm:p-8">
@@ -311,17 +422,101 @@ export function CatererForm({ initial, catererId }) {
         <CheckboxGroup name={dict.form.services} options={ADDITIONAL_SERVICES} labels={dict.services} values={form.services} onChange={(v) => set('services', v)} />
       </FieldBlock>
 
-      <TextField label={dict.form.priceFrom} type="number" value={form.priceFrom} onChange={(v) => set('priceFrom', v)} />
+      <InlineNumberField label={dict.form.priceFrom} value={form.priceFrom} onChange={(v) => set('priceFrom', v)} />
 
       <FieldBlock label={dict.form.packages.title}>
         <p className="text-sm text-ink/70 -mt-1">{dict.form.packages.subtitle}</p>
-        <div className="space-y-4 mt-2">
+
+        <div className="mt-2 border-2 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-4">
+          <p className="font-display font-semibold text-teal text-sm">{dict.profile.packages.commonToAll}</p>
+
+          <FieldBlock label={dict.form.packages.includedCategories}>
+            <CheckboxGroup
+              name={dict.form.packages.includedCategories}
+              options={MENU_CATEGORIES}
+              labels={dict.menuCategories}
+              values={commonCategories}
+              onChange={(next) => {
+                const cat =
+                  next.length > commonCategories.length
+                    ? next.find((c) => !commonCategories.includes(c))
+                    : commonCategories.find((c) => !next.includes(c));
+                if (cat) toggleCommonCategory(cat);
+              }}
+            />
+            {commonCategories.length > 0 && (
+              <div className="flex flex-wrap gap-4 pt-1">
+                {commonCategories.map((cat) => (
+                  <InlineNumberField
+                    key={cat}
+                    label={dict.menuCategories[cat]}
+                    value={commonCategoryLimit(cat) ?? ''}
+                    onChange={(v) => setCommonCategoryLimit(cat, v)}
+                  />
+                ))}
+              </div>
+            )}
+          </FieldBlock>
+
+          <div>
+            <p className="text-sm font-display font-semibold text-teal mb-2">{dict.form.packages.addons}</p>
+            <div className="space-y-2">
+              {commonAddons.map((addon) => (
+                <div key={addon.id} className="grid sm:grid-cols-[3fr,auto,5rem,auto] gap-2 items-end">
+                  <TextField
+                    label={dict.form.packages.addonName}
+                    value={addon.name[locale]}
+                    onChange={(v) => updateCommonAddon(addon.id, { name: { ...addon.name, [locale]: v } })}
+                  />
+                  <label className="block space-y-1.5">
+                    <span className="text-sm font-display font-semibold text-teal">{dict.form.packages.addonPriceType}</span>
+                    <select
+                      value={addon.priceType}
+                      onChange={(e) => updateCommonAddon(addon.id, { priceType: e.target.value })}
+                      className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
+                    >
+                      {ADDON_PRICE_TYPES.map((pt) => (
+                        <option key={pt} value={pt}>
+                          {pt === 'per_guest' ? dict.form.packages.priceTypePerGuest : dict.form.packages.priceTypeFlat}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <TextField
+                    label={dict.form.packages.addonAmount}
+                    type="number"
+                    value={addon.amount}
+                    onChange={(v) => updateCommonAddon(addon.id, { amount: v })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCommonAddon(addon.id)}
+                    className="text-orangeDark text-sm font-semibold underline focus-ring rounded h-fit"
+                  >
+                    {dict.form.packages.removeAddon}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={addCommonAddon}
+              className="mt-2 text-teal text-sm font-display font-semibold underline focus-ring rounded"
+            >
+              + {dict.form.packages.addAddon}
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-4 mt-4">
           {form.packages.map((pkg, pkgIndex) => (
             <PackageEditor
               key={pkg.id}
               pkg={pkg}
               dict={dict}
               locale={locale}
+              commonCategories={commonCategories}
+              commonAddonIds={commonAddonIds}
               onNameChange={(text) => setPackageName(pkgIndex, text)}
               onFieldChange={(patch) => updatePackage(pkgIndex, patch)}
               onRemove={() => removePackage(pkgIndex)}
@@ -432,6 +627,21 @@ function TextField({ label, value, onChange, type = 'text', required }) {
   );
 }
 
+function InlineNumberField({ label, value, onChange, required }) {
+  return (
+    <label className="flex items-center gap-2">
+      <span className="text-sm font-display font-semibold text-teal">{label}</span>
+      <input
+        type="number"
+        required={required}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-20 rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
+      />
+    </label>
+  );
+}
+
 function TextArea({ label, value, onChange }) {
   return (
     <label className="block space-y-1.5">
@@ -450,6 +660,8 @@ function PackageEditor({
   pkg,
   dict,
   locale,
+  commonCategories,
+  commonAddonIds,
   onNameChange,
   onFieldChange,
   onRemove,
@@ -459,6 +671,7 @@ function PackageEditor({
   onAddonNameChange
 }) {
   const d = dict.form.packages;
+  const ownIncludedCategories = pkg.includedCategories.filter((cat) => !commonCategories.includes(cat));
   return (
     <div className="border-2 border-teal/30 rounded-blob p-4 space-y-3 bg-cream/60">
       <div className="flex items-start justify-between gap-3">
@@ -474,35 +687,48 @@ function PackageEditor({
         </button>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-3">
-        <TextField
-          label={d.pricePerGuest}
-          type="number"
-          value={pkg.pricePerGuest}
-          onChange={(v) => onFieldChange({ pricePerGuest: v })}
-        />
-        <TextField
-          label={d.minGuests}
-          type="number"
-          value={pkg.minGuests}
-          onChange={(v) => onFieldChange({ minGuests: v })}
-        />
+      <div className="flex flex-wrap gap-4">
+        <InlineNumberField label={d.pricePerGuest} value={pkg.pricePerGuest} onChange={(v) => onFieldChange({ pricePerGuest: v })} />
+        <InlineNumberField label={d.minGuests} value={pkg.minGuests} onChange={(v) => onFieldChange({ minGuests: v })} />
       </div>
 
       <FieldBlock label={d.includedCategories}>
         <CheckboxGroup
           name={d.includedCategories}
-          options={MENU_CATEGORIES}
+          options={MENU_CATEGORIES.filter((cat) => !commonCategories.includes(cat))}
           labels={dict.menuCategories}
-          values={pkg.includedCategories}
-          onChange={(v) => onFieldChange({ includedCategories: v })}
+          values={ownIncludedCategories}
+          onChange={(v) => {
+            const nextIncluded = [...commonCategories, ...v];
+            onFieldChange({
+              includedCategories: nextIncluded,
+              categoryLimits: Object.fromEntries(Object.entries(pkg.categoryLimits || {}).filter(([cat]) => nextIncluded.includes(cat)))
+            });
+          }}
         />
       </FieldBlock>
+
+      {ownIncludedCategories.length > 0 && (
+        <FieldBlock label={d.categoryLimits}>
+          <div className="flex flex-wrap gap-4">
+            {ownIncludedCategories.map((cat) => (
+              <InlineNumberField
+                key={cat}
+                label={dict.menuCategories[cat]}
+                value={pkg.categoryLimits?.[cat] ?? ''}
+                onChange={(v) => onFieldChange({ categoryLimits: { ...pkg.categoryLimits, [cat]: v } })}
+              />
+            ))}
+          </div>
+        </FieldBlock>
+      )}
 
       <div>
         <p className="text-sm font-display font-semibold text-teal mb-2">{d.addons}</p>
         <div className="space-y-2">
-          {pkg.addons.map((addon, addonIndex) => (
+          {pkg.addons.map((addon, addonIndex) => {
+            if (commonAddonIds.includes(addon.id)) return null;
+            return (
             <div key={addon.id} className="grid sm:grid-cols-[3fr,auto,5rem,auto] gap-2 items-end">
               <TextField label={d.addonName} value={addon.name[locale]} onChange={(v) => onAddonNameChange(addonIndex, v)} />
               <label className="block space-y-1.5">
@@ -533,7 +759,8 @@ function PackageEditor({
                 {d.removeAddon}
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
         <button
           type="button"

@@ -274,6 +274,15 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
   const commonAddons = commonAddonIds.map((id) => packages[0].addons.find((a) => a.id === id)).filter(Boolean);
   const commonBilledGuests = Math.max(Number(guestCount) || 0, commonMinGuests || 0);
 
+  // Menu categories included in every package (shown once, in "common to all", instead of repeated on each card).
+  const categorySets = packages.map((p) => new Set(p.includedCategories || []));
+  const commonCategories =
+    comparable && categorySets.length > 0 ? [...categorySets[0]].filter((cat) => dict.menuCategories[cat] && categorySets.every((s) => s.has(cat))) : [];
+  const commonCategoryLimit = (cat) => {
+    const values = packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
+    return values.every((v) => v === values[0]) ? values[0] : null;
+  };
+
   return (
     <section>
       <h2 className="font-display font-bold text-xl text-teal mb-3">{d.title}</h2>
@@ -310,11 +319,12 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
               <p className="text-sm text-ink/70">₪{pkg.pricePerGuest} {d.perGuest}</p>
               {!commonMinGuests && pkg.minGuests && <p className="text-xs text-ink/50">{d.minGuestsNote.replace('{n}', pkg.minGuests)}</p>}
 
-              {pkg.includedCategories?.length > 0 && (
+              {pkg.includedCategories?.filter((m) => dict.menuCategories[m] && !commonCategories.includes(m)).length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {pkg.includedCategories.filter((m) => dict.menuCategories[m]).map((m) => (
+                  {pkg.includedCategories.filter((m) => dict.menuCategories[m] && !commonCategories.includes(m)).map((m) => (
                     <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
                       {dict.menuCategories[m]}
+                      {pkg.categoryLimits?.[m] && ` · ${d.categoryChoiceCount.replace('{n}', pkg.categoryLimits[m])}`}
                     </span>
                   ))}
                 </div>
@@ -351,10 +361,20 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
         })}
       </div>
 
-      {(commonMinGuests || commonAddons.length > 0) && (
+      {(commonMinGuests || commonCategories.length > 0 || commonAddons.length > 0) && (
         <div className="mt-4 border-4 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-2">
           <p className="font-display font-semibold text-teal text-sm">{d.commonToAll}</p>
           {commonMinGuests && <p className="text-xs text-ink/60">{d.minGuestsNote.replace('{n}', commonMinGuests)}</p>}
+          {commonCategories.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {commonCategories.map((m) => (
+                <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
+                  {dict.menuCategories[m]}
+                  {commonCategoryLimit(m) && ` · ${d.categoryChoiceCount.replace('{n}', commonCategoryLimit(m))}`}
+                </span>
+              ))}
+            </div>
+          )}
           {commonAddons.length > 0 && (
             <div>
               <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
