@@ -11,10 +11,29 @@ import {
   CATERING_TYPES,
   EVENT_TYPES,
   MENU_CATEGORIES,
-  BEVERAGE_TYPES,
   ADDITIONAL_SERVICES,
+  ADDON_PRICE_TYPES,
   LOCALES
 } from '../lib/constants';
+
+function makeId() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+function blankPackage() {
+  return {
+    id: makeId(),
+    name: { he: '', en: '', fr: '' },
+    pricePerGuest: '',
+    minGuests: '',
+    includedCategories: [],
+    addons: []
+  };
+}
+
+function blankAddon() {
+  return { id: makeId(), name: { he: '', en: '', fr: '' }, priceType: 'per_guest', amount: '' };
+}
 
 const BLANK = {
   businessName: '',
@@ -28,7 +47,6 @@ const BLANK = {
   priceFrom: '',
   eventTypes: [],
   menuCategories: [],
-  beverageTypes: [],
   services: [],
   phone: '',
   whatsapp: '',
@@ -37,7 +55,8 @@ const BLANK = {
   instagram: '',
   facebook: '',
   photos: [],
-  videos: []
+  videos: [],
+  packages: []
 };
 
 export function CatererForm({ initial, catererId }) {
@@ -51,6 +70,16 @@ export function CatererForm({ initial, catererId }) {
     if (!initial?.districts && initial?.district) merged.districts = [initial.district];
     if (!initial?.kashrutLevels && initial?.kashrut) merged.kashrutLevels = [initial.kashrut];
     if (!initial?.cateringTypes && initial?.cateringType) merged.cateringTypes = [initial.cateringType];
+    merged.packages = (initial?.packages || []).map((pkg) => ({
+      ...blankPackage(),
+      ...pkg,
+      name: toLocalizedDraft(pkg.name, locale),
+      addons: (pkg.addons || []).map((addon) => ({
+        ...blankAddon(),
+        ...addon,
+        name: toLocalizedDraft(addon.name, locale)
+      }))
+    }));
     return merged;
   });
   const [saving, setSaving] = useState(false);
@@ -65,6 +94,43 @@ export function CatererForm({ initial, catererId }) {
 
   function setLocalized(key, text) {
     setForm((prev) => ({ ...prev, [key]: { ...prev[key], [locale]: text } }));
+  }
+
+  function addPackage() {
+    setForm((prev) => ({ ...prev, packages: [...prev.packages, blankPackage()] }));
+  }
+
+  function removePackage(pkgIndex) {
+    setForm((prev) => ({ ...prev, packages: prev.packages.filter((_, i) => i !== pkgIndex) }));
+  }
+
+  function updatePackage(pkgIndex, patch) {
+    setForm((prev) => ({
+      ...prev,
+      packages: prev.packages.map((pkg, i) => (i === pkgIndex ? { ...pkg, ...patch } : pkg))
+    }));
+  }
+
+  function setPackageName(pkgIndex, text) {
+    updatePackage(pkgIndex, { name: { ...form.packages[pkgIndex].name, [locale]: text } });
+  }
+
+  function addAddon(pkgIndex) {
+    updatePackage(pkgIndex, { addons: [...form.packages[pkgIndex].addons, blankAddon()] });
+  }
+
+  function removeAddon(pkgIndex, addonIndex) {
+    updatePackage(pkgIndex, { addons: form.packages[pkgIndex].addons.filter((_, i) => i !== addonIndex) });
+  }
+
+  function updateAddon(pkgIndex, addonIndex, patch) {
+    updatePackage(pkgIndex, {
+      addons: form.packages[pkgIndex].addons.map((addon, i) => (i === addonIndex ? { ...addon, ...patch } : addon))
+    });
+  }
+
+  function setAddonName(pkgIndex, addonIndex, text) {
+    updateAddon(pkgIndex, addonIndex, { name: { ...form.packages[pkgIndex].addons[addonIndex].name, [locale]: text } });
   }
 
   // Live in-form translation preview: when the owner switches the active
@@ -233,15 +299,40 @@ export function CatererForm({ initial, catererId }) {
         <CheckboxGroup name={dict.form.menuCategories} options={MENU_CATEGORIES} labels={dict.menuCategories} values={form.menuCategories} onChange={(v) => set('menuCategories', v)} />
       </FieldBlock>
 
-      <FieldBlock label={dict.form.beverageTypes}>
-        <CheckboxGroup name={dict.form.beverageTypes} options={BEVERAGE_TYPES} labels={dict.beverageTypes} values={form.beverageTypes} onChange={(v) => set('beverageTypes', v)} />
-      </FieldBlock>
-
       <FieldBlock label={dict.form.services}>
         <CheckboxGroup name={dict.form.services} options={ADDITIONAL_SERVICES} labels={dict.services} values={form.services} onChange={(v) => set('services', v)} />
       </FieldBlock>
 
       <TextField label={dict.form.priceFrom} type="number" value={form.priceFrom} onChange={(v) => set('priceFrom', v)} />
+
+      <FieldBlock label={dict.form.packages.title}>
+        <p className="text-sm text-ink/70 -mt-1">{dict.form.packages.subtitle}</p>
+        <div className="space-y-4 mt-2">
+          {form.packages.map((pkg, pkgIndex) => (
+            <PackageEditor
+              key={pkg.id}
+              pkg={pkg}
+              dict={dict}
+              locale={locale}
+              onNameChange={(text) => setPackageName(pkgIndex, text)}
+              onFieldChange={(patch) => updatePackage(pkgIndex, patch)}
+              onRemove={() => removePackage(pkgIndex)}
+              onAddAddon={() => addAddon(pkgIndex)}
+              onRemoveAddon={(addonIndex) => removeAddon(pkgIndex, addonIndex)}
+              onAddonFieldChange={(addonIndex, patch) => updateAddon(pkgIndex, addonIndex, patch)}
+              onAddonNameChange={(addonIndex, text) => setAddonName(pkgIndex, addonIndex, text)}
+            />
+          ))}
+          {form.packages.length === 0 && <p className="text-sm text-ink/50">{dict.form.packages.empty}</p>}
+        </div>
+        <button
+          type="button"
+          onClick={addPackage}
+          className="mt-3 bg-tealGreen text-cream px-4 py-2 rounded-full font-display font-semibold focus-ring"
+        >
+          + {dict.form.packages.addPackage}
+        </button>
+      </FieldBlock>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <TextField label={dict.form.phone} value={form.phone} onChange={(v) => set('phone', v)} />
@@ -323,6 +414,107 @@ function TextArea({ label, value, onChange }) {
         className="w-full rounded-blob border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
       />
     </label>
+  );
+}
+
+function PackageEditor({
+  pkg,
+  dict,
+  locale,
+  onNameChange,
+  onFieldChange,
+  onRemove,
+  onAddAddon,
+  onRemoveAddon,
+  onAddonFieldChange,
+  onAddonNameChange
+}) {
+  const d = dict.form.packages;
+  return (
+    <div className="border-2 border-teal/30 rounded-blob p-4 space-y-3 bg-cream/60">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1">
+          <TextField label={d.name} value={pkg.name[locale]} onChange={onNameChange} />
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-orangeDark text-sm font-semibold underline focus-ring rounded shrink-0 mt-6"
+        >
+          {d.removePackage}
+        </button>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3">
+        <TextField
+          label={d.pricePerGuest}
+          type="number"
+          value={pkg.pricePerGuest}
+          onChange={(v) => onFieldChange({ pricePerGuest: v })}
+        />
+        <TextField
+          label={d.minGuests}
+          type="number"
+          value={pkg.minGuests}
+          onChange={(v) => onFieldChange({ minGuests: v })}
+        />
+      </div>
+
+      <FieldBlock label={d.includedCategories}>
+        <CheckboxGroup
+          name={d.includedCategories}
+          options={MENU_CATEGORIES}
+          labels={dict.menuCategories}
+          values={pkg.includedCategories}
+          onChange={(v) => onFieldChange({ includedCategories: v })}
+        />
+      </FieldBlock>
+
+      <div>
+        <p className="text-sm font-display font-semibold text-teal mb-2">{d.addons}</p>
+        <div className="space-y-2">
+          {pkg.addons.map((addon, addonIndex) => (
+            <div key={addon.id} className="grid sm:grid-cols-[3fr,auto,5rem,auto] gap-2 items-end">
+              <TextField label={d.addonName} value={addon.name[locale]} onChange={(v) => onAddonNameChange(addonIndex, v)} />
+              <label className="block space-y-1.5">
+                <span className="text-sm font-display font-semibold text-teal">{d.addonPriceType}</span>
+                <select
+                  value={addon.priceType}
+                  onChange={(e) => onAddonFieldChange(addonIndex, { priceType: e.target.value })}
+                  className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
+                >
+                  {ADDON_PRICE_TYPES.map((pt) => (
+                    <option key={pt} value={pt}>
+                      {pt === 'per_guest' ? d.priceTypePerGuest : d.priceTypeFlat}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <TextField
+                label={d.addonAmount}
+                type="number"
+                value={addon.amount}
+                onChange={(v) => onAddonFieldChange(addonIndex, { amount: v })}
+              />
+              <button
+                type="button"
+                onClick={() => onRemoveAddon(addonIndex)}
+                className="text-orangeDark text-sm font-semibold underline focus-ring rounded h-fit"
+              >
+                {d.removeAddon}
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={onAddAddon}
+          className="mt-2 text-teal text-sm font-display font-semibold underline focus-ring rounded"
+        >
+          + {d.addAddon}
+        </button>
+      </div>
+    </div>
   );
 }
 

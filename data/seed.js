@@ -16,8 +16,7 @@ export const seedCaterers = [
     maxGuests: 500,
     priceFrom: 180,
     eventTypes: ['bar_mitzvah', 'engagement', 'celebration'],
-    menuCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts', 'beverages'],
-    beverageTypes: ['alcoholic', 'non_alcoholic'],
+    menuCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts', 'beverages_non_alcoholic', 'beverages_alcoholic'],
     services: ['elegant_tableware', 'free_delivery', 'waiter_staff'],
     phone: '+972-3-5551234',
     whatsapp: '+972545665417',
@@ -60,8 +59,7 @@ export const seedCaterers = [
     maxGuests: 200,
     priceFrom: 95,
     eventTypes: ['brit', 'shabbat_chatan', 'celebration'],
-    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages'],
-    beverageTypes: ['non_alcoholic'],
+    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages_non_alcoholic'],
     services: ['elegant_tableware', 'setup_teardown'],
     phone: '+972-2-5559876',
     whatsapp: '+972529876543',
@@ -103,8 +101,7 @@ export const seedCaterers = [
     maxGuests: 800,
     priceFrom: 150,
     eventTypes: ['celebration', 'memorial', 'bar_mitzvah'],
-    menuCategories: ['salads', 'meat', 'main_courses', 'beverages'],
-    beverageTypes: ['alcoholic', 'non_alcoholic'],
+    menuCategories: ['salads', 'meat', 'main_courses', 'beverages_non_alcoholic', 'beverages_alcoholic'],
     services: ['live_cooking_station', 'sound_system', 'free_delivery'],
     phone: '+972-4-5551122',
     whatsapp: '+972541122334',
@@ -148,7 +145,6 @@ export const seedCaterers = [
     priceFrom: 120,
     eventTypes: ['bar_mitzvah', 'memorial', 'celebration'],
     menuCategories: ['salads', 'meat', 'main_courses', 'desserts'],
-    beverageTypes: ['non_alcoholic'],
     services: ['free_delivery', 'setup_teardown'],
     phone: '+972-8-5553344',
     whatsapp: '+972533344556',
@@ -190,8 +186,7 @@ export const seedCaterers = [
     maxGuests: 250,
     priceFrom: 130,
     eventTypes: ['engagement', 'shabbat_chatan', 'celebration'],
-    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages'],
-    beverageTypes: ['alcoholic', 'non_alcoholic'],
+    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages_non_alcoholic', 'beverages_alcoholic'],
     services: ['elegant_tableware', 'waiter_staff'],
     phone: '+972-4-5556677',
     whatsapp: '+972546677889',
@@ -233,8 +228,7 @@ export const seedCaterers = [
     maxGuests: 400,
     priceFrom: 160,
     eventTypes: ['brit', 'celebration', 'bar_mitzvah'],
-    menuCategories: ['salads', 'meat', 'main_courses', 'desserts', 'beverages'],
-    beverageTypes: ['non_alcoholic'],
+    menuCategories: ['salads', 'meat', 'main_courses', 'desserts', 'beverages_non_alcoholic'],
     services: ['elegant_tableware', 'free_delivery', 'setup_teardown'],
     phone: '+972-2-5552233',
     whatsapp: '+972522334455',
@@ -277,8 +271,7 @@ export const seedCaterers = [
     maxGuests: 120,
     priceFrom: 85,
     eventTypes: ['bar_mitzvah', 'celebration'],
-    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages'],
-    beverageTypes: ['non_alcoholic'],
+    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages_non_alcoholic'],
     services: ['setup_teardown'],
     phone: '+972-3-5554455',
     whatsapp: '+972544455667',
@@ -320,8 +313,7 @@ export const seedCaterers = [
     maxGuests: 600,
     priceFrom: 175,
     eventTypes: ['engagement', 'celebration', 'bar_mitzvah'],
-    menuCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts', 'beverages'],
-    beverageTypes: ['alcoholic', 'non_alcoholic'],
+    menuCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts', 'beverages_non_alcoholic', 'beverages_alcoholic'],
     services: ['live_cooking_station', 'elegant_tableware', 'waiter_staff', 'sound_system'],
     phone: '+972-3-5557788',
     whatsapp: '+972567788990',
@@ -364,8 +356,7 @@ export const seedCaterers = [
     maxGuests: 300,
     priceFrom: 140,
     eventTypes: ['bar_mitzvah', 'memorial'],
-    menuCategories: ['salads', 'meat', 'main_courses', 'beverages'],
-    beverageTypes: ['non_alcoholic'],
+    menuCategories: ['salads', 'meat', 'main_courses', 'beverages_non_alcoholic'],
     services: ['free_delivery', 'setup_teardown', 'sound_system'],
     phone: '+972-8-5558899',
     whatsapp: '+972588899001',
@@ -407,8 +398,7 @@ export const seedCaterers = [
     maxGuests: 220,
     priceFrom: 110,
     eventTypes: ['shabbat_chatan', 'celebration', 'engagement'],
-    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages'],
-    beverageTypes: ['non_alcoholic'],
+    menuCategories: ['salads', 'fish', 'main_courses', 'desserts', 'beverages_non_alcoholic'],
     services: ['elegant_tableware', 'free_delivery'],
     phone: '+972-4-5550011',
     whatsapp: '+972500011223',
@@ -428,6 +418,156 @@ export const seedCaterers = [
       'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
       'https://youtu.be/jNQXAC9IVRw',
       'https://www.youtube.com/shorts/dQw4w9WgXcQ'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-shulchan-hamelech',
+    businessName: 'שולחן המלך קייטרינג',
+    ownerEmail: 'yelotag@gmail.com',
+    description: {
+      he: 'שתי רמות תפריט לכל אירוע - קלאסי ומשודרג - כדי שכל תקציב ימצא את המנה המושלמת, עם אפשרות לשדרג ל"אירוע מלא" הכולל צוות, כלים והובלה.',
+      en: 'Two menu tiers for every event - Classic and Premium - so every budget finds the right dish, with an optional "full event" upgrade covering staff, tableware and delivery.',
+      fr: 'Deux niveaux de menu pour chaque événement - Classique et Premium - afin que chaque budget trouve son bonheur, avec un supplément "événement complet" incluant personnel, vaisselle et livraison.'
+    },
+    districts: ['center', 'telaviv'],
+    city: 'רמלה',
+    address: 'רחוב הרצל 40, רמלה',
+    kashrutLevels: ['rabbanut'],
+    cateringTypes: ['meat'],
+    maxGuests: 500,
+    priceFrom: 75,
+    packages: [
+      {
+        id: 'classic',
+        name: { he: 'קלאסי', en: 'Classic', fr: 'Classique' },
+        pricePerGuest: 75,
+        minGuests: 20,
+        includedCategories: ['salads', 'fish', 'meat', 'main_courses'],
+        addons: [
+          { id: 'full-event', name: { he: "שדרוג 'אירוע מלא' (צוות, כלים, הובלה)", en: "'Full event' upgrade (staff, tableware, delivery)", fr: "Supplément 'événement complet' (personnel, vaisselle, livraison)" }, priceType: 'per_guest', amount: 60 },
+          { id: 'upgrade-nesicha', name: { he: 'שדרוג דג נסיכה', en: 'Nesicha fish upgrade', fr: 'Supplément poisson Nesicha' }, priceType: 'per_guest', amount: 5 },
+          { id: 'upgrade-salmon', name: { he: 'שדרוג סלמון', en: 'Salmon upgrade', fr: 'Supplément saumon' }, priceType: 'per_guest', amount: 10 }
+        ]
+      },
+      {
+        id: 'premium',
+        name: { he: 'משודרג', en: 'Premium', fr: 'Premium' },
+        pricePerGuest: 95,
+        minGuests: 20,
+        includedCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts'],
+        addons: [
+          { id: 'full-event', name: { he: "שדרוג 'אירוע מלא' (צוות, כלים, הובלה)", en: "'Full event' upgrade (staff, tableware, delivery)", fr: "Supplément 'événement complet' (personnel, vaisselle, livraison)" }, priceType: 'per_guest', amount: 60 }
+        ]
+      }
+    ],
+    eventTypes: ['bar_mitzvah', 'engagement', 'celebration'],
+    menuCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts', 'beverages_non_alcoholic', 'beverages_alcoholic'],
+    services: ['elegant_tableware', 'waiter_staff', 'free_delivery'],
+    phone: '+972-8-5551188',
+    whatsapp: '+972501122778',
+    email: 'info@shulchan-hamelech.example',
+    website: 'https://shulchan-hamelech.example',
+    instagram: 'https://instagram.com/shulchan_hamelech',
+    facebook: 'https://facebook.com/shulchanhamelech',
+    photos: [
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200',
+      'https://images.unsplash.com/photo-1555244162-803834f70033?w=1200',
+      'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=1200',
+      'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://youtu.be/9bZkp7q19f0'
+    ],
+    status: 'approved',
+    reviewedBy: 'joetiger05@gmail.com',
+    reviewedAt: '2026-01-01T00:00:00.000Z',
+    rejectionReason: null
+  },
+  {
+    id: 'demo-agada',
+    businessName: 'אגדה קייטרינג',
+    ownerEmail: 'yelotag@gmail.com',
+    description: {
+      he: 'ארבע חבילות קייטרינג לכל תקציב וכל אירוע - מ"אגדת הדגים" הקלה ועד "אגדת השבת" המלאה הכוללת סעודת שבת בבוקר ודגים לסעודה שלישית.',
+      en: 'Four catering packages for every budget and occasion - from the light "Fish Legend" up to the full "Shabbat Legend", which includes a Saturday morning meal and fish for the third meal.',
+      fr: 'Quatre formules de traiteur pour chaque budget et occasion - de la légère "Légende du poisson" jusqu\'à la "Légende du Shabbat" complète, incluant le repas du samedi matin et le poisson du troisième repas.'
+    },
+    districts: ['center', 'jerusalem'],
+    city: 'מודיעין',
+    address: 'רחוב עמק דותן 5, מודיעין',
+    kashrutLevels: ['mehadrin'],
+    cateringTypes: ['meat'],
+    maxGuests: 600,
+    priceFrom: 48,
+    packages: [
+      {
+        id: 'fish-legend',
+        name: { he: 'אגדת הדגים', en: 'Fish Legend', fr: 'Légende du poisson' },
+        pricePerGuest: 48,
+        minGuests: 30,
+        includedCategories: ['salads', 'fish', 'main_courses'],
+        addons: [
+          { id: 'salmon-platter', name: { he: '50 קציצות דגים סלמון ברוטב מזרחי', en: '50 salmon fishballs in Mizrahi sauce', fr: '50 boulettes de saumon sauce orientale' }, priceType: 'flat', amount: 250 },
+          { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
+        ]
+      },
+      {
+        id: 'meat-legend',
+        name: { he: 'אגדת הבשרים', en: 'Meat Legend', fr: 'Légende de la viande' },
+        pricePerGuest: 55,
+        minGuests: 30,
+        includedCategories: ['salads', 'meat', 'main_courses'],
+        addons: [
+          { id: 'cigars-platter', name: { he: 'סיגרים גסטרונום ענק', en: 'Giant gastronom cigars platter', fr: 'Plateau géant de cigares gastronomes' }, priceType: 'flat', amount: 150 },
+          { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
+        ]
+      },
+      {
+        id: 'perfect-legend',
+        name: { he: 'האגדה המושלמת', en: 'The Perfect Legend', fr: 'La Légende parfaite' },
+        pricePerGuest: 70,
+        minGuests: 30,
+        includedCategories: ['salads', 'fish', 'meat', 'main_courses'],
+        addons: [
+          { id: 'kubeh-platter', name: { he: 'קובה בורגול גסטרונום ענק', en: 'Giant bulgur kubbeh platter', fr: 'Plateau géant de kebbé au boulgour' }, priceType: 'flat', amount: 150 },
+          { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
+        ]
+      },
+      {
+        id: 'shabbat-legend',
+        name: { he: 'אגדת השבת (כולל חמין וסעודה שלישית)', en: 'Shabbat Legend (includes cholent & third meal)', fr: "Légende du Shabbat (avec hamin et troisième repas)" },
+        pricePerGuest: 148,
+        minGuests: 30,
+        includedCategories: ['salads', 'fish', 'meat', 'main_courses'],
+        addons: [
+          { id: 'meat-head-platter', name: { he: 'בשר ראש בסגנון מזרחי ענק', en: 'Giant Mizrahi-style head meat platter', fr: 'Plateau géant de viande de tête à l\'orientale' }, priceType: 'flat', amount: 450 },
+          { id: 'dessert-platter', name: { he: 'פלטת מיקס קינוחים', en: 'Mixed dessert platter', fr: 'Plateau de desserts assortis' }, priceType: 'flat', amount: 180 }
+        ]
+      }
+    ],
+    eventTypes: ['shabbat_chatan', 'celebration', 'bar_mitzvah', 'engagement'],
+    menuCategories: ['salads', 'fish', 'meat', 'main_courses', 'desserts', 'beverages_non_alcoholic', 'beverages_alcoholic'],
+    services: ['elegant_tableware', 'waiter_staff', 'free_delivery'],
+    phone: '+972-8-5552299',
+    whatsapp: '+972502233889',
+    email: 'info@agada-catering.example',
+    website: 'https://agada-catering.example',
+    instagram: 'https://instagram.com/agada_catering',
+    facebook: 'https://facebook.com/agadacatering',
+    photos: [
+      'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1200',
+      'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=1200',
+      'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=1200',
+      'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=1200'
+    ],
+    videos: [
+      'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
+      'https://youtu.be/jNQXAC9IVRw'
     ],
     status: 'approved',
     reviewedBy: 'joetiger05@gmail.com',

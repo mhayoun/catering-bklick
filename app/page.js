@@ -14,7 +14,6 @@ const EMPTY_FILTERS = {
   eventTypes: [],
   minGuests: '',
   menuCategories: [],
-  beverageTypes: [],
   services: []
 };
 
@@ -35,7 +34,6 @@ export default function HomePage() {
     f.cateringTypes.forEach((v) => params.append('cateringTypes', v));
     f.eventTypes.forEach((v) => params.append('eventTypes', v));
     f.menuCategories.forEach((v) => params.append('menuCategories', v));
-    f.beverageTypes.forEach((v) => params.append('beverageTypes', v));
     f.services.forEach((v) => params.append('services', v));
 
     try {
@@ -98,7 +96,7 @@ export default function HomePage() {
 
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
             {results.map((c) => (
-              <CatererCard key={c.id} caterer={c} />
+              <CatererCard key={c.id} caterer={c} guestCount={filters.minGuests} />
             ))}
           </div>
         </section>

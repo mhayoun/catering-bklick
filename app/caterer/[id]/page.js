@@ -6,12 +6,14 @@ import { useLanguage } from '../../../components/LanguageProvider';
 import { Logo } from '../../../components/Logo';
 import { ProposalModal } from '../../../components/ProposalModal';
 import { pickLocalized, toArrayField } from '../../../lib/localized';
+import { estimatePackageTotal, cheapestPackageEstimate } from '../../../lib/pricing';
 
 export default function CatererProfilePage({ params }) {
   const { dict, locale } = useLanguage();
   const [caterer, setCaterer] = useState(undefined);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [proposalOpen, setProposalOpen] = useState(false);
+  const [guestCount, setGuestCount] = useState('');
 
   useEffect(() => {
     fetch(`/api/caterers/${params.id}`)
@@ -161,24 +163,23 @@ export default function CatererProfilePage({ params }) {
       <section>
         <h2 className="font-display font-bold text-xl text-teal mb-3">{dict.profile.menu}</h2>
         <div className="flex flex-wrap gap-2">
-          {(caterer.menuCategories || []).map((m) => (
+          {(caterer.menuCategories || []).filter((m) => dict.menuCategories[m]).map((m) => (
             <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-3 py-1 text-sm">
               {dict.menuCategories[m]}
-            </span>
-          ))}
-          {(caterer.beverageTypes || []).map((b) => (
-            <span key={b} className="bg-limeLight border-2 border-teal/40 rounded-full px-3 py-1 text-sm">
-              {dict.beverageTypes[b]}
             </span>
           ))}
         </div>
       </section>
 
+      {caterer.packages?.length > 0 && (
+        <PackagesSection caterer={caterer} dict={dict} locale={locale} guestCount={guestCount} setGuestCount={setGuestCount} />
+      )}
+
       {caterer.services?.length > 0 && (
         <section>
           <h2 className="font-display font-bold text-xl text-teal mb-3">{dict.profile.services}</h2>
           <div className="flex flex-wrap gap-2">
-            {caterer.services.map((s) => (
+            {caterer.services.filter((s) => dict.services[s]).map((s) => (
               <span key={s} className="bg-tealGreen/20 border-2 border-tealGreen rounded-full px-3 py-1 text-sm text-tealGreen font-semibold">
                 {dict.services[s]}
               </span>
@@ -251,6 +252,84 @@ export default function CatererProfilePage({ params }) {
         <ProposalModal caterer={caterer} onClose={() => setProposalOpen(false)} />
       )}
     </div>
+  );
+}
+
+function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
+  const d = dict.profile.packages;
+  const cheapest = cheapestPackageEstimate(caterer, guestCount);
+
+  return (
+    <section>
+      <h2 className="font-display font-bold text-xl text-teal mb-3">{d.title}</h2>
+
+      <label className="block max-w-xs mb-4">
+        <span className="text-sm font-display font-semibold text-teal">{d.guestCountLabel}</span>
+        <input
+          type="number"
+          min="1"
+          value={guestCount}
+          onChange={(e) => setGuestCount(e.target.value)}
+          className="mt-1.5 w-full rounded-full border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
+        />
+      </label>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        {caterer.packages.map((pkg) => {
+          const estimate = estimatePackageTotal(pkg, guestCount);
+          const isCheapest = cheapest && cheapest.pkg.id === pkg.id;
+          return (
+            <div
+              key={pkg.id}
+              className={`border-4 rounded-blob p-4 space-y-2 ${isCheapest ? 'border-orange bg-orange/5' : 'border-teal/30 bg-white/70'}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="font-display font-bold text-teal">{pickLocalized(pkg.name, locale)}</h3>
+                {isCheapest && (
+                  <span className="text-xs font-display font-bold bg-orange text-cream px-2 py-1 rounded-full whitespace-nowrap">
+                    {d.cheapestBadge}
+                  </span>
+                )}
+              </div>
+
+              <p className="text-sm text-ink/70">₪{pkg.pricePerGuest} {d.perGuest}</p>
+              {pkg.minGuests && <p className="text-xs text-ink/50">{d.minGuestsNote.replace('{n}', pkg.minGuests)}</p>}
+
+              {pkg.includedCategories?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {pkg.includedCategories.filter((m) => dict.menuCategories[m]).map((m) => (
+                    <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
+                      {dict.menuCategories[m]}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {estimate && (
+                <div className="pt-2 border-t-2 border-teal/10">
+                  <p className="font-display font-extrabold text-lg text-teal">
+                    ₪{Math.round(estimate.total).toLocaleString()} <span className="text-sm font-body font-normal text-ink/60">{d.estimatedTotal}</span>
+                  </p>
+                  {estimate.belowMinimum && <p className="text-xs text-orangeDark mt-1">{d.belowMinimum}</p>}
+                  {estimate.availableAddons.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
+                      <ul className="text-xs text-ink/60 space-y-0.5">
+                        {estimate.availableAddons.map((addon) => (
+                          <li key={addon.id}>
+                            + {pickLocalized(addon.name, locale)}: ₪{Math.round(addon.estimatedAmount).toLocaleString()}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

@@ -27,7 +27,7 @@ export async function PUT(request, { params }) {
 
   const existing = await getCaterer(params.id);
   if (!existing) return NextResponse.json({ error: 'not found' }, { status: 404 });
-  if (existing.ownerEmail !== session.user.email) {
+  if (existing.ownerEmail !== session.user.email && !isAdminEmail(session.user.email)) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
 
@@ -38,7 +38,8 @@ export async function PUT(request, { params }) {
 
   const record = await upsertCaterer(
     { ...existing, ...body, description, city, id: params.id, ownerEmail: existing.ownerEmail },
-    session.user.email
+    session.user.email,
+    isAdminEmail(session.user.email)
   );
   return NextResponse.json({ caterer: record });
 }
@@ -48,7 +49,7 @@ export async function DELETE(_request, { params }) {
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
-  const ok = await deleteCaterer(params.id, session.user.email);
+  const ok = await deleteCaterer(params.id, session.user.email, isAdminEmail(session.user.email));
   if (!ok) return NextResponse.json({ error: 'forbidden or not found' }, { status: 403 });
   return NextResponse.json({ success: true });
 }

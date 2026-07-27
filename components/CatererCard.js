@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { useLanguage } from './LanguageProvider';
 import { pickLocalized, toArrayField } from '../lib/localized';
+import { cheapestPackageEstimate } from '../lib/pricing';
 
-export function CatererCard({ caterer }) {
+export function CatererCard({ caterer, guestCount }) {
   const { dict, t, locale } = useLanguage();
   const photo = caterer.photos?.[0];
   const cateringTypes = toArrayField(caterer, 'cateringTypes', 'cateringType');
+  const estimate = guestCount ? cheapestPackageEstimate(caterer, guestCount) : null;
 
   return (
     <Link
@@ -42,10 +44,16 @@ export function CatererCard({ caterer }) {
           <span>{pickLocalized(caterer.city, locale)}</span>
           <span>{t('card.guestsUpTo', { n: caterer.maxGuests })}</span>
         </div>
-        {caterer.priceFrom && (
+        {estimate ? (
           <p className="text-sm font-display font-semibold text-orange">
-            {dict.card.from} ₪{caterer.priceFrom} {dict.card.perGuest}
+            ₪{Math.round(estimate.total).toLocaleString()} {t('card.estimatedFor', { n: guestCount })}
           </p>
+        ) : (
+          caterer.priceFrom && (
+            <p className="text-sm font-display font-semibold text-orange">
+              {dict.card.from} ₪{caterer.priceFrom} {dict.card.perGuest}
+            </p>
+          )
         )}
       </div>
     </Link>

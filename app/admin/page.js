@@ -13,19 +13,41 @@ export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [pending, setPending] = useState(null);
+  const [all, setAll] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
 
+  function loadAll() {
+    fetch('/api/admin/caterers')
+      .then((r) => r.json())
+      .then((data) => setAll(data.results || []));
+  }
+
   useEffect(() => {
     if (session?.user?.isAdmin) {
       fetch('/api/admin/pending')
         .then((r) => r.json())
         .then((data) => setPending(data.results || []));
+      loadAll();
     }
   }, [session]);
+
+  async function handleDelete(id) {
+    if (!window.confirm(dict.admin.confirmDelete)) return;
+    setBusyId(id);
+    try {
+      const res = await fetch(`/api/caterers/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setAll((prev) => prev.filter((c) => c.id !== id));
+        setPending((prev) => prev.filter((c) => c.id !== id));
+      }
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   if (status === 'loading' || (status === 'authenticated' && session?.user?.isAdmin === undefined)) {
     return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
@@ -54,6 +76,7 @@ export default function AdminPage() {
       });
       if (res.ok) {
         setPending((prev) => prev.filter((c) => c.id !== id));
+        loadAll();
       }
     } finally {
       setBusyId(null);
@@ -116,6 +139,51 @@ export default function AdminPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="pt-4 border-t-2 border-teal/10">
+        <h2 className="font-display font-bold text-xl text-teal mb-3">{dict.admin.allTitle}</h2>
+
+        {all === null && <p className="text-teal text-center py-6">…</p>}
+
+        {all?.length === 0 && (
+          <p className="bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center text-ink/70">
+            {dict.admin.allEmpty}
+          </p>
+        )}
+
+        {all?.length > 0 && (
+          <div className="space-y-3">
+            {all.map((c) => (
+              <div key={c.id} className="bg-white border-2 border-teal/30 rounded-blob p-4 flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <p className="font-display font-bold text-teal">{c.businessName}</p>
+                  <p className="text-sm text-ink/60">
+                    {dict.admin.submittedBy}: {c.ownerEmail} ·{' '}
+                    {c.status === 'approved' && dict.dashboard.statusApproved}
+                    {c.status === 'pending_review' && dict.dashboard.statusPending}
+                    {c.status === 'rejected' && dict.dashboard.statusRejected}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 whitespace-nowrap">
+                  <Link href={`/caterer/${c.id}`} className="text-sm text-tealGreen font-semibold hover:underline focus-ring rounded">
+                    {dict.admin.viewFullProfile}
+                  </Link>
+                  <Link href={`/dashboard/${c.id}/edit`} className="text-sm text-teal font-semibold hover:underline focus-ring rounded">
+                    {dict.dashboard.edit}
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    disabled={busyId === c.id}
+                    className="text-sm text-orangeDark font-semibold hover:underline focus-ring rounded disabled:opacity-60"
+                  >
+                    {dict.dashboard.delete}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

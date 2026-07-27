@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/auth';
 import { searchCaterers, upsertCaterer } from '../../../lib/store';
+import { isAdminEmail } from '../../../lib/admin';
 import { fillLocalizedGaps } from '../../../lib/translate';
 
 export async function GET(request) {
@@ -15,7 +16,6 @@ export async function GET(request) {
     eventTypes: searchParams.getAll('eventTypes'),
     minGuests: searchParams.get('minGuests') || '',
     menuCategories: searchParams.getAll('menuCategories'),
-    beverageTypes: searchParams.getAll('beverageTypes'),
     services: searchParams.getAll('services')
   };
 
@@ -42,7 +42,8 @@ export async function POST(request) {
 
   const record = await upsertCaterer(
     { ...body, description, city, id: undefined, ownerEmail: session.user.email },
-    session.user.email
+    session.user.email,
+    isAdminEmail(session.user.email)
   );
 
   return NextResponse.json({ caterer: record }, { status: 201 });

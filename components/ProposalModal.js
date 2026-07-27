@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLanguage } from './LanguageProvider';
 import { CheckboxGroup } from './CheckboxGroup';
 import { pickLocalized, toArrayField } from '../lib/localized';
+import { estimatePackageTotal } from '../lib/pricing';
 import { EVENT_TYPES } from '../lib/constants';
 
 export function ProposalModal({ caterer, onClose }) {
@@ -12,9 +13,9 @@ export function ProposalModal({ caterer, onClose }) {
   const eventTypeOptions = caterer.eventTypes?.length ? caterer.eventTypes : EVENT_TYPES;
   const cateringTypeOptions = toArrayField(caterer, 'cateringTypes', 'cateringType');
   const kashrutOptions = toArrayField(caterer, 'kashrutLevels', 'kashrut');
-  const menuOptions = caterer.menuCategories || [];
-  const beverageOptions = caterer.beverageTypes || [];
-  const serviceOptions = caterer.services || [];
+  const menuOptions = (caterer.menuCategories || []).filter((m) => dict.menuCategories[m]);
+  const serviceOptions = (caterer.services || []).filter((s) => dict.services[s]);
+  const packages = caterer.packages || [];
 
   const [form, setForm] = useState({
     where: pickLocalized(caterer.city, locale),
@@ -23,14 +24,24 @@ export function ProposalModal({ caterer, onClose }) {
     cateringType: cateringTypeOptions[0] || '',
     kashrut: kashrutOptions[0] || '',
     guests: '',
-    menu: [],
-    beverages: [],
+    packageId: packages[0]?.id || '',
+    menu: packages[0]?.includedCategories || [],
     services: []
   });
 
   function set(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
+
+  // Picking a package pre-fills the menu checkboxes with what that package
+  // includes - the customer can still adjust them by hand afterwards.
+  function selectPackage(packageId) {
+    const pkg = packages.find((p) => p.id === packageId);
+    setForm((prev) => ({ ...prev, packageId, menu: pkg?.includedCategories || prev.menu }));
+  }
+
+  const selectedPackage = packages.find((p) => p.id === form.packageId) || null;
+  const estimate = selectedPackage ? estimatePackageTotal(selectedPackage, form.guests) : null;
 
   function buildMessage() {
     // Emoji are built from numeric code points via String.fromCodePoint()
@@ -46,8 +57,8 @@ export function ProposalModal({ caterer, onClose }) {
     const STAR_OF_DAVID = String.fromCodePoint(0x2721, 0xfe0f); // ✡️
     const PEOPLE = String.fromCodePoint(0x1f465); // 👥
     const FOOD = String.fromCodePoint(0x1f372); // 🍲
-    const DRINK = String.fromCodePoint(0x1f964); // 🥤
     const SPARKLES = String.fromCodePoint(0x2728); // ✨
+    const MONEY = String.fromCodePoint(0x1f4b0); // 💰
 
     const lines = [`${dict.proposal.messageIntro} ${caterer.businessName}:`];
     if (form.where) lines.push(`${PIN} ${dict.proposal.where}: ${form.where}`);
@@ -56,8 +67,13 @@ export function ProposalModal({ caterer, onClose }) {
     if (form.cateringType) lines.push(`${PLATE} ${dict.search.cateringType}: ${dict.cateringType[form.cateringType]}`);
     if (form.kashrut) lines.push(`${STAR_OF_DAVID} ${dict.search.kashrut}: ${dict.kashrut[form.kashrut]}`);
     if (form.guests) lines.push(`${PEOPLE} ${dict.proposal.guests}: ${form.guests}`);
+    if (selectedPackage) {
+      lines.push(`${PLATE} ${dict.proposal.package}: ${pickLocalized(selectedPackage.name, locale)} (₪${selectedPackage.pricePerGuest} ${dict.card.perGuest})`);
+    }
+    if (estimate) {
+      lines.push(`${MONEY} ${dict.proposal.estimatedPrice}: ₪${Math.round(estimate.total).toLocaleString()}`);
+    }
     if (form.menu.length) lines.push(`${FOOD} ${dict.search.menu}: ${form.menu.map((m) => dict.menuCategories[m]).join(', ')}`);
-    if (form.beverages.length) lines.push(`${DRINK} ${dict.search.beverages}: ${form.beverages.map((b) => dict.beverageTypes[b]).join(', ')}`);
     if (form.services.length) lines.push(`${SPARKLES} ${dict.search.services}: ${form.services.map((s) => dict.services[s]).join(', ')}`);
     return lines.join('\n');
   }
@@ -129,6 +145,23 @@ export function ProposalModal({ caterer, onClose }) {
           </Field>
         </div>
 
+        {packages.length > 0 && (
+          <Field label={dict.proposal.package}>
+            <Select
+              value={form.packageId}
+              onChange={selectPackage}
+              options={packages.map((p) => p.id)}
+              labels={Object.fromEntries(packages.map((p) => [p.id, pickLocalized(p.name, locale)]))}
+            />
+            {estimate && (
+              <p className="text-sm text-tealGreen font-semibold mt-1.5">
+                {dict.proposal.estimatedPrice}: ₪{Math.round(estimate.total).toLocaleString()}
+                {estimate.belowMinimum && ` (${dict.profile.packages.belowMinimum})`}
+              </p>
+            )}
+          </Field>
+        )}
+
         {eventTypeOptions.length > 0 && (
           <Field label={dict.search.eventType}>
             <Select value={form.eventType} onChange={(v) => set('eventType', v)} options={eventTypeOptions} labels={dict.eventTypes} />
@@ -152,12 +185,6 @@ export function ProposalModal({ caterer, onClose }) {
         {menuOptions.length > 0 && (
           <Field label={dict.search.menu}>
             <CheckboxGroup name={dict.search.menu} options={menuOptions} labels={dict.menuCategories} values={form.menu} onChange={(v) => set('menu', v)} />
-          </Field>
-        )}
-
-        {beverageOptions.length > 0 && (
-          <Field label={dict.search.beverages}>
-            <CheckboxGroup name={dict.search.beverages} options={beverageOptions} labels={dict.beverageTypes} values={form.beverages} onChange={(v) => set('beverages', v)} />
           </Field>
         )}
 

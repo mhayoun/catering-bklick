@@ -8,7 +8,6 @@ import {
   CATERING_TYPES,
   EVENT_TYPES,
   MENU_CATEGORIES,
-  BEVERAGE_TYPES,
   ADDITIONAL_SERVICES,
   GUEST_COUNT_BRACKETS
 } from '../lib/constants';
@@ -36,7 +35,6 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
     filters.cateringTypes.length +
     filters.eventTypes.length +
     filters.menuCategories.length +
-    filters.beverageTypes.length +
     filters.services.length +
     (filters.minGuests ? 1 : 0);
 
@@ -113,10 +111,6 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
 
         <FilterSection title={dict.search.menu}>
           <CheckList options={MENU_CATEGORIES} labels={dict.menuCategories} values={filters.menuCategories} onToggle={(v) => toggle('menuCategories', v)} />
-        </FilterSection>
-
-        <FilterSection title={dict.search.beverages}>
-          <CheckList options={BEVERAGE_TYPES} labels={dict.beverageTypes} values={filters.beverageTypes} onToggle={(v) => toggle('beverageTypes', v)} />
         </FilterSection>
 
         <FilterSection title={dict.search.services}>
