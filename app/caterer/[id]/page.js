@@ -298,6 +298,41 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
         />
       </label>
 
+      {(commonMinGuests || commonCategories.length > 0 || commonAddons.length > 0) && (
+        <div className="mb-4 border-4 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-2">
+          <p className="font-display font-semibold text-teal text-sm">{d.commonToAll}</p>
+          {commonMinGuests && <p className="text-xs text-ink/60">{d.minGuestsNote.replace('{n}', commonMinGuests)}</p>}
+          {commonCategories.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {commonCategories.map((m) => (
+                <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
+                  {dict.menuCategories[m]}
+                  {commonCategoryLimit(m) && ` · ${d.categoryChoiceCount.replace('{n}', commonCategoryLimit(m))}`}
+                </span>
+              ))}
+            </div>
+          )}
+          {commonAddons.length > 0 && (
+            <div>
+              <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
+              <ul className="text-xs text-ink/60 space-y-0.5">
+                {commonAddons.map((addon) => {
+                  const estimatedAmount =
+                    addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
+                  return (
+                    <li key={addon.id}>
+                      + {pickLocalized(addon.name, locale)}: ₪{Number(addon.amount).toLocaleString()}
+                      {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
+                      {commonBilledGuests > 0 && ` — ₪${Math.round(estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="grid sm:grid-cols-2 gap-4">
         {caterer.packages.map((pkg) => {
           const estimate = estimatePackageTotal(pkg, guestCount);
@@ -360,41 +395,6 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
           );
         })}
       </div>
-
-      {(commonMinGuests || commonCategories.length > 0 || commonAddons.length > 0) && (
-        <div className="mt-4 border-4 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-2">
-          <p className="font-display font-semibold text-teal text-sm">{d.commonToAll}</p>
-          {commonMinGuests && <p className="text-xs text-ink/60">{d.minGuestsNote.replace('{n}', commonMinGuests)}</p>}
-          {commonCategories.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {commonCategories.map((m) => (
-                <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
-                  {dict.menuCategories[m]}
-                  {commonCategoryLimit(m) && ` · ${d.categoryChoiceCount.replace('{n}', commonCategoryLimit(m))}`}
-                </span>
-              ))}
-            </div>
-          )}
-          {commonAddons.length > 0 && (
-            <div>
-              <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
-              <ul className="text-xs text-ink/60 space-y-0.5">
-                {commonAddons.map((addon) => {
-                  const estimatedAmount =
-                    addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
-                  return (
-                    <li key={addon.id}>
-                      + {pickLocalized(addon.name, locale)}: ₪{Number(addon.amount).toLocaleString()}
-                      {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
-                      {commonBilledGuests > 0 && ` — ₪${Math.round(estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
     </section>
   );
 }
