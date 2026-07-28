@@ -63,7 +63,8 @@ const BLANK = {
   // already folded into each package's own includedCategories/categoryLimits/addons.
   commonCategories: [],
   commonCategoryLimits: {},
-  commonAddons: []
+  commonAddons: [],
+  commonMinGuests: ''
 };
 
 export function CatererForm({ initial, catererId }) {
@@ -110,6 +111,10 @@ export function CatererForm({ initial, catererId }) {
         : [];
     merged.commonAddons = commonAddonIds.map((id) => merged.packages[0].addons.find((a) => a.id === id)).filter(Boolean);
 
+    const minGuestsValues = merged.packages.map((p) => Number(p.minGuests) || null);
+    merged.commonMinGuests =
+      merged.packages.length > 1 && minGuestsValues.every((v) => v && v === minGuestsValues[0]) ? String(minGuestsValues[0]) : '';
+
     return merged;
   });
   const [saving, setSaving] = useState(false);
@@ -133,6 +138,7 @@ export function CatererForm({ initial, catererId }) {
         ...prev.packages,
         {
           ...blankPackage(),
+          minGuests: prev.commonMinGuests,
           includedCategories: [...prev.commonCategories],
           categoryLimits: { ...prev.commonCategoryLimits },
           addons: prev.commonAddons.map((addon) => ({ ...addon }))
@@ -177,6 +183,14 @@ export function CatererForm({ initial, catererId }) {
   // Bulk helpers below apply a single edit to every package at once, so a
   // menu category or add-on that's the same across all formulas only needs
   // to be defined/edited in one place instead of per-package.
+
+  function setCommonMinGuests(value) {
+    setForm((prev) => ({
+      ...prev,
+      commonMinGuests: value,
+      packages: prev.packages.map((pkg) => ({ ...pkg, minGuests: value }))
+    }));
+  }
 
   function toggleCommonCategory(cat) {
     setForm((prev) => {
@@ -335,7 +349,7 @@ export function CatererForm({ initial, catererId }) {
       // commonCategories/commonCategoryLimits/commonAddons are an editor-only
       // convenience - everything they represent is already folded into each
       // package's own includedCategories/categoryLimits/addons.
-      const { commonCategories, commonCategoryLimits, commonAddons, ...payload } = form;
+      const { commonCategories, commonCategoryLimits, commonAddons, commonMinGuests, ...payload } = form;
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -356,6 +370,7 @@ export function CatererForm({ initial, catererId }) {
   const commonCategoryLimit = (cat) => form.commonCategoryLimits?.[cat] ?? null;
   const commonAddons = form.commonAddons;
   const commonAddonIds = form.commonAddons.map((a) => a.id);
+  const commonMinGuests = form.commonMinGuests;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 bg-white/70 border-4 border-teal rounded-blob p-6 sm:p-8">
@@ -429,6 +444,8 @@ export function CatererForm({ initial, catererId }) {
 
         <div className="mt-2 border-2 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-4">
           <p className="font-display font-semibold text-teal text-sm">{dict.profile.packages.commonToAll}</p>
+
+          <InlineNumberField label={dict.form.packages.minGuests} value={commonMinGuests} onChange={setCommonMinGuests} />
 
           <FieldBlock label={dict.form.packages.includedCategories}>
             <CheckboxGroup
@@ -521,6 +538,7 @@ export function CatererForm({ initial, catererId }) {
               locale={locale}
               commonCategories={commonCategories}
               commonAddonIds={commonAddonIds}
+              commonMinGuests={commonMinGuests}
               onNameChange={(text) => setPackageName(pkgIndex, text)}
               onFieldChange={(patch) => updatePackage(pkgIndex, patch)}
               onRemove={() => removePackage(pkgIndex)}
@@ -667,6 +685,7 @@ function PackageEditor({
   locale,
   commonCategories,
   commonAddonIds,
+  commonMinGuests,
   onNameChange,
   onFieldChange,
   onRemove,
@@ -694,7 +713,9 @@ function PackageEditor({
 
       <div className="flex flex-wrap gap-4">
         <InlineNumberField label={d.pricePerGuest} value={pkg.pricePerGuest} onChange={(v) => onFieldChange({ pricePerGuest: v })} />
-        <InlineNumberField label={d.minGuests} value={pkg.minGuests} onChange={(v) => onFieldChange({ minGuests: v })} />
+        {!commonMinGuests && (
+          <InlineNumberField label={d.minGuests} value={pkg.minGuests} onChange={(v) => onFieldChange({ minGuests: v })} />
+        )}
       </div>
 
       <FieldBlock label={d.includedCategories}>
