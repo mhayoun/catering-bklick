@@ -212,7 +212,7 @@ export default function CatererProfilePage({ params }) {
           {caterer.address && <p><strong>{dict.profile.address}:</strong> {caterer.address}</p>}
           {caterer.phone && (
             <a href={`tel:${caterer.phone}`} className="text-orange font-semibold hover:underline focus-ring rounded">
-              📞 {dict.profile.call}: {caterer.phone}
+              📞 {dict.profile.call}: <span dir="ltr" className="inline-block">{caterer.phone}</span>
             </a>
           )}
           {caterer.whatsapp && (

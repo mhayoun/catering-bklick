@@ -15,6 +15,7 @@ export async function GET(request) {
     cateringTypes: searchParams.getAll('cateringTypes'),
     eventTypes: searchParams.getAll('eventTypes'),
     minGuests: searchParams.get('minGuests') || '',
+    maxMinOrder: searchParams.get('maxMinOrder') || '',
     menuCategories: searchParams.getAll('menuCategories'),
     services: searchParams.getAll('services')
   };

@@ -9,7 +9,8 @@ import {
   EVENT_TYPES,
   MENU_CATEGORIES,
   ADDITIONAL_SERVICES,
-  GUEST_COUNT_BRACKETS
+  GUEST_COUNT_BRACKETS,
+  MIN_ORDER_BRACKETS
 } from '../lib/constants';
 
 export function FilterSidebar({ filters, setFilters, onReset }) {
@@ -29,6 +30,10 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
     setFilters((prev) => ({ ...prev, minGuests: prev.minGuests === value ? '' : value }));
   }
 
+  function setMaxMinOrder(value) {
+    setFilters((prev) => ({ ...prev, maxMinOrder: prev.maxMinOrder === value ? '' : value }));
+  }
+
   const activeCount =
     filters.districts.length +
     filters.kashrutLevels.length +
@@ -36,7 +41,8 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
     filters.eventTypes.length +
     filters.menuCategories.length +
     filters.services.length +
-    (filters.minGuests ? 1 : 0);
+    (filters.minGuests ? 1 : 0) +
+    (filters.maxMinOrder ? 1 : 0);
 
   return (
     <aside className="w-full lg:w-72 shrink-0">
@@ -104,6 +110,23 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
                   className="accent-orange h-4 w-4"
                 />
                 {dict.guestBrackets[g.id]}
+              </label>
+            ))}
+          </div>
+        </FilterSection>
+
+        <FilterSection title={dict.search.minOrder}>
+          <div className="space-y-1.5">
+            {MIN_ORDER_BRACKETS.map((g) => (
+              <label key={g.id} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-teal">
+                <input
+                  type="radio"
+                  name="minOrder"
+                  checked={String(filters.maxMinOrder) === String(g.max)}
+                  onChange={() => setMaxMinOrder(String(g.max))}
+                  className="accent-orange h-4 w-4"
+                />
+                {dict.minOrderBrackets[g.id]}
               </label>
             ))}
           </div>

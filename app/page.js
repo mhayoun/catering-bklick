@@ -13,6 +13,7 @@ const EMPTY_FILTERS = {
   cateringTypes: [],
   eventTypes: [],
   minGuests: '',
+  maxMinOrder: '',
   menuCategories: [],
   services: []
 };
@@ -29,6 +30,7 @@ export default function HomePage() {
     const params = new URLSearchParams();
     if (f.keyword) params.set('keyword', f.keyword);
     if (f.minGuests) params.set('minGuests', f.minGuests);
+    if (f.maxMinOrder) params.set('maxMinOrder', f.maxMinOrder);
     f.districts.forEach((v) => params.append('districts', v));
     f.kashrutLevels.forEach((v) => params.append('kashrutLevels', v));
     f.cateringTypes.forEach((v) => params.append('cateringTypes', v));
