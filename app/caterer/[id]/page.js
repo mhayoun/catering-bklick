@@ -344,15 +344,19 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
           {itemizedCategories
             .filter((cat) => commonItemsByCategory[cat].length > 0)
             .map((cat) => (
-              <p key={cat} className="text-xs text-ink/60 leading-relaxed">
-                <span className="font-display font-semibold text-teal">{dict.menuCategories[cat]}: </span>
-                {commonItemsByCategory[cat].map((item) => pickLocalized(item, locale)).join(', ')}
-              </p>
+              <details key={cat} className="text-xs text-ink/60">
+                <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
+                  {dict.menuCategories[cat]} ({commonItemsByCategory[cat].length})
+                </summary>
+                <p className="pt-1 leading-relaxed">{commonItemsByCategory[cat].map((item) => pickLocalized(item, locale)).join(', ')}</p>
+              </details>
             ))}
           {commonAddons.length > 0 && (
-            <div>
-              <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
-              <ul className="text-xs text-ink/60 space-y-0.5">
+            <details className="text-xs text-ink/60">
+              <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
+                {d.addonsIncluded} ({commonAddons.length})
+              </summary>
+              <ul className="pt-1 space-y-0.5">
                 {commonAddons.map((addon) => {
                   const estimatedAmount =
                     addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
@@ -365,7 +369,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                   );
                 })}
               </ul>
-            </div>
+            </details>
           )}
         </div>
       )}
