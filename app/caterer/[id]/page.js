@@ -274,14 +274,43 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
   const commonAddons = commonAddonIds.map((id) => packages[0].addons.find((a) => a.id === id)).filter(Boolean);
   const commonBilledGuests = Math.max(Number(guestCount) || 0, commonMinGuests || 0);
 
-  // Menu categories included in every package (shown once, in "common to all", instead of repeated on each card).
+  // Menu categories included in every package with the SAME choice count (shown once, in "common to all",
+  // instead of repeated on each card). A category included everywhere but with a different count per package
+  // (e.g. salads: choose 7 in one package, choose 8 in another) must stay on its own card - hoisting it here
+  // would silently drop the per-package number instead of showing it.
   const categorySets = packages.map((p) => new Set(p.includedCategories || []));
-  const commonCategories =
-    comparable && categorySets.length > 0 ? [...categorySets[0]].filter((cat) => dict.menuCategories[cat] && categorySets.every((s) => s.has(cat))) : [];
   const commonCategoryLimit = (cat) => {
     const values = packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
     return values.every((v) => v === values[0]) ? values[0] : null;
   };
+  const commonCategories =
+    comparable && categorySets.length > 0
+      ? [...categorySets[0]].filter((cat) => {
+          if (!dict.menuCategories[cat] || !categorySets.every((s) => s.has(cat))) return false;
+          const values = packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
+          const varies = values.some((v) => v !== null) && !values.every((v) => v === values[0]);
+          return !varies;
+        })
+      : [];
+
+  // Specific menu items (e.g. individual salads) present in every package's own item list for a
+  // given category - shown once in "common to all" instead of repeated on each card. Only computed
+  // for categories where EVERY package actually lists items (not just a choice count).
+  const itemizedCategories = comparable
+    ? [...new Set(packages.flatMap((p) => Object.keys(p.categoryItems || {})))].filter((cat) =>
+        packages.every((p) => (p.categoryItems?.[cat]?.length || 0) > 0)
+      )
+    : [];
+  const commonItemIdsByCategory = Object.fromEntries(
+    itemizedCategories.map((cat) => {
+      const itemSets = packages.map((p) => new Set(p.categoryItems[cat].map((it) => it.id)));
+      const commonIds = [...itemSets[0]].filter((itemId) => itemSets.every((s) => s.has(itemId)));
+      return [cat, new Set(commonIds)];
+    })
+  );
+  const commonItemsByCategory = Object.fromEntries(
+    itemizedCategories.map((cat) => [cat, packages[0].categoryItems[cat].filter((it) => commonItemIdsByCategory[cat].has(it.id))])
+  );
 
   return (
     <section>
@@ -298,7 +327,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
         />
       </label>
 
-      {(commonMinGuests || commonCategories.length > 0 || commonAddons.length > 0) && (
+      {(commonMinGuests || commonCategories.length > 0 || commonAddons.length > 0 || itemizedCategories.some((cat) => commonItemsByCategory[cat].length > 0)) && (
         <div className="mb-4 border-4 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-2">
           <p className="font-display font-semibold text-teal text-sm">{d.commonToAll}</p>
           {commonMinGuests && <p className="text-xs text-ink/60">{d.minGuestsNote.replace('{n}', commonMinGuests)}</p>}
@@ -312,6 +341,14 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
               ))}
             </div>
           )}
+          {itemizedCategories
+            .filter((cat) => commonItemsByCategory[cat].length > 0)
+            .map((cat) => (
+              <p key={cat} className="text-xs text-ink/60 leading-relaxed">
+                <span className="font-display font-semibold text-teal">{dict.menuCategories[cat]}: </span>
+                {commonItemsByCategory[cat].map((item) => pickLocalized(item, locale)).join(', ')}
+              </p>
+            ))}
           {commonAddons.length > 0 && (
             <div>
               <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
@@ -364,6 +401,22 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                   ))}
                 </div>
               )}
+
+              {pkg.includedCategories
+                ?.filter((m) => pkg.categoryItems?.[m]?.length > 0)
+                .map((m) => {
+                  const commonIds = commonItemIdsByCategory[m];
+                  const items = commonIds ? pkg.categoryItems[m].filter((it) => !commonIds.has(it.id)) : pkg.categoryItems[m];
+                  if (items.length === 0) return null;
+                  return (
+                    <details key={`${m}-items`} className="text-xs text-ink/60">
+                      <summary className="cursor-pointer text-teal font-display font-semibold underline focus-ring rounded">
+                        {dict.menuCategories[m]} · {commonIds ? d.extraOptions : d.viewOptions}
+                      </summary>
+                      <p className="pt-1 leading-relaxed">{items.map((item) => pickLocalized(item, locale)).join(', ')}</p>
+                    </details>
+                  );
+                })}
 
               {estimate && (
                 <div className="pt-2 border-t-2 border-teal/10">
