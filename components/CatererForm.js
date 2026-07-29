@@ -577,8 +577,49 @@ export function CatererForm({ initial, catererId }) {
             )}
           </FieldBlock>
 
-          <div>
-            <p className="text-sm font-display font-semibold text-teal mb-2">{dict.form.packages.addons}</p>
+          <div className="space-y-3">
+            {[...new Set([...commonCategories, ...Object.keys(commonCategoryItems)])].map((cat) => (
+              <details key={`${cat}-common-items`} className="border-2 border-teal/20 rounded-blob p-2">
+                <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
+                  {dict.menuCategories[cat]} · {dict.form.packages.menuItems}
+                  {(commonCategoryItems[cat]?.length || 0) > 0 && ` (${commonCategoryItems[cat].length})`}
+                </summary>
+                <div className="space-y-1 mt-2">
+                  {(commonCategoryItems[cat] || []).map((item) => (
+                    <div key={item.id} className="grid grid-cols-[1fr,auto] gap-2 items-center">
+                      <TextField
+                        label={dict.form.packages.menuItemName}
+                        hideLabel
+                        value={item[locale] || ''}
+                        onChange={(v) => updateCommonCategoryItem(cat, item.id, v)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeCommonCategoryItem(cat, item.id)}
+                        aria-label={dict.form.packages.removeMenuItem}
+                        className="text-red-600 hover:text-red-700 font-bold text-lg leading-none focus-ring rounded h-fit px-1"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => addCommonCategoryItem(cat)}
+                  className="mt-1 text-teal text-sm font-display font-semibold underline focus-ring rounded"
+                >
+                  + {dict.form.packages.addMenuItem}
+                </button>
+              </details>
+            ))}
+          </div>
+
+          <details className="border-2 border-teal/20 rounded-blob p-2">
+            <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
+              {dict.form.packages.addons}
+              {commonAddons.length > 0 && ` (${commonAddons.length})`}
+            </summary>
             {commonAddons.length > 0 && (
               <div className="grid gap-2 sm:grid-cols-[3fr,auto,5rem,auto] items-center">
                 <AddonsHeaderRow d={dict.form.packages} />
@@ -628,45 +669,7 @@ export function CatererForm({ initial, catererId }) {
             >
               + {dict.form.packages.addAddon}
             </button>
-          </div>
-
-          <div className="space-y-3">
-            {[...new Set([...commonCategories, ...Object.keys(commonCategoryItems)])].map((cat) => (
-              <details key={`${cat}-common-items`} className="border-2 border-teal/20 rounded-blob p-2">
-                <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
-                  {dict.menuCategories[cat]} · {dict.form.packages.menuItems}
-                  {(commonCategoryItems[cat]?.length || 0) > 0 && ` (${commonCategoryItems[cat].length})`}
-                </summary>
-                <div className="space-y-1 mt-2">
-                  {(commonCategoryItems[cat] || []).map((item) => (
-                    <div key={item.id} className="grid grid-cols-[1fr,auto] gap-2 items-center">
-                      <TextField
-                        label={dict.form.packages.menuItemName}
-                        hideLabel
-                        value={item[locale] || ''}
-                        onChange={(v) => updateCommonCategoryItem(cat, item.id, v)}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeCommonCategoryItem(cat, item.id)}
-                        aria-label={dict.form.packages.removeMenuItem}
-                        className="text-red-600 hover:text-red-700 font-bold text-lg leading-none focus-ring rounded h-fit px-1"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => addCommonCategoryItem(cat)}
-                  className="mt-1 text-teal text-sm font-display font-semibold underline focus-ring rounded"
-                >
-                  + {dict.form.packages.addMenuItem}
-                </button>
-              </details>
-            ))}
-          </div>
+          </details>
         </details>
 
         <div className="space-y-4 mt-4">
@@ -945,8 +948,12 @@ function PackageEditor({
         </div>
       )}
 
-      <div>
-        <p className="text-sm font-display font-semibold text-teal mb-2">{d.addons}</p>
+      <details className="border-2 border-teal/20 rounded-blob p-2">
+        <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
+          {d.addons}
+          {pkg.addons.filter((a) => !commonAddonIds.includes(a.id)).length > 0 &&
+            ` (${pkg.addons.filter((a) => !commonAddonIds.includes(a.id)).length})`}
+        </summary>
         {pkg.addons.some((a) => !commonAddonIds.includes(a.id)) && (
           <div className="grid gap-2 sm:grid-cols-[3fr,auto,5rem,auto] items-center">
             <AddonsHeaderRow d={d} />
@@ -994,7 +1001,7 @@ function PackageEditor({
         >
           + {d.addAddon}
         </button>
-      </div>
+      </details>
     </div>
   );
 }
