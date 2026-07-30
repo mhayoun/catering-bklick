@@ -105,11 +105,11 @@ export function FilterSidebar({ filters, setFilters, onReset, searchMode, setSea
           </button>
         </div>
 
-        <FilterSection title={dict.search.location} defaultOpen>
+        <FilterSection title={dict.search.location}>
           <CheckList options={DISTRICTS} labels={dict.districts} values={filters.districts} onToggle={(v) => toggle('districts', v)} />
         </FilterSection>
 
-        <FilterSection title={dict.search.cateringType} defaultOpen>
+        <FilterSection title={dict.search.cateringType}>
           <CheckList options={CATERING_TYPES} labels={dict.cateringType} values={filters.cateringTypes} onToggle={(v) => toggle('cateringTypes', v)} />
         </FilterSection>
 
@@ -117,7 +117,7 @@ export function FilterSidebar({ filters, setFilters, onReset, searchMode, setSea
           <CheckList options={KASHRUT_LEVELS} labels={dict.kashrut} values={filters.kashrutLevels} onToggle={(v) => toggle('kashrutLevels', v)} />
         </FilterSection>
 
-        <FilterSection title={dict.search.eventType} defaultOpen>
+        <FilterSection title={dict.search.eventType}>
           <CheckList options={EVENT_TYPES} labels={dict.eventTypes} values={filters.eventTypes} onToggle={(v) => toggle('eventTypes', v)} />
         </FilterSection>
 
