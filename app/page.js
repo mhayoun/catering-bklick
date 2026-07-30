@@ -6,7 +6,7 @@ import { FilterSidebar } from '../components/FilterSidebar';
 import { CatererCard } from '../components/CatererCard';
 import { FormulaCard } from '../components/FormulaCard';
 import { Logo } from '../components/Logo';
-import { buildPackageHaystack, countOccurrences } from '../lib/search';
+import { buildPackageHaystack, countOccurrencesMulti, parseKeywords } from '../lib/search';
 
 const EMPTY_FILTERS = {
   keyword: '',
@@ -32,10 +32,12 @@ export default function HomePage() {
   // "formulas" search mode. When an event-type filter is active, only formulas individually
   // tagged with one of the selected event types are kept (the caterer-level match in
   // searchCaterers is broader - it also passes a caterer whose OTHER packages carry the tag,
-  // so this narrows back down to just the matching ones). With a keyword search active,
-  // formulas are ranked by how many times the term appears in that formula's own content
-  // (falling back to price, cheapest first, when there's no keyword or as a tie-breaker).
+  // so this narrows back down to just the matching ones). With a keyword search active (one or
+  // more terms, comma/space separated), formulas are ranked by how many times ANY of the terms
+  // appears in that formula's own content (falling back to price, cheapest first, when there's
+  // no keyword or as a tie-breaker).
   const keyword = filters.keyword?.trim();
+  const keywordTerms = useMemo(() => parseKeywords(keyword), [keyword]);
   const formulas = useMemo(() => {
     const flattened = results
       .flatMap((caterer) => (caterer.packages || []).map((pkg) => ({ caterer, pkg })))
@@ -44,14 +46,14 @@ export default function HomePage() {
           filters.eventTypes.length === 0 || filters.eventTypes.some((e) => (pkg.eventTypes || []).includes(e))
       );
 
-    if (keyword) {
+    if (keywordTerms.length > 0) {
       return flattened
-        .map((f) => ({ ...f, matchCount: countOccurrences(buildPackageHaystack(f.caterer, f.pkg), keyword) }))
+        .map((f) => ({ ...f, matchCount: countOccurrencesMulti(buildPackageHaystack(f.caterer, f.pkg), keywordTerms) }))
         .filter((f) => f.matchCount > 0)
         .sort((a, b) => b.matchCount - a.matchCount || Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
     }
     return flattened.sort((a, b) => Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
-  }, [results, filters.eventTypes, keyword]);
+  }, [results, filters.eventTypes, keywordTerms]);
 
   const runSearch = useCallback(async (f) => {
     setLoading(true);

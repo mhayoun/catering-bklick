@@ -9,7 +9,7 @@ import { ProposalModal } from '../../../components/ProposalModal';
 import { Highlight } from '../../../components/Highlight';
 import { pickLocalized, toArrayField } from '../../../lib/localized';
 import { estimatePackageTotal, cheapestPackageEstimate } from '../../../lib/pricing';
-import { countOccurrences } from '../../../lib/search';
+import { countOccurrences, parseKeywords } from '../../../lib/search';
 
 export default function CatererProfilePage({ params }) {
   const { dict, locale } = useLanguage();
@@ -273,10 +273,11 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl 
   const d = dict.profile.packages;
   const cheapest = cheapestPackageEstimate(caterer, guestCount);
   const packages = caterer.packages;
-  // Whether a search-highlighted term appears in the given text - used to auto-open the
-  // accordion it's inside of, so a visitor arriving from search results doesn't have to
-  // click through every collapsed section to find where their term matched.
-  const hasMatch = (text) => Boolean(hl) && countOccurrences(text, hl) > 0;
+  // Whether any search-highlighted term (comma/space separated) appears in the given text -
+  // used to auto-open the accordion it's inside of, so a visitor arriving from search results
+  // doesn't have to click through every collapsed section to find where their terms matched.
+  const hlTerms = parseKeywords(hl);
+  const hasMatch = (text) => hlTerms.some((term) => countOccurrences(text, term) > 0);
 
   // Only worth extracting "common to all" when there's more than one package to compare.
   const comparable = packages.length > 1;
