@@ -29,6 +29,7 @@ function blankPackage() {
     includedCategories: [],
     categoryLimits: {},
     categoryItems: {},
+    eventTypes: [],
     addons: []
   };
 }
@@ -886,6 +887,16 @@ function PackageEditor({
               categoryLimits: Object.fromEntries(Object.entries(pkg.categoryLimits || {}).filter(([cat]) => nextIncluded.includes(cat)))
             });
           }}
+        />
+      </FieldBlock>
+
+      <FieldBlock label={d.eventTypes}>
+        <CheckboxGroup
+          name={d.eventTypes}
+          options={EVENT_TYPES}
+          labels={dict.eventTypes}
+          values={pkg.eventTypes || []}
+          onChange={(v) => onFieldChange({ eventTypes: v })}
         />
       </FieldBlock>
 

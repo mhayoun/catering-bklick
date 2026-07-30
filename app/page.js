@@ -28,13 +28,21 @@ export default function HomePage() {
   const debounceRef = useRef(null);
 
   // Every caterer's packages, flattened into individual formula results and
-  // sorted cheapest-first - only relevant in "formulas" search mode.
+  // sorted cheapest-first - only relevant in "formulas" search mode. When an
+  // event-type filter is active, only formulas individually tagged with one
+  // of the selected event types are kept (the caterer-level match in
+  // searchCaterers is broader - it also passes a caterer whose OTHER
+  // packages carry the tag, so this narrows back down to just the matching ones).
   const formulas = useMemo(
     () =>
       results
         .flatMap((caterer) => (caterer.packages || []).map((pkg) => ({ caterer, pkg })))
+        .filter(
+          ({ pkg }) =>
+            filters.eventTypes.length === 0 || filters.eventTypes.some((e) => (pkg.eventTypes || []).includes(e))
+        )
         .sort((a, b) => Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest)),
-    [results]
+    [results, filters.eventTypes]
   );
 
   const runSearch = useCallback(async (f) => {
