@@ -432,9 +432,11 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
               )}
 
               {pkg.addons?.some((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)) && (
-                <div className="pt-2 border-t-2 border-teal/10">
-                  <p className="text-xs text-ink/50">{d.addonsIncluded}</p>
-                  <ul className="text-xs text-ink/60 space-y-0.5">
+                <details className="pt-2 border-t-2 border-teal/10 text-xs text-ink/60">
+                  <summary className="cursor-pointer text-ink/50 font-display font-semibold focus-ring rounded">
+                    {d.addonsIncluded} ({pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)).length})
+                  </summary>
+                  <ul className="pt-1 space-y-0.5">
                     {pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)).map((addon) => {
                       const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
                       return (
@@ -446,7 +448,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                       );
                     })}
                   </ul>
-                </div>
+                </details>
               )}
             </div>
           );
