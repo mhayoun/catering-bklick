@@ -5,15 +5,16 @@ import { useLanguage } from './LanguageProvider';
 import { pickLocalized, toArrayField } from '../lib/localized';
 import { cheapestPackageEstimate } from '../lib/pricing';
 
-export function CatererCard({ caterer, guestCount }) {
+export function CatererCard({ caterer, guestCount, matchCount, keyword }) {
   const { dict, t, locale } = useLanguage();
   const photo = caterer.photos?.[0];
   const cateringTypes = toArrayField(caterer, 'cateringTypes', 'cateringType');
   const estimate = guestCount ? cheapestPackageEstimate(caterer, guestCount) : null;
+  const href = keyword ? `/caterer/${caterer.id}?hl=${encodeURIComponent(keyword)}` : `/caterer/${caterer.id}`;
 
   return (
     <Link
-      href={`/caterer/${caterer.id}`}
+      href={href}
       className="group block bg-white border-4 border-teal rounded-blob overflow-hidden shadow-card hover:shadow-cardHover hover:-translate-y-1 transition-transform focus-ring"
     >
       <div className="h-40 bg-limeLight overflow-hidden">
@@ -39,6 +40,11 @@ export function CatererCard({ caterer, guestCount }) {
             ))}
           </span>
         </div>
+        {matchCount > 0 && (
+          <span className="inline-block text-xs font-display font-semibold bg-yellow-300 text-ink px-2 py-0.5 rounded-full">
+            {t('card.matchCount', { n: matchCount })}
+          </span>
+        )}
         <p className="text-sm text-ink/70 line-clamp-2">{pickLocalized(caterer.description, locale)}</p>
         <div className="flex items-center justify-between text-sm font-body text-teal/80 pt-1">
           <span>{pickLocalized(caterer.city, locale)}</span>

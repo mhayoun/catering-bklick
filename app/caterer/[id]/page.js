@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useLanguage } from '../../../components/LanguageProvider';
 import { Logo } from '../../../components/Logo';
 import { ProposalModal } from '../../../components/ProposalModal';
+import { Highlight } from '../../../components/Highlight';
 import { pickLocalized, toArrayField } from '../../../lib/localized';
 import { estimatePackageTotal, cheapestPackageEstimate } from '../../../lib/pricing';
+import { countOccurrences } from '../../../lib/search';
 
 export default function CatererProfilePage({ params }) {
   const { dict, locale } = useLanguage();
@@ -14,6 +17,7 @@ export default function CatererProfilePage({ params }) {
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [proposalOpen, setProposalOpen] = useState(false);
   const [guestCount, setGuestCount] = useState('');
+  const hl = useSearchParams().get('hl') || '';
 
   useEffect(() => {
     fetch(`/api/caterers/${params.id}`)
@@ -55,13 +59,17 @@ export default function CatererProfilePage({ params }) {
 
       <header className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div>
-          <h1 className="font-display font-extrabold text-3xl text-teal">{caterer.businessName}</h1>
-          <p className="text-ink/70 mt-1">{pickLocalized(caterer.city, locale)}</p>
+          <h1 className="font-display font-extrabold text-3xl text-teal">
+            <Highlight text={caterer.businessName} query={hl} />
+          </h1>
+          <p className="text-ink/70 mt-1">
+            <Highlight text={pickLocalized(caterer.city, locale)} query={hl} />
+          </p>
         </div>
         <span className="bg-tealGreen text-cream font-display font-bold px-3 py-1.5 rounded-full text-sm">
-          {toArrayField(caterer, 'cateringTypes', 'cateringType').map((ct) => dict.cateringType[ct]).join(' + ')}
+          <Highlight text={toArrayField(caterer, 'cateringTypes', 'cateringType').map((ct) => dict.cateringType[ct]).join(' + ')} query={hl} />
           {' · '}
-          {toArrayField(caterer, 'kashrutLevels', 'kashrut').map((k) => dict.kashrut[k]).join(' + ')}
+          <Highlight text={toArrayField(caterer, 'kashrutLevels', 'kashrut').map((k) => dict.kashrut[k]).join(' + ')} query={hl} />
         </span>
       </header>
 
@@ -157,7 +165,9 @@ export default function CatererProfilePage({ params }) {
 
       <section>
         <h2 className="font-display font-bold text-xl text-teal mb-2">{dict.profile.about}</h2>
-        <p className="text-ink/80">{pickLocalized(caterer.description, locale)}</p>
+        <p className="text-ink/80">
+          <Highlight text={pickLocalized(caterer.description, locale)} query={hl} />
+        </p>
       </section>
 
       <section>
@@ -165,14 +175,14 @@ export default function CatererProfilePage({ params }) {
         <div className="flex flex-wrap gap-2">
           {(caterer.menuCategories || []).filter((m) => dict.menuCategories[m]).map((m) => (
             <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-3 py-1 text-sm">
-              {dict.menuCategories[m]}
+              <Highlight text={dict.menuCategories[m]} query={hl} />
             </span>
           ))}
         </div>
       </section>
 
       {caterer.packages?.length > 0 && (
-        <PackagesSection caterer={caterer} dict={dict} locale={locale} guestCount={guestCount} setGuestCount={setGuestCount} />
+        <PackagesSection caterer={caterer} dict={dict} locale={locale} guestCount={guestCount} setGuestCount={setGuestCount} hl={hl} />
       )}
 
       {caterer.services?.length > 0 && (
@@ -181,7 +191,7 @@ export default function CatererProfilePage({ params }) {
           <div className="flex flex-wrap gap-2">
             {caterer.services.filter((s) => dict.services[s]).map((s) => (
               <span key={s} className="bg-tealGreen/20 border-2 border-tealGreen rounded-full px-3 py-1 text-sm text-tealGreen font-semibold">
-                {dict.services[s]}
+                <Highlight text={dict.services[s]} query={hl} />
               </span>
             ))}
           </div>
@@ -209,7 +219,11 @@ export default function CatererProfilePage({ params }) {
       <section className="bg-white/70 border-4 border-teal rounded-blob p-6">
         <h2 className="font-display font-bold text-xl text-teal mb-4">{dict.profile.contact}</h2>
         <div className="grid sm:grid-cols-2 gap-3">
-          {caterer.address && <p><strong>{dict.profile.address}:</strong> {caterer.address}</p>}
+          {caterer.address && (
+            <p>
+              <strong>{dict.profile.address}:</strong> <Highlight text={caterer.address} query={hl} />
+            </p>
+          )}
           {caterer.phone && (
             <a href={`tel:${caterer.phone}`} className="text-orange font-semibold hover:underline focus-ring rounded">
               📞 {dict.profile.call}: <span dir="ltr" className="inline-block">{caterer.phone}</span>
@@ -255,10 +269,14 @@ export default function CatererProfilePage({ params }) {
   );
 }
 
-function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
+function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl }) {
   const d = dict.profile.packages;
   const cheapest = cheapestPackageEstimate(caterer, guestCount);
   const packages = caterer.packages;
+  // Whether a search-highlighted term appears in the given text - used to auto-open the
+  // accordion it's inside of, so a visitor arriving from search results doesn't have to
+  // click through every collapsed section to find where their term matched.
+  const hasMatch = (text) => Boolean(hl) && countOccurrences(text, hl) > 0;
 
   // Only worth extracting "common to all" when there's more than one package to compare.
   const comparable = packages.length > 1;
@@ -335,7 +353,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
             <div className="flex flex-wrap gap-1.5">
               {commonCategories.map((m) => (
                 <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
-                  {dict.menuCategories[m]}
+                  <Highlight text={dict.menuCategories[m]} query={hl} />
                   {commonCategoryLimit(m) && ` · ${d.categoryChoiceCount.replace('{n}', commonCategoryLimit(m))}`}
                 </span>
               ))}
@@ -343,16 +361,24 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
           )}
           {itemizedCategories
             .filter((cat) => commonItemsByCategory[cat].length > 0)
-            .map((cat) => (
-              <details key={cat} className="text-xs text-ink/60">
-                <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
-                  {dict.menuCategories[cat]} ({commonItemsByCategory[cat].length})
-                </summary>
-                <p className="pt-1 leading-relaxed">{commonItemsByCategory[cat].map((item) => pickLocalized(item, locale)).join(', ')}</p>
-              </details>
-            ))}
+            .map((cat) => {
+              const text = commonItemsByCategory[cat].map((item) => pickLocalized(item, locale)).join(', ');
+              return (
+                <details key={cat} open={hasMatch(text)} className="text-xs text-ink/60">
+                  <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
+                    {dict.menuCategories[cat]} ({commonItemsByCategory[cat].length})
+                  </summary>
+                  <p className="pt-1 leading-relaxed">
+                    <Highlight text={text} query={hl} />
+                  </p>
+                </details>
+              );
+            })}
           {commonAddons.length > 0 && (
-            <details className="text-xs text-ink/60">
+            <details
+              open={hasMatch(commonAddons.map((a) => pickLocalized(a.name, locale)).join(', '))}
+              className="text-xs text-ink/60"
+            >
               <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
                 {d.addonsIncluded} ({commonAddons.length})
               </summary>
@@ -362,7 +388,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                     addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
                   return (
                     <li key={addon.id}>
-                      + {pickLocalized(addon.name, locale)}: ₪{Number(addon.amount).toLocaleString()}
+                      + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />: ₪{Number(addon.amount).toLocaleString()}
                       {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
                       {commonBilledGuests > 0 && ` — ₪${Math.round(estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
                     </li>
@@ -385,7 +411,9 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
               className={`border-4 rounded-blob p-4 space-y-2 scroll-mt-24 ${isCheapest ? 'border-orange bg-orange/5' : 'border-teal/30 bg-white/70'}`}
             >
               <div className="flex items-center justify-between gap-2">
-                <h3 className="font-display font-bold text-teal">{pickLocalized(pkg.name, locale)}</h3>
+                <h3 className="font-display font-bold text-teal">
+                  <Highlight text={pickLocalized(pkg.name, locale)} query={hl} />
+                </h3>
                 {isCheapest && (
                   <span className="text-xs font-display font-bold bg-orange text-cream px-2 py-1 rounded-full whitespace-nowrap">
                     {d.cheapestBadge}
@@ -400,7 +428,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {pkg.includedCategories.filter((m) => dict.menuCategories[m] && !commonCategories.includes(m)).map((m) => (
                     <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
-                      {dict.menuCategories[m]}
+                      <Highlight text={dict.menuCategories[m]} query={hl} />
                       {pkg.categoryLimits?.[m] && ` · ${d.categoryChoiceCount.replace('{n}', pkg.categoryLimits[m])}`}
                     </span>
                   ))}
@@ -413,12 +441,15 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                   const commonIds = commonItemIdsByCategory[m];
                   const items = commonIds ? pkg.categoryItems[m].filter((it) => !commonIds.has(it.id)) : pkg.categoryItems[m];
                   if (items.length === 0) return null;
+                  const text = items.map((item) => pickLocalized(item, locale)).join(', ');
                   return (
-                    <details key={`${m}-items`} className="text-xs text-ink/60">
+                    <details key={`${m}-items`} open={hasMatch(text)} className="text-xs text-ink/60">
                       <summary className="cursor-pointer text-teal font-display font-semibold underline focus-ring rounded">
                         {dict.menuCategories[m]} · {commonIds ? d.extraOptions : d.viewOptions}
                       </summary>
-                      <p className="pt-1 leading-relaxed">{items.map((item) => pickLocalized(item, locale)).join(', ')}</p>
+                      <p className="pt-1 leading-relaxed">
+                        <Highlight text={text} query={hl} />
+                      </p>
                     </details>
                   );
                 })}
@@ -433,7 +464,15 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
               )}
 
               {pkg.addons?.some((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)) && (
-                <details className="pt-2 border-t-2 border-teal/10 text-xs text-ink/60">
+                <details
+                  open={hasMatch(
+                    pkg.addons
+                      .filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id))
+                      .map((a) => pickLocalized(a.name, locale))
+                      .join(', ')
+                  )}
+                  className="pt-2 border-t-2 border-teal/10 text-xs text-ink/60"
+                >
                   <summary className="cursor-pointer text-ink/50 font-display font-semibold focus-ring rounded">
                     {d.addonsIncluded} ({pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)).length})
                   </summary>
@@ -442,7 +481,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
                       const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
                       return (
                         <li key={addon.id}>
-                          + {pickLocalized(addon.name, locale)}: ₪{Number(addon.amount).toLocaleString()}
+                          + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />: ₪{Number(addon.amount).toLocaleString()}
                           {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
                           {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
                         </li>
