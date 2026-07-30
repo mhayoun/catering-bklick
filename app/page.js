@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLanguage } from '../components/LanguageProvider';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { CatererCard } from '../components/CatererCard';
+import { FormulaCard } from '../components/FormulaCard';
 import { Logo } from '../components/Logo';
 
 const EMPTY_FILTERS = {
@@ -21,9 +22,20 @@ const EMPTY_FILTERS = {
 export default function HomePage() {
   const { dict, t } = useLanguage();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [searchMode, setSearchMode] = useState('formulas');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef(null);
+
+  // Every caterer's packages, flattened into individual formula results and
+  // sorted cheapest-first - only relevant in "formulas" search mode.
+  const formulas = useMemo(
+    () =>
+      results
+        .flatMap((caterer) => (caterer.packages || []).map((pkg) => ({ caterer, pkg })))
+        .sort((a, b) => Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest)),
+    [results]
+  );
 
   const runSearch = useCallback(async (f) => {
     setLoading(true);
@@ -83,23 +95,34 @@ export default function HomePage() {
           filters={filters}
           setFilters={setFilters}
           onReset={() => setFilters(EMPTY_FILTERS)}
+          searchMode={searchMode}
+          setSearchMode={setSearchMode}
         />
 
         <section className="flex-1 min-w-0">
           <p className="font-display font-semibold text-teal mb-4">
-            {loading ? '…' : t('search.resultsCount', { n: results.length })}
+            {loading
+              ? '…'
+              : searchMode === 'formulas'
+                ? t('search.resultsCountFormulas', { n: formulas.length })
+                : t('search.resultsCount', { n: results.length })}
           </p>
 
-          {!loading && results.length === 0 && (
+          {!loading && searchMode === 'formulas' && formulas.length === 0 && (
+            <p className="text-ink/70 bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center">
+              {dict.search.noResultsFormulas}
+            </p>
+          )}
+          {!loading && searchMode === 'caterers' && results.length === 0 && (
             <p className="text-ink/70 bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center">
               {dict.search.noResults}
             </p>
           )}
 
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {results.map((c) => (
-              <CatererCard key={c.id} caterer={c} guestCount={filters.minGuests} />
-            ))}
+            {searchMode === 'formulas'
+              ? formulas.map(({ caterer, pkg }) => <FormulaCard key={`${caterer.id}-${pkg.id}`} caterer={caterer} pkg={pkg} />)
+              : results.map((c) => <CatererCard key={c.id} caterer={c} guestCount={filters.minGuests} />)}
           </div>
         </section>
       </div>

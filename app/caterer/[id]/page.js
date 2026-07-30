@@ -381,7 +381,8 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount }) {
           return (
             <div
               key={pkg.id}
-              className={`border-4 rounded-blob p-4 space-y-2 ${isCheapest ? 'border-orange bg-orange/5' : 'border-teal/30 bg-white/70'}`}
+              id={`pkg-${pkg.id}`}
+              className={`border-4 rounded-blob p-4 space-y-2 scroll-mt-24 ${isCheapest ? 'border-orange bg-orange/5' : 'border-teal/30 bg-white/70'}`}
             >
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-display font-bold text-teal">{pickLocalized(pkg.name, locale)}</h3>

@@ -13,7 +13,7 @@ import {
   MIN_ORDER_BRACKETS
 } from '../lib/constants';
 
-export function FilterSidebar({ filters, setFilters, onReset }) {
+export function FilterSidebar({ filters, setFilters, onReset, searchMode, setSearchMode }) {
   const { dict } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -81,6 +81,29 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
             {dict.search.reset} ({activeCount})
           </button>
         )}
+
+        <div className="flex p-2 gap-1 bg-cream/60">
+          <button
+            type="button"
+            onClick={() => setSearchMode('formulas')}
+            aria-pressed={searchMode === 'formulas'}
+            className={`flex-1 text-sm font-display font-semibold rounded-full px-3 py-1.5 focus-ring transition-colors ${
+              searchMode === 'formulas' ? 'bg-teal text-cream' : 'text-teal hover:bg-teal/10'
+            }`}
+          >
+            {dict.search.modeFormulas}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchMode('caterers')}
+            aria-pressed={searchMode === 'caterers'}
+            className={`flex-1 text-sm font-display font-semibold rounded-full px-3 py-1.5 focus-ring transition-colors ${
+              searchMode === 'caterers' ? 'bg-teal text-cream' : 'text-teal hover:bg-teal/10'
+            }`}
+          >
+            {dict.search.modeCaterers}
+          </button>
+        </div>
 
         <FilterSection title={dict.search.location} defaultOpen>
           <CheckList options={DISTRICTS} labels={dict.districts} values={filters.districts} onToggle={(v) => toggle('districts', v)} />
