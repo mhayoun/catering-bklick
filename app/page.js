@@ -127,11 +127,19 @@ export default function HomePage() {
             </p>
           )}
 
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
-            {searchMode === 'formulas'
-              ? formulas.map(({ caterer, pkg }) => <FormulaCard key={`${caterer.id}-${pkg.id}`} caterer={caterer} pkg={pkg} />)
-              : results.map((c) => <CatererCard key={c.id} caterer={c} guestCount={filters.minGuests} />)}
-          </div>
+          {searchMode === 'formulas' ? (
+            <div className="flex flex-col gap-3">
+              {formulas.map(({ caterer, pkg }) => (
+                <FormulaCard key={`${caterer.id}-${pkg.id}`} caterer={caterer} pkg={pkg} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              {results.map((c) => (
+                <CatererCard key={c.id} caterer={c} guestCount={filters.minGuests} />
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </div>
