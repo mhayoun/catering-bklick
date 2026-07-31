@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useLanguage } from '../../../components/LanguageProvider';
@@ -11,7 +11,18 @@ import { pickLocalized, toArrayField } from '../../../lib/localized';
 import { estimatePackageTotal, cheapestPackageEstimate } from '../../../lib/pricing';
 import { countOccurrences, parseKeywords } from '../../../lib/search';
 
-export default function CatererProfilePage({ params }) {
+// useSearchParams() must be read inside a Suspense boundary, or Next.js's production build can
+// silently freeze it (it read fine in `next dev`, which skips that optimization) - this is what
+// broke the "?hl=" highlight/auto-open-accordion feature specifically in production.
+export default function CatererProfilePage(props) {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>}>
+      <CatererProfilePageInner {...props} />
+    </Suspense>
+  );
+}
+
+function CatererProfilePageInner({ params }) {
   const { dict, locale } = useLanguage();
   const [caterer, setCaterer] = useState(undefined);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
