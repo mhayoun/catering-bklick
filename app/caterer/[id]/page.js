@@ -426,11 +426,23 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl 
                 <h3 className="font-display font-bold text-teal">
                   <Highlight text={pickLocalized(pkg.name, locale)} query={hl} />
                 </h3>
-                {isCheapest && (
-                  <span className="text-xs font-display font-bold bg-orange text-cream px-2 py-1 rounded-full whitespace-nowrap">
-                    {d.cheapestBadge}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {pkg.sourceUrl && (
+                    <a
+                      href={pkg.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-teal/70 hover:underline focus-ring rounded whitespace-nowrap"
+                    >
+                      🔗 {d.viewSource}
+                    </a>
+                  )}
+                  {isCheapest && (
+                    <span className="text-xs font-display font-bold bg-orange text-cream px-2 py-1 rounded-full whitespace-nowrap">
+                      {d.cheapestBadge}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <p className="text-sm text-ink/70">₪{pkg.pricePerGuest} {d.perGuest}</p>
