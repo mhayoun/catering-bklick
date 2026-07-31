@@ -10,6 +10,7 @@ export async function GET(request) {
 
   const filters = {
     keyword: searchParams.get('keyword') || '',
+    locale: searchParams.get('locale') || 'he',
     districts: searchParams.getAll('districts'),
     kashrutLevels: searchParams.getAll('kashrutLevels'),
     cateringTypes: searchParams.getAll('cateringTypes'),

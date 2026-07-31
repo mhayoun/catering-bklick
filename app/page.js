@@ -21,7 +21,7 @@ const EMPTY_FILTERS = {
 };
 
 export default function HomePage() {
-  const { dict, t } = useLanguage();
+  const { dict, t, locale } = useLanguage();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [searchMode, setSearchMode] = useState('formulas');
   const [results, setResults] = useState([]);
@@ -35,7 +35,8 @@ export default function HomePage() {
   // so this narrows back down to just the matching ones). With a keyword search active (one or
   // more terms, comma/space separated), formulas are ranked by how many times ANY of the terms
   // appears in that formula's own content (falling back to price, cheapest first, when there's
-  // no keyword or as a tie-breaker).
+  // no keyword or as a tie-breaker). Scoped to the current display locale, same as the API's
+  // ranking, so the count shown always matches what can actually be highlighted on click-through.
   const keyword = filters.keyword?.trim();
   const keywordTerms = useMemo(() => parseKeywords(keyword), [keyword]);
   const formulas = useMemo(() => {
@@ -48,17 +49,18 @@ export default function HomePage() {
 
     if (keywordTerms.length > 0) {
       return flattened
-        .map((f) => ({ ...f, matchCount: countOccurrencesMulti(buildPackageHaystack(f.caterer, f.pkg), keywordTerms) }))
+        .map((f) => ({ ...f, matchCount: countOccurrencesMulti(buildPackageHaystack(f.caterer, f.pkg, locale), keywordTerms) }))
         .filter((f) => f.matchCount > 0)
         .sort((a, b) => b.matchCount - a.matchCount || Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
     }
     return flattened.sort((a, b) => Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
-  }, [results, filters.eventTypes, keywordTerms]);
+  }, [results, filters.eventTypes, keywordTerms, locale]);
 
-  const runSearch = useCallback(async (f) => {
+  const runSearch = useCallback(async (f, loc) => {
     setLoading(true);
     const params = new URLSearchParams();
     if (f.keyword) params.set('keyword', f.keyword);
+    params.set('locale', loc || 'he');
     if (f.minGuests) params.set('minGuests', f.minGuests);
     if (f.maxMinOrder) params.set('maxMinOrder', f.maxMinOrder);
     f.districts.forEach((v) => params.append('districts', v));
@@ -77,14 +79,15 @@ export default function HomePage() {
     }
   }, []);
 
-  // Auto-apply: every filter change (checkbox click or keyword typing)
-  // re-runs the search after a short debounce, no submit button needed.
+  // Auto-apply: every filter change (checkbox click or keyword typing), or a language switch
+  // (which changes which locale keyword matching/ranking is scoped to), re-runs the search
+  // after a short debounce, no submit button needed.
   useEffect(() => {
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => runSearch(filters), 250);
+    debounceRef.current = setTimeout(() => runSearch(filters, locale), 250);
     return () => clearTimeout(debounceRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filters, locale]);
 
   return (
     <div>
