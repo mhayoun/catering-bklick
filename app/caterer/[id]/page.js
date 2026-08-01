@@ -283,13 +283,67 @@ function CatererProfilePageInner({ params }) {
 function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl }) {
   const d = dict.profile.packages;
   const cheapest = cheapestPackageEstimate(caterer, guestCount);
-  const packages = caterer.packages;
   // Whether any search-highlighted term (comma/space separated) appears in the given text -
   // used to auto-open the accordion it's inside of, so a visitor arriving from search results
   // doesn't have to click through every collapsed section to find where their terms matched.
   const hlTerms = parseKeywords(hl);
   const hasMatch = (text) => hlTerms.some((term) => countOccurrences(text, term) > 0);
 
+  // Fixed-price-per-guest formulas and à-la-carte item catalogs (pkg.type === 'a_la_carte')
+  // are different enough in shape (price/min-guests/addons mean different things on each)
+  // that comparing them together in one "common to all" block would be meaningless - each
+  // gets its own group, with its own "common to all" comparison scoped to just that group.
+  const formulaPackages = caterer.packages.filter((p) => p.type !== 'a_la_carte');
+  const alaCartePackages = caterer.packages.filter((p) => p.type === 'a_la_carte');
+
+  return (
+    <section>
+      <h2 className="font-display font-bold text-xl text-teal mb-3">{d.title}</h2>
+
+      <label className="block max-w-xs mb-4">
+        <span className="text-sm font-display font-semibold text-teal">{d.guestCountLabel}</span>
+        <input
+          type="number"
+          min="1"
+          value={guestCount}
+          onChange={(e) => setGuestCount(e.target.value)}
+          className="mt-1.5 w-full rounded-full border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
+        />
+      </label>
+
+      {formulaPackages.length > 0 && (
+        <PackageGroup
+          heading={dict.search.modeFormulas}
+          packages={formulaPackages}
+          dict={dict}
+          d={d}
+          locale={locale}
+          hl={hl}
+          hasMatch={hasMatch}
+          guestCount={guestCount}
+          cheapest={cheapest}
+        />
+      )}
+
+      {alaCartePackages.length > 0 && (
+        <PackageGroup
+          heading={dict.search.modeALaCarte}
+          packages={alaCartePackages}
+          dict={dict}
+          d={d}
+          locale={locale}
+          hl={hl}
+          hasMatch={hasMatch}
+          guestCount={guestCount}
+          cheapest={cheapest}
+          className={formulaPackages.length > 0 ? 'mt-8' : ''}
+        />
+      )}
+    </section>
+  );
+}
+
+function PackageGroup({ heading, packages, dict, d, locale, hl, hasMatch, guestCount, cheapest, className }) {
   // Only worth extracting "common to all" when there's more than one package to compare.
   const comparable = packages.length > 1;
 
@@ -343,19 +397,8 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl 
   );
 
   return (
-    <section>
-      <h2 className="font-display font-bold text-xl text-teal mb-3">{d.title}</h2>
-
-      <label className="block max-w-xs mb-4">
-        <span className="text-sm font-display font-semibold text-teal">{d.guestCountLabel}</span>
-        <input
-          type="number"
-          min="1"
-          value={guestCount}
-          onChange={(e) => setGuestCount(e.target.value)}
-          className="mt-1.5 w-full rounded-full border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
-        />
-      </label>
+    <div className={className}>
+      <h3 className="font-display font-bold text-lg text-teal/80 mb-2">{heading}</h3>
 
       {(commonMinGuests || commonCategories.length > 0 || commonAddons.length > 0 || itemizedCategories.some((cat) => commonItemsByCategory[cat].length > 0)) && (
         <div className="mb-4 border-4 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-2">
@@ -413,7 +456,7 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl 
       )}
 
       <div className="grid sm:grid-cols-2 gap-4">
-        {caterer.packages.map((pkg) => {
+        {packages.map((pkg) => {
           const estimate = estimatePackageTotal(pkg, guestCount);
           const isCheapest = cheapest && cheapest.pkg.id === pkg.id;
           return (
@@ -487,38 +530,73 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl 
                 </div>
               )}
 
-              {pkg.addons?.some((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)) && (
-                <details
-                  open={hasMatch(
-                    pkg.addons
-                      .filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id))
-                      .map((a) => pickLocalized(a.name, locale))
-                      .join(', ')
-                  )}
-                  className="pt-2 border-t-2 border-teal/10 text-xs text-ink/60"
-                >
-                  <summary className="cursor-pointer text-ink/50 font-display font-semibold focus-ring rounded">
-                    {d.addonsIncluded} ({pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)).length})
-                  </summary>
-                  <ul className="pt-1 space-y-0.5">
-                    {pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)).map((addon) => {
-                      const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
-                      return (
-                        <li key={addon.id}>
-                          + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />: ₪{Number(addon.amount).toLocaleString()}
-                          {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
-                          {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </details>
-              )}
+              {pkg.addons?.some((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)) &&
+                (() => {
+                  const shownAddons = pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id));
+                  const renderAddonLine = (addon) => {
+                    const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
+                    return (
+                      <li key={addon.id}>
+                        + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />: ₪{Number(addon.amount).toLocaleString()}
+                        {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
+                        {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                      </li>
+                    );
+                  };
+
+                  // Menu-item catalogs (e.g. an à-la-carte holiday menu) tag every addon with the
+                  // category it came from - group those into nested accordions instead of one long
+                  // flat list. Packages with untagged addons (e.g. hand-authored formulas) keep the
+                  // original single flat list.
+                  const allCategorized = shownAddons.every((a) => a.category);
+
+                  if (!allCategorized) {
+                    return (
+                      <details
+                        open={hasMatch(shownAddons.map((a) => pickLocalized(a.name, locale)).join(', '))}
+                        className="pt-2 border-t-2 border-teal/10 text-xs text-ink/60"
+                      >
+                        <summary className="cursor-pointer text-ink/50 font-display font-semibold focus-ring rounded">
+                          {d.addonsIncluded} ({shownAddons.length})
+                        </summary>
+                        <ul className="pt-1 space-y-0.5">{shownAddons.map(renderAddonLine)}</ul>
+                      </details>
+                    );
+                  }
+
+                  const groups = [];
+                  const groupIndexByKey = {};
+                  shownAddons.forEach((addon) => {
+                    const key = addon.category.en || pickLocalized(addon.category, locale);
+                    if (!(key in groupIndexByKey)) {
+                      groupIndexByKey[key] = groups.length;
+                      groups.push({ category: addon.category, items: [] });
+                    }
+                    groups[groupIndexByKey[key]].items.push(addon);
+                  });
+
+                  return (
+                    <div className="pt-2 border-t-2 border-teal/10 space-y-1">
+                      {groups.map(({ category, items }) => (
+                        <details
+                          key={category.en}
+                          open={hasMatch(items.map((a) => pickLocalized(a.name, locale)).join(', '))}
+                          className="text-xs text-ink/60"
+                        >
+                          <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
+                            {pickLocalized(category, locale)} ({items.length})
+                          </summary>
+                          <ul className="pt-1 space-y-0.5 ps-2">{items.map(renderAddonLine)}</ul>
+                        </details>
+                      ))}
+                    </div>
+                  );
+                })()}
             </div>
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }
 

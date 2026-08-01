@@ -42,8 +42,14 @@ export function FormulaCard({ caterer, pkg, matchCount, keyword }) {
       </div>
 
       <p className="shrink-0 text-end text-sm sm:text-base font-display font-bold text-orange whitespace-nowrap">
-        ₪{Number(pkg.pricePerGuest).toLocaleString()}
-        <span className="block text-xs font-body font-normal text-ink/50">{dict.card.perGuest}</span>
+        {pkg.type === 'a_la_carte' ? (
+          t('card.itemsCount', { n: pkg.addons?.length || 0 })
+        ) : (
+          <>
+            ₪{Number(pkg.pricePerGuest).toLocaleString()}
+            <span className="block text-xs font-body font-normal text-ink/50">{dict.card.perGuest}</span>
+          </>
+        )}
       </p>
     </Link>
   );

@@ -103,6 +103,16 @@ export function FilterSidebar({ filters, setFilters, onReset, searchMode, setSea
           >
             {dict.search.modeCaterers}
           </button>
+          <button
+            type="button"
+            onClick={() => setSearchMode('a_la_carte')}
+            aria-pressed={searchMode === 'a_la_carte'}
+            className={`flex-1 text-sm font-display font-semibold rounded-full px-3 py-1.5 focus-ring transition-colors ${
+              searchMode === 'a_la_carte' ? 'bg-teal text-cream' : 'text-teal hover:bg-teal/10'
+            }`}
+          >
+            {dict.search.modeALaCarte}
+          </button>
         </div>
 
         <FilterSection title={dict.search.location}>

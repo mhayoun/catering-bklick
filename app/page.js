@@ -28,33 +28,48 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef(null);
 
-  // Every caterer's packages, flattened into individual formula results - only relevant in
-  // "formulas" search mode. When an event-type filter is active, only formulas individually
-  // tagged with one of the selected event types are kept (the caterer-level match in
-  // searchCaterers is broader - it also passes a caterer whose OTHER packages carry the tag,
-  // so this narrows back down to just the matching ones). With a keyword search active (one or
-  // more terms, comma/space separated), formulas are ranked by how many times ANY of the terms
-  // appears in that formula's own content (falling back to price, cheapest first, when there's
-  // no keyword or as a tie-breaker). Scoped to the current display locale, same as the API's
-  // ranking, so the count shown always matches what can actually be highlighted on click-through.
+  // When an event-type filter is active, only packages individually tagged with one of the
+  // selected event types are kept (the caterer-level match in searchCaterers is broader - it
+  // also passes a caterer whose OTHER packages carry the tag, so this narrows back down to just
+  // the matching ones).
   const keyword = filters.keyword?.trim();
   const keywordTerms = useMemo(() => parseKeywords(keyword), [keyword]);
-  const formulas = useMemo(() => {
-    const flattened = results
-      .flatMap((caterer) => (caterer.packages || []).map((pkg) => ({ caterer, pkg })))
-      .filter(
-        ({ pkg }) =>
-          filters.eventTypes.length === 0 || filters.eventTypes.some((e) => (pkg.eventTypes || []).includes(e))
-      );
 
-    if (keywordTerms.length > 0) {
-      return flattened
-        .map((f) => ({ ...f, matchCount: countOccurrencesMulti(buildPackageHaystack(f.caterer, f.pkg, locale), keywordTerms) }))
-        .filter((f) => f.matchCount > 0)
-        .sort((a, b) => b.matchCount - a.matchCount || Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
-    }
-    return flattened.sort((a, b) => Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
-  }, [results, filters.eventTypes, keywordTerms, locale]);
+  // Flattens every caterer's packages into individual results, optionally restricted to one
+  // package "type" - true fixed-price formulas vs à-la-carte menus (build-your-own item catalogs,
+  // tagged pkg.type === 'a_la_carte'). Shared by both the "formulas" and "a_la_carte" search modes.
+  const flattenPackages = useCallback(
+    (typeFilter) =>
+      results
+        .flatMap((caterer) => (caterer.packages || []).map((pkg) => ({ caterer, pkg })))
+        .filter(({ pkg }) => (typeFilter === 'a_la_carte' ? pkg.type === 'a_la_carte' : pkg.type !== 'a_la_carte'))
+        .filter(
+          ({ pkg }) =>
+            filters.eventTypes.length === 0 || filters.eventTypes.some((e) => (pkg.eventTypes || []).includes(e))
+        ),
+    [results, filters.eventTypes]
+  );
+
+  const rankPackages = useCallback(
+    (flattened) => {
+      if (keywordTerms.length > 0) {
+        return flattened
+          .map((f) => ({ ...f, matchCount: countOccurrencesMulti(buildPackageHaystack(f.caterer, f.pkg, locale), keywordTerms) }))
+          .filter((f) => f.matchCount > 0)
+          .sort((a, b) => b.matchCount - a.matchCount || Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
+      }
+      return flattened.sort((a, b) => Number(a.pkg.pricePerGuest) - Number(b.pkg.pricePerGuest));
+    },
+    [keywordTerms, locale]
+  );
+
+  // With a keyword search active (one or more terms, comma/space separated), formulas are ranked
+  // by how many times ANY of the terms appears in that formula's own content (falling back to
+  // price, cheapest first, when there's no keyword or as a tie-breaker). Scoped to the current
+  // display locale, same as the API's ranking, so the count shown always matches what can
+  // actually be highlighted on click-through.
+  const formulas = useMemo(() => rankPackages(flattenPackages('formula')), [flattenPackages, rankPackages]);
+  const alaCarte = useMemo(() => rankPackages(flattenPackages('a_la_carte')), [flattenPackages, rankPackages]);
 
   const runSearch = useCallback(async (f, loc) => {
     setLoading(true);
@@ -126,12 +141,19 @@ export default function HomePage() {
               ? '…'
               : searchMode === 'formulas'
                 ? t('search.resultsCountFormulas', { n: formulas.length })
-                : t('search.resultsCount', { n: results.length })}
+                : searchMode === 'a_la_carte'
+                  ? t('search.resultsCountALaCarte', { n: alaCarte.length })
+                  : t('search.resultsCount', { n: results.length })}
           </p>
 
           {!loading && searchMode === 'formulas' && formulas.length === 0 && (
             <p className="text-ink/70 bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center">
               {dict.search.noResultsFormulas}
+            </p>
+          )}
+          {!loading && searchMode === 'a_la_carte' && alaCarte.length === 0 && (
+            <p className="text-ink/70 bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center">
+              {dict.search.noResultsALaCarte}
             </p>
           )}
           {!loading && searchMode === 'caterers' && results.length === 0 && (
@@ -140,13 +162,21 @@ export default function HomePage() {
             </p>
           )}
 
-          {searchMode === 'formulas' ? (
+          {searchMode === 'formulas' && (
             <div className="flex flex-col gap-3">
               {formulas.map(({ caterer, pkg, matchCount }) => (
                 <FormulaCard key={`${caterer.id}-${pkg.id}`} caterer={caterer} pkg={pkg} matchCount={matchCount} keyword={keyword} />
               ))}
             </div>
-          ) : (
+          )}
+          {searchMode === 'a_la_carte' && (
+            <div className="flex flex-col gap-3">
+              {alaCarte.map(({ caterer, pkg, matchCount }) => (
+                <FormulaCard key={`${caterer.id}-${pkg.id}`} caterer={caterer} pkg={pkg} matchCount={matchCount} keyword={keyword} />
+              ))}
+            </div>
+          )}
+          {searchMode === 'caterers' && (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
               {results.map((c) => (
                 <CatererCard key={c.id} caterer={c} guestCount={filters.minGuests} matchCount={c.matchCount} keyword={keyword} />
