@@ -370,8 +370,9 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
   const commonMinGuests =
     comparable && minGuestsValues[0] > 0 && minGuestsValues.every((v) => v === minGuestsValues[0]) ? minGuestsValues[0] : null;
 
-  // Add-ons (matched by id) present with a real price in every package.
-  const addonIdSets = packages.map((p) => new Set((p.addons || []).filter((a) => Number(a?.amount)).map((a) => a.id)));
+  // Add-ons (matched by id) present in every package - shown once instead of once per card,
+  // regardless of whether they carry a real price or are "price on request" (amount 0).
+  const addonIdSets = packages.map((p) => new Set((p.addons || []).map((a) => a.id)));
   const commonAddonIds = comparable && addonIdSets.length > 0 ? [...addonIdSets[0]].filter((id) => addonIdSets.every((s) => s.has(id))) : [];
   const commonAddons = commonAddonIds.map((id) => packages[0].addons.find((a) => a.id === id)).filter(Boolean);
   const commonBilledGuests = Math.max(Number(guestCount) || 0, commonMinGuests || 0);
@@ -455,13 +456,21 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
               </summary>
               <ul className="pt-1 space-y-0.5">
                 {commonAddons.map((addon) => {
+                  const hasPrice = Number(addon.amount) > 0;
                   const estimatedAmount =
                     addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
                   return (
                     <li key={addon.id}>
-                      + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />: ₪{Number(addon.amount).toLocaleString()}
-                      {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
-                      {commonBilledGuests > 0 && ` — ₪${Math.round(estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                      + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />:{' '}
+                      {hasPrice ? (
+                        <>
+                          ₪{Number(addon.amount).toLocaleString()}
+                          {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
+                          {commonBilledGuests > 0 && ` — ₪${Math.round(estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                        </>
+                      ) : (
+                        d.priceOnRequest
+                      )}
                     </li>
                   );
                 })}
@@ -546,16 +555,24 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                 </div>
               )}
 
-              {pkg.addons?.some((a) => Number(a?.amount) && !commonAddonIds.includes(a.id)) &&
+              {pkg.addons?.some((a) => !commonAddonIds.includes(a.id)) &&
                 (() => {
-                  const shownAddons = pkg.addons.filter((a) => Number(a?.amount) && !commonAddonIds.includes(a.id));
+                  const shownAddons = pkg.addons.filter((a) => !commonAddonIds.includes(a.id));
                   const renderAddonLine = (addon) => {
+                    const hasPrice = Number(addon.amount) > 0;
                     const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
                     return (
                       <li key={addon.id}>
-                        + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />: ₪{Number(addon.amount).toLocaleString()}
-                        {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
-                        {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                        + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />:{' '}
+                        {hasPrice ? (
+                          <>
+                            ₪{Number(addon.amount).toLocaleString()}
+                            {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
+                            {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                          </>
+                        ) : (
+                          d.priceOnRequest
+                        )}
                       </li>
                     );
                   };
