@@ -7,11 +7,16 @@ import { pickLocalized } from '../lib/localized';
 export function FormulaCard({ caterer, pkg, matchCount, keyword }) {
   const { dict, t, locale } = useLanguage();
   const photo = caterer.photos?.[0];
-  const hl = keyword ? `?hl=${encodeURIComponent(keyword)}` : '';
+  const params = new URLSearchParams();
+  if (keyword) params.set('hl', keyword);
+  // Tags which accordion (formulas vs à la carte) should open by default on arrival, matching
+  // whichever of the two this card came from - the caterer profile page reads it back via ?mode=.
+  params.set('mode', pkg.type === 'a_la_carte' ? 'a_la_carte' : 'formulas');
+  const qs = params.toString();
 
   return (
     <Link
-      href={`/caterer/${caterer.id}${hl}#pkg-${pkg.id}`}
+      href={`/caterer/${caterer.id}${qs ? `?${qs}` : ''}#pkg-${pkg.id}`}
       className="group flex items-center gap-4 bg-white border-4 border-teal rounded-blob overflow-hidden shadow-card hover:shadow-cardHover hover:-translate-y-0.5 transition-transform focus-ring p-2 sm:p-3"
     >
       <div className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-blob overflow-hidden bg-limeLight">

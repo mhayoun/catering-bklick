@@ -29,6 +29,10 @@ function CatererProfilePageInner({ params }) {
   const [proposalOpen, setProposalOpen] = useState(false);
   const [guestCount, setGuestCount] = useState('');
   const hl = useSearchParams().get('hl') || '';
+  // Which search mode the visitor arrived from (?mode=formulas|a_la_carte) - when a caterer has
+  // both formulas and à-la-carte menus, this decides which of the two accordions opens by
+  // default, so someone who searched specifically for one doesn't have to click to reveal it.
+  const arrivalMode = useSearchParams().get('mode') || '';
 
   useEffect(() => {
     fetch(`/api/caterers/${params.id}`)
@@ -181,19 +185,16 @@ function CatererProfilePageInner({ params }) {
         </p>
       </section>
 
-      <section>
-        <h2 className="font-display font-bold text-xl text-teal mb-3">{dict.profile.menu}</h2>
-        <div className="flex flex-wrap gap-2">
-          {(caterer.menuCategories || []).filter((m) => dict.menuCategories[m]).map((m) => (
-            <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-3 py-1 text-sm">
-              <Highlight text={dict.menuCategories[m]} query={hl} />
-            </span>
-          ))}
-        </div>
-      </section>
-
       {caterer.packages?.length > 0 && (
-        <PackagesSection caterer={caterer} dict={dict} locale={locale} guestCount={guestCount} setGuestCount={setGuestCount} hl={hl} />
+        <PackagesSection
+          caterer={caterer}
+          dict={dict}
+          locale={locale}
+          guestCount={guestCount}
+          setGuestCount={setGuestCount}
+          hl={hl}
+          arrivalMode={arrivalMode}
+        />
       )}
 
       {caterer.services?.length > 0 && (
@@ -280,7 +281,7 @@ function CatererProfilePageInner({ params }) {
   );
 }
 
-function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl }) {
+function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl, arrivalMode }) {
   const d = dict.profile.packages;
   const cheapest = cheapestPackageEstimate(caterer, guestCount);
   // Whether any search-highlighted term (comma/space separated) appears in the given text -
@@ -295,11 +296,31 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl 
   // gets its own group, with its own "common to all" comparison scoped to just that group.
   const formulaPackages = caterer.packages.filter((p) => p.type !== 'a_la_carte');
   const alaCartePackages = caterer.packages.filter((p) => p.type === 'a_la_carte');
+  // Only worth an accordion (collapsed by default) when a visitor has to choose between the two -
+  // a caterer with just one kind shows it plainly, nothing to collapse against. When both exist,
+  // whichever search mode the visitor arrived from (?mode=formulas|a_la_carte) opens by default;
+  // arriving from the plain "caterers" search (or a bookmarked/direct link) leaves both collapsed.
+  const bothPresent = formulaPackages.length > 0 && alaCartePackages.length > 0;
 
-  return (
-    <section>
-      <h2 className="font-display font-bold text-xl text-teal mb-3">{d.title}</h2>
+  const groupProps = { dict, d, locale, hl, hasMatch, guestCount, cheapest };
 
+  // The overall menu-category tags and the guest-count price calculator only make sense
+  // alongside fixed-price formulas - an à-la-carte catalog has no per-guest price to calculate -
+  // so both live inside the Formules group instead of as page-wide sections above it.
+  const menuAndCalculator = (
+    <>
+      <div className="mb-4">
+        <h3 className="font-display font-bold text-lg text-teal mb-2">{dict.profile.menu}</h3>
+        <div className="flex flex-wrap gap-2">
+          {(caterer.menuCategories || []).filter((m) => dict.menuCategories[m]).map((m) => (
+            <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-3 py-1 text-sm">
+              <Highlight text={dict.menuCategories[m]} query={hl} />
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <h3 className="font-display font-bold text-lg text-teal mb-3">{d.title}</h3>
       <label className="block max-w-xs mb-4">
         <span className="text-sm font-display font-semibold text-teal">{d.guestCountLabel}</span>
         <input
@@ -310,40 +331,37 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl 
           className="mt-1.5 w-full rounded-full border-2 border-teal/40 px-4 py-2 bg-cream focus-ring"
         />
       </label>
+    </>
+  );
 
-      {formulaPackages.length > 0 && (
-        <PackageGroup
-          heading={dict.search.modeFormulas}
-          packages={formulaPackages}
-          dict={dict}
-          d={d}
-          locale={locale}
-          hl={hl}
-          hasMatch={hasMatch}
-          guestCount={guestCount}
-          cheapest={cheapest}
-        />
-      )}
+  const renderGroup = (heading, packages, openWhenMode, extraContent) =>
+    bothPresent ? (
+      <details open={arrivalMode === openWhenMode} className="mb-4 border-2 border-teal/20 rounded-blob overflow-hidden">
+        <summary className="cursor-pointer px-4 py-2.5 bg-teal/10 font-display font-bold text-lg text-teal focus-ring">
+          {heading}
+        </summary>
+        <div className="p-4">
+          {extraContent}
+          <PackageGroup packages={packages} {...groupProps} />
+        </div>
+      </details>
+    ) : (
+      <div className="mb-4">
+        <h3 className="font-display font-bold text-lg text-teal/80 mb-2">{heading}</h3>
+        {extraContent}
+        <PackageGroup packages={packages} {...groupProps} />
+      </div>
+    );
 
-      {alaCartePackages.length > 0 && (
-        <PackageGroup
-          heading={dict.search.modeALaCarte}
-          packages={alaCartePackages}
-          dict={dict}
-          d={d}
-          locale={locale}
-          hl={hl}
-          hasMatch={hasMatch}
-          guestCount={guestCount}
-          cheapest={cheapest}
-          className={formulaPackages.length > 0 ? 'mt-8' : ''}
-        />
-      )}
+  return (
+    <section>
+      {formulaPackages.length > 0 && renderGroup(dict.search.modeFormulas, formulaPackages, 'formulas', menuAndCalculator)}
+      {alaCartePackages.length > 0 && renderGroup(dict.search.modeALaCarte, alaCartePackages, 'a_la_carte')}
     </section>
   );
 }
 
-function PackageGroup({ heading, packages, dict, d, locale, hl, hasMatch, guestCount, cheapest, className }) {
+function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, cheapest }) {
   // Only worth extracting "common to all" when there's more than one package to compare.
   const comparable = packages.length > 1;
 
@@ -397,9 +415,7 @@ function PackageGroup({ heading, packages, dict, d, locale, hl, hasMatch, guestC
   );
 
   return (
-    <div className={className}>
-      <h3 className="font-display font-bold text-lg text-teal/80 mb-2">{heading}</h3>
-
+    <>
       {(commonMinGuests || commonCategories.length > 0 || commonAddons.length > 0 || itemizedCategories.some((cat) => commonItemsByCategory[cat].length > 0)) && (
         <div className="mb-4 border-4 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-2">
           <p className="font-display font-semibold text-teal text-sm">{d.commonToAll}</p>
@@ -596,7 +612,7 @@ function PackageGroup({ heading, packages, dict, d, locale, hl, hasMatch, guestC
           );
         })}
       </div>
-    </div>
+    </>
   );
 }
 
