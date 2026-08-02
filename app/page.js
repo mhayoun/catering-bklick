@@ -5,7 +5,6 @@ import { useLanguage } from '../components/LanguageProvider';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { CatererCard } from '../components/CatererCard';
 import { FormulaCard } from '../components/FormulaCard';
-import { Logo } from '../components/Logo';
 import { buildPackageHaystack, countOccurrencesMulti, parseKeywords } from '../lib/search';
 
 const EMPTY_FILTERS = {
@@ -107,21 +106,17 @@ export default function HomePage() {
   return (
     <div>
       <section className="bg-teal text-cream">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-start">
-          <Logo className="h-16 w-16 sm:h-20 sm:w-20 shrink-0" />
-          <div className="flex-1">
-            <h1 className="font-display font-extrabold text-2xl sm:text-4xl leading-tight">{dict.hero.title}</h1>
-            <p className="mt-2 text-limeLight/90 max-w-2xl">{dict.hero.subtitle}</p>
+        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display font-extrabold text-base sm:text-lg leading-tight">{dict.hero.title}</h1>
+            <p className="text-xs text-limeLight/90 truncate">{dict.hero.subtitle}</p>
           </div>
-        </div>
-
-        <div className="mx-auto max-w-6xl px-4 pb-8">
           <input
             type="text"
             value={filters.keyword}
             onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
             placeholder={dict.search.keyword}
-            className="w-full rounded-full border-0 px-5 py-3.5 bg-cream text-ink placeholder:text-ink/50 focus-ring text-base shadow-card"
+            className="w-full max-w-[12rem] sm:max-w-xs shrink-0 rounded-full border-0 px-4 py-2 bg-cream text-ink placeholder:text-ink/50 focus-ring text-sm shadow-card"
           />
         </div>
       </section>
