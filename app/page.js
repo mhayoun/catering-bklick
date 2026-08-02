@@ -23,7 +23,7 @@ const EMPTY_FILTERS = {
 export default function HomePage() {
   const { dict, t, locale } = useLanguage();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
-  const [searchMode, setSearchMode] = useState('formulas');
+  const [searchMode, setSearchMode] = useState('caterers');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const debounceRef = useRef(null);
@@ -127,24 +127,53 @@ export default function HomePage() {
       </section>
 
       <div className="mx-auto max-w-6xl px-4 py-6 flex flex-col lg:flex-row gap-6">
-        <FilterSidebar
-          filters={filters}
-          setFilters={setFilters}
-          onReset={() => setFilters(EMPTY_FILTERS)}
-          searchMode={searchMode}
-          setSearchMode={setSearchMode}
-        />
+        <FilterSidebar filters={filters} setFilters={setFilters} onReset={() => setFilters(EMPTY_FILTERS)} />
 
         <section className="flex-1 min-w-0">
-          <p className="font-display font-semibold text-teal mb-4">
-            {loading
-              ? '…'
-              : searchMode === 'formulas'
-                ? t('search.resultsCountFormulas', { n: formulas.length })
-                : searchMode === 'a_la_carte'
-                  ? t('search.resultsCountALaCarte', { n: alaCarte.length })
-                  : t('search.resultsCount', { n: results.length })}
-          </p>
+          <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+            <p className="font-display font-semibold text-teal">
+              {loading
+                ? '…'
+                : searchMode === 'formulas'
+                  ? t('search.resultsCountFormulas', { n: formulas.length })
+                  : searchMode === 'a_la_carte'
+                    ? t('search.resultsCountALaCarte', { n: alaCarte.length })
+                    : t('search.resultsCount', { n: results.length })}
+            </p>
+
+            <div className="flex gap-1 bg-cream/60 rounded-full p-1 border-2 border-teal/10">
+              <button
+                type="button"
+                onClick={() => setSearchMode('caterers')}
+                aria-pressed={searchMode === 'caterers'}
+                className={`text-sm font-display font-semibold rounded-full px-3 py-1.5 focus-ring transition-colors ${
+                  searchMode === 'caterers' ? 'bg-teal text-cream' : 'text-teal hover:bg-teal/10'
+                }`}
+              >
+                {dict.search.modeCaterers}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchMode('formulas')}
+                aria-pressed={searchMode === 'formulas'}
+                className={`text-sm font-display font-semibold rounded-full px-3 py-1.5 focus-ring transition-colors ${
+                  searchMode === 'formulas' ? 'bg-teal text-cream' : 'text-teal hover:bg-teal/10'
+                }`}
+              >
+                {dict.search.modeFormulas}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchMode('a_la_carte')}
+                aria-pressed={searchMode === 'a_la_carte'}
+                className={`text-sm font-display font-semibold rounded-full px-3 py-1.5 focus-ring transition-colors ${
+                  searchMode === 'a_la_carte' ? 'bg-teal text-cream' : 'text-teal hover:bg-teal/10'
+                }`}
+              >
+                {dict.search.modeALaCarte}
+              </button>
+            </div>
+          </div>
 
           {!loading && searchMode === 'formulas' && formulas.length === 0 && (
             <p className="text-ink/70 bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center">
