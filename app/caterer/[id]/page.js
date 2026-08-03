@@ -461,15 +461,18 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                     addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
                   return (
                     <li key={addon.id}>
-                      + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />:{' '}
+                      + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />
                       {hasPrice ? (
                         <>
+                          :{' '}
                           ₪{Number(addon.amount).toLocaleString()}
                           {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
                           {commonBilledGuests > 0 && ` — ₪${Math.round(estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
                         </>
+                      ) : addon.priceType === 'included' ? (
+                        ` (${dict.form.packages.priceTypeIncluded})`
                       ) : (
-                        d.priceOnRequest
+                        `: ${d.priceOnRequest}`
                       )}
                     </li>
                   );
@@ -563,15 +566,18 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                     const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
                     return (
                       <li key={addon.id}>
-                        + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />:{' '}
+                        + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />
                         {hasPrice ? (
                           <>
+                            :{' '}
                             ₪{Number(addon.amount).toLocaleString()}
                             {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
                             {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
                           </>
+                        ) : addon.priceType === 'included' ? (
+                          ` (${dict.form.packages.priceTypeIncluded})`
                         ) : (
-                          d.priceOnRequest
+                          `: ${d.priceOnRequest}`
                         )}
                       </li>
                     );
@@ -597,31 +603,60 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                     );
                   }
 
-                  const groups = [];
-                  const groupIndexByKey = {};
-                  shownAddons.forEach((addon) => {
-                    const key = addon.category.en || pickLocalized(addon.category, locale);
-                    if (!(key in groupIndexByKey)) {
-                      groupIndexByKey[key] = groups.length;
-                      groups.push({ category: addon.category, items: [] });
-                    }
-                    groups[groupIndexByKey[key]].items.push(addon);
-                  });
+                  // Groups a flat addon list by a localized-label field (e.g. addon.category or
+                  // addon.subcategory), preserving first-seen order. Shared by both nesting levels
+                  // below - a meal (category) can itself be broken down into dish types (subcategory).
+                  const groupByLabel = (list, getLabel) => {
+                    const out = [];
+                    const indexByKey = {};
+                    list.forEach((addon) => {
+                      const label = getLabel(addon);
+                      const key = label.en || pickLocalized(label, locale);
+                      if (!(key in indexByKey)) {
+                        indexByKey[key] = out.length;
+                        out.push({ label, items: [] });
+                      }
+                      out[indexByKey[key]].items.push(addon);
+                    });
+                    return out;
+                  };
+
+                  const groups = groupByLabel(shownAddons, (a) => a.category);
 
                   return (
                     <div className="pt-2 border-t-2 border-teal/10 space-y-1">
-                      {groups.map(({ category, items }) => (
-                        <details
-                          key={category.en}
-                          open={hasMatch(items.map((a) => pickLocalized(a.name, locale)).join(', '))}
-                          className="text-xs text-ink/60"
-                        >
-                          <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
-                            {pickLocalized(category, locale)} ({items.length})
-                          </summary>
-                          <ul className="pt-1 space-y-0.5 ps-2">{items.map(renderAddonLine)}</ul>
-                        </details>
-                      ))}
+                      {groups.map(({ label: category, items }) => {
+                        const allSubcategorized = items.every((a) => a.subcategory);
+                        return (
+                          <details
+                            key={category.en}
+                            open={hasMatch(items.map((a) => pickLocalized(a.name, locale)).join(', '))}
+                            className="text-xs text-ink/60"
+                          >
+                            <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
+                              {pickLocalized(category, locale)} ({items.length})
+                            </summary>
+                            {allSubcategorized ? (
+                              <div className="pt-1 space-y-1 ps-2">
+                                {groupByLabel(items, (a) => a.subcategory).map(({ label: subcategory, items: subItems }) => (
+                                  <details
+                                    key={subcategory.en}
+                                    open={hasMatch(subItems.map((a) => pickLocalized(a.name, locale)).join(', '))}
+                                    className="text-xs text-ink/60"
+                                  >
+                                    <summary className="cursor-pointer text-teal/80 font-display font-semibold focus-ring rounded">
+                                      {pickLocalized(subcategory, locale)} ({subItems.length})
+                                    </summary>
+                                    <ul className="pt-1 space-y-0.5 ps-2">{subItems.map(renderAddonLine)}</ul>
+                                  </details>
+                                ))}
+                              </div>
+                            ) : (
+                              <ul className="pt-1 space-y-0.5 ps-2">{items.map(renderAddonLine)}</ul>
+                            )}
+                          </details>
+                        );
+                      })}
                     </div>
                   );
                 })()}

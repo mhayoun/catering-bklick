@@ -640,7 +640,11 @@ export function CatererForm({ initial, catererId }) {
                     >
                       {ADDON_PRICE_TYPES.map((pt) => (
                         <option key={pt} value={pt}>
-                          {pt === 'per_guest' ? dict.form.packages.priceTypePerGuest : dict.form.packages.priceTypeFlat}
+                          {pt === 'per_guest'
+                            ? dict.form.packages.priceTypePerGuest
+                            : pt === 'included'
+                              ? dict.form.packages.priceTypeIncluded
+                              : dict.form.packages.priceTypeFlat}
                         </option>
                       ))}
                     </select>
@@ -981,7 +985,7 @@ function PackageEditor({
                   >
                     {ADDON_PRICE_TYPES.map((pt) => (
                       <option key={pt} value={pt}>
-                        {pt === 'per_guest' ? d.priceTypePerGuest : d.priceTypeFlat}
+                        {pt === 'per_guest' ? d.priceTypePerGuest : pt === 'included' ? d.priceTypeIncluded : d.priceTypeFlat}
                       </option>
                     ))}
                   </select>
