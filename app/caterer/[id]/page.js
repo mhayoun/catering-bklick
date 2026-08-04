@@ -471,6 +471,8 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                         </>
                       ) : addon.priceType === 'included' ? (
                         ` (${dict.form.packages.priceTypeIncluded})`
+                      ) : addon.priceType === 'note' ? (
+                        ''
                       ) : (
                         `: ${d.priceOnRequest}`
                       )}
@@ -518,6 +520,21 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
 
               <p className="text-sm text-ink/70">₪{pkg.pricePerGuest} {d.perGuest}</p>
               {!commonMinGuests && pkg.minGuests && <p className="text-xs text-ink/50">{d.minGuestsNote.replace('{n}', pkg.minGuests)}</p>}
+
+              {pkg.priceTiers?.length > 0 && (
+                <div className="border-2 border-teal/15 rounded-blob p-2 space-y-0.5 bg-cream/50">
+                  <p className="text-xs font-display font-semibold text-teal">{d.priceTiersTitle}</p>
+                  {pkg.priceTiers.map((tier, i) => (
+                    <p key={i} className="text-xs text-ink/70">
+                      <Highlight text={pickLocalized(tier.label, locale)} query={hl} />
+                      {': '}
+                      {tier.withoutSetup != null && `₪${tier.withoutSetup} (${d.priceTierWithoutSetup})`}
+                      {tier.withoutSetup != null && tier.withSetup != null && ' · '}
+                      {tier.withSetup != null && `₪${tier.withSetup} (${d.priceTierWithSetup})`}
+                    </p>
+                  ))}
+                </div>
+              )}
 
               {pkg.includedCategories?.filter((m) => dict.menuCategories[m] && !commonCategories.includes(m)).length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
@@ -576,6 +593,8 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                           </>
                         ) : addon.priceType === 'included' ? (
                           ` (${dict.form.packages.priceTypeIncluded})`
+                        ) : addon.priceType === 'note' ? (
+                          ''
                         ) : (
                           `: ${d.priceOnRequest}`
                         )}
@@ -660,6 +679,17 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                     </div>
                   );
                 })()}
+
+              {pkg.eventTypes?.filter((et) => dict.eventTypes[et]).length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t-2 border-teal/10">
+                  <span className="text-xs text-ink/50">{dict.search.eventType}:</span>
+                  {pkg.eventTypes.filter((et) => dict.eventTypes[et]).map((et) => (
+                    <span key={et} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
+                      <Highlight text={dict.eventTypes[et]} query={hl} />
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

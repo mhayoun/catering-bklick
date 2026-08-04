@@ -38,6 +38,13 @@ function blankAddon() {
   return { id: makeId(), name: { he: '', en: '', fr: '' }, priceType: 'per_guest', amount: '' };
 }
 
+function priceTypeLabel(priceType, d) {
+  if (priceType === 'per_guest') return d.priceTypePerGuest;
+  if (priceType === 'included') return d.priceTypeIncluded;
+  if (priceType === 'note') return d.priceTypeNote;
+  return d.priceTypeFlat;
+}
+
 function blankCategoryItem() {
   return { id: makeId(), he: '', en: '', fr: '' };
 }
@@ -640,11 +647,7 @@ export function CatererForm({ initial, catererId }) {
                     >
                       {ADDON_PRICE_TYPES.map((pt) => (
                         <option key={pt} value={pt}>
-                          {pt === 'per_guest'
-                            ? dict.form.packages.priceTypePerGuest
-                            : pt === 'included'
-                              ? dict.form.packages.priceTypeIncluded
-                              : dict.form.packages.priceTypeFlat}
+                          {priceTypeLabel(pt, dict.form.packages)}
                         </option>
                       ))}
                     </select>
@@ -985,7 +988,7 @@ function PackageEditor({
                   >
                     {ADDON_PRICE_TYPES.map((pt) => (
                       <option key={pt} value={pt}>
-                        {pt === 'per_guest' ? d.priceTypePerGuest : pt === 'included' ? d.priceTypeIncluded : d.priceTypeFlat}
+                        {priceTypeLabel(pt, d)}
                       </option>
                     ))}
                   </select>
