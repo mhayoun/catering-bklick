@@ -9,7 +9,7 @@ import { ProposalModal } from '../../../components/ProposalModal';
 import { Highlight } from '../../../components/Highlight';
 import { pickLocalized, toArrayField } from '../../../lib/localized';
 import { estimatePackageTotal, cheapestPackageEstimate } from '../../../lib/pricing';
-import { countOccurrences, parseKeywords } from '../../../lib/search';
+import { buildPackageHaystack, countOccurrences, parseKeywords } from '../../../lib/search';
 
 // useSearchParams() must be read inside a Suspense boundary, or Next.js's production build can
 // silently freeze it (it read fine in `next dev`, which skips that optimization) - this is what
@@ -299,8 +299,11 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl,
   // Only worth an accordion (collapsed by default) when a visitor has to choose between the two -
   // a caterer with just one kind shows it plainly, nothing to collapse against. When both exist,
   // whichever search mode the visitor arrived from (?mode=formulas|a_la_carte) opens by default;
-  // arriving from the plain "caterers" search (or a bookmarked/direct link) leaves both collapsed.
+  // a group also opens on its own if a search term actually matches inside it (e.g. the visitor
+  // arrived from the plain caterer-card search, which carries ?hl= but no ?mode=), so a match
+  // in the à-la-carte catalog isn't hidden just because the outer accordion stayed collapsed.
   const bothPresent = formulaPackages.length > 0 && alaCartePackages.length > 0;
+  const groupHasMatch = (packages) => packages.some((p) => hasMatch(buildPackageHaystack(caterer, p, locale)));
 
   const groupProps = { dict, d, locale, hl, hasMatch, guestCount, cheapest };
 
@@ -336,7 +339,10 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl,
 
   const renderGroup = (heading, packages, openWhenMode, extraContent) =>
     bothPresent ? (
-      <details open={arrivalMode === openWhenMode} className="mb-4 border-2 border-teal/20 rounded-blob overflow-hidden">
+      <details
+        open={arrivalMode === openWhenMode || groupHasMatch(packages)}
+        className="mb-4 border-2 border-teal/20 rounded-blob overflow-hidden"
+      >
         <summary className="cursor-pointer px-4 py-2.5 bg-teal/10 font-display font-bold text-lg text-teal focus-ring">
           {heading}
         </summary>

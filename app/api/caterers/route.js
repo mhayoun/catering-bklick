@@ -18,6 +18,7 @@ export async function GET(request) {
     minGuests: searchParams.get('minGuests') || '',
     maxMinOrder: searchParams.get('maxMinOrder') || '',
     menuCategories: searchParams.getAll('menuCategories'),
+    alaCarteCategories: searchParams.getAll('alaCarteCategories'),
     services: searchParams.getAll('services')
   };
 

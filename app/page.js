@@ -16,6 +16,7 @@ const EMPTY_FILTERS = {
   minGuests: '',
   maxMinOrder: '',
   menuCategories: [],
+  alaCarteCategories: [],
   services: []
 };
 
@@ -82,6 +83,7 @@ export default function HomePage() {
     f.cateringTypes.forEach((v) => params.append('cateringTypes', v));
     f.eventTypes.forEach((v) => params.append('eventTypes', v));
     f.menuCategories.forEach((v) => params.append('menuCategories', v));
+    f.alaCarteCategories.forEach((v) => params.append('alaCarteCategories', v));
     f.services.forEach((v) => params.append('services', v));
 
     try {

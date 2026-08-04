@@ -8,6 +8,7 @@ import {
   CATERING_TYPES,
   EVENT_TYPES,
   MENU_CATEGORIES,
+  ALACARTE_CATEGORIES,
   ADDITIONAL_SERVICES,
   GUEST_COUNT_BRACKETS,
   MIN_ORDER_BRACKETS
@@ -40,6 +41,7 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
     filters.cateringTypes.length +
     filters.eventTypes.length +
     filters.menuCategories.length +
+    filters.alaCarteCategories.length +
     filters.services.length +
     (filters.minGuests ? 1 : 0) +
     (filters.maxMinOrder ? 1 : 0);
@@ -135,6 +137,15 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
 
           <FilterSection title={dict.search.menu}>
             <CheckList options={MENU_CATEGORIES} labels={dict.menuCategories} values={filters.menuCategories} onToggle={(v) => toggle('menuCategories', v)} />
+          </FilterSection>
+
+          <FilterSection title={dict.search.alaCarteMenu}>
+            <CheckList
+              options={ALACARTE_CATEGORIES}
+              labels={dict.alaCarteCategories}
+              values={filters.alaCarteCategories}
+              onToggle={(v) => toggle('alaCarteCategories', v)}
+            />
           </FilterSection>
 
           <FilterSection title={dict.search.services}>
