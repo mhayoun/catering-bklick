@@ -518,7 +518,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                 </div>
               </div>
 
-              <p className="text-sm text-ink/70">₪{pkg.pricePerGuest} {d.perGuest}</p>
+              {pkg.pricePerGuest && <p className="text-sm text-ink/70">₪{pkg.pricePerGuest} {d.perGuest}</p>}
               {!commonMinGuests && pkg.minGuests && <p className="text-xs text-ink/50">{d.minGuestsNote.replace('{n}', pkg.minGuests)}</p>}
 
               {pkg.priceTiers?.length > 0 && (
@@ -615,7 +615,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                         className="pt-2 border-t-2 border-teal/10 text-xs text-ink/60"
                       >
                         <summary className="cursor-pointer text-ink/50 font-display font-semibold focus-ring rounded">
-                          {d.addonsIncluded} ({shownAddons.length})
+                          {pkg.type === 'a_la_carte' ? d.allProducts : d.addonsIncluded} ({shownAddons.length})
                         </summary>
                         <ul className="pt-1 space-y-0.5">{shownAddons.map(renderAddonLine)}</ul>
                       </details>
