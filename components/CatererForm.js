@@ -11,6 +11,7 @@ import {
   CATERING_TYPES,
   EVENT_TYPES,
   MENU_CATEGORIES,
+  ALACARTE_CATEGORIES,
   ADDITIONAL_SERVICES,
   ADDON_PRICE_TYPES,
   LOCALES
@@ -61,6 +62,7 @@ const BLANK = {
   priceFrom: '',
   eventTypes: [],
   menuCategories: [],
+  alaCarteCategories: [],
   services: [],
   phone: '',
   whatsapp: '',
@@ -512,19 +514,17 @@ export function CatererForm({ initial, catererId }) {
 
       <TextField label={dict.form.address} value={form.address} onChange={(v) => set('address', v)} />
 
-      <div className="grid sm:grid-cols-3 gap-6">
-        <FieldBlock label={dict.form.districts}>
-          <CheckboxGroup name={dict.form.districts} options={DISTRICTS} labels={dict.districts} values={form.districts} onChange={(v) => set('districts', v)} />
-        </FieldBlock>
+      <FieldBlock label={dict.form.districts}>
+        <CheckboxGroup name={dict.form.districts} options={DISTRICTS} labels={dict.districts} values={form.districts} onChange={(v) => set('districts', v)} />
+      </FieldBlock>
 
-        <FieldBlock label={dict.form.kashrutLevels}>
-          <CheckboxGroup name={dict.form.kashrutLevels} options={KASHRUT_LEVELS} labels={dict.kashrut} values={form.kashrutLevels} onChange={(v) => set('kashrutLevels', v)} />
-        </FieldBlock>
+      <FieldBlock label={dict.form.kashrutLevels}>
+        <CheckboxGroup name={dict.form.kashrutLevels} options={KASHRUT_LEVELS} labels={dict.kashrut} values={form.kashrutLevels} onChange={(v) => set('kashrutLevels', v)} />
+      </FieldBlock>
 
-        <FieldBlock label={dict.form.cateringTypes}>
-          <CheckboxGroup name={dict.form.cateringTypes} options={CATERING_TYPES} labels={dict.cateringType} values={form.cateringTypes} onChange={(v) => set('cateringTypes', v)} />
-        </FieldBlock>
-      </div>
+      <FieldBlock label={dict.form.cateringTypes}>
+        <CheckboxGroup name={dict.form.cateringTypes} options={CATERING_TYPES} labels={dict.cateringType} values={form.cateringTypes} onChange={(v) => set('cateringTypes', v)} />
+      </FieldBlock>
 
       <TextField
         label={dict.form.maxGuests}
@@ -539,6 +539,10 @@ export function CatererForm({ initial, catererId }) {
 
       <FieldBlock label={dict.form.menuCategories}>
         <CheckboxGroup name={dict.form.menuCategories} options={MENU_CATEGORIES} labels={dict.menuCategories} values={form.menuCategories} onChange={(v) => set('menuCategories', v)} />
+      </FieldBlock>
+
+      <FieldBlock label={dict.form.alaCarteCategories}>
+        <CheckboxGroup name={dict.form.alaCarteCategories} options={ALACARTE_CATEGORIES} labels={dict.alaCarteCategories} values={form.alaCarteCategories} onChange={(v) => set('alaCarteCategories', v)} />
       </FieldBlock>
 
       <FieldBlock label={dict.form.services}>

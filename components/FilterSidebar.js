@@ -140,12 +140,7 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
           </FilterSection>
 
           <FilterSection title={dict.search.alaCarteMenu}>
-            <CheckList
-              options={ALACARTE_CATEGORIES}
-              labels={dict.alaCarteCategories}
-              values={filters.alaCarteCategories}
-              onToggle={(v) => toggle('alaCarteCategories', v)}
-            />
+            <CheckList options={ALACARTE_CATEGORIES} labels={dict.alaCarteCategories} values={filters.alaCarteCategories} onToggle={(v) => toggle('alaCarteCategories', v)} />
           </FilterSection>
 
           <FilterSection title={dict.search.services}>
