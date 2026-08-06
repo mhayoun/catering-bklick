@@ -24,6 +24,7 @@ function makeId() {
 function blankPackage() {
   return {
     id: makeId(),
+    type: 'formula',
     name: { he: '', en: '', fr: '' },
     pricePerGuest: '',
     minGuests: '',
@@ -35,8 +36,16 @@ function blankPackage() {
   };
 }
 
+// À-la-carte "packages" are really flat item catalogs (e.g. "Catering Trays", "Bakery") rather
+// than fixed-price formulas - no included-categories/choice-count logic, just addons each tagged
+// with their own categoryId (see ALACARTE_CATEGORIES), so they don't join the formula "common to
+// all" template machinery below.
+function blankAlaCartePackage() {
+  return { ...blankPackage(), type: 'a_la_carte' };
+}
+
 function blankAddon() {
-  return { id: makeId(), name: { he: '', en: '', fr: '' }, priceType: 'per_guest', amount: '' };
+  return { id: makeId(), name: { he: '', en: '', fr: '' }, priceType: 'per_guest', amount: '', categoryId: '' };
 }
 
 function priceTypeLabel(priceType, d) {
@@ -110,12 +119,15 @@ export function CatererForm({ initial, catererId }) {
     // everywhere but with a different choice count per package must NOT be folded in here:
     // editing/saving the "common" count would silently overwrite every package's own
     // (deliberately different) number with a single shared one.
-    const categorySets = merged.packages.map((p) => new Set(p.includedCategories || []));
+    // Scoped to formula packages only - à-la-carte packages don't use includedCategories/
+    // categoryLimits/commonAddons at all (see blankAlaCartePackage above).
+    const formulaPkgs = merged.packages.filter((p) => p.type !== 'a_la_carte');
+    const categorySets = formulaPkgs.map((p) => new Set(p.includedCategories || []));
     merged.commonCategories =
-      merged.packages.length > 1 && categorySets.length > 0
+      formulaPkgs.length > 1 && categorySets.length > 0
         ? [...categorySets[0]].filter((cat) => {
             if (!categorySets.every((s) => s.has(cat))) return false;
-            const values = merged.packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
+            const values = formulaPkgs.map((p) => Number(p.categoryLimits?.[cat]) || null);
             const varies = values.some((v) => v !== null) && !values.every((v) => v === values[0]);
             return !varies;
           })
@@ -123,39 +135,39 @@ export function CatererForm({ initial, catererId }) {
     merged.commonCategoryLimits = Object.fromEntries(
       merged.commonCategories
         .map((cat) => {
-          const values = merged.packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
+          const values = formulaPkgs.map((p) => Number(p.categoryLimits?.[cat]) || null);
           return values.every((v) => v === values[0]) ? [cat, values[0]] : null;
         })
         .filter(Boolean)
     );
-    const addonIdSets = merged.packages.map((p) => new Set((p.addons || []).map((a) => a.id)));
+    const addonIdSets = formulaPkgs.map((p) => new Set((p.addons || []).map((a) => a.id)));
     const commonAddonIds =
-      merged.packages.length > 1 && addonIdSets.length > 0
+      formulaPkgs.length > 1 && addonIdSets.length > 0
         ? [...addonIdSets[0]].filter((id) => addonIdSets.every((s) => s.has(id)))
         : [];
-    merged.commonAddons = commonAddonIds.map((id) => merged.packages[0].addons.find((a) => a.id === id)).filter(Boolean);
+    merged.commonAddons = commonAddonIds.map((id) => formulaPkgs[0].addons.find((a) => a.id === id)).filter(Boolean);
 
     // Specific menu items (e.g. individual salads) present in every package's own item list for a
     // category - edited once here and pushed into every package, instead of maintaining duplicate
     // copies. Independent of commonCategories above: a category can have a shared item pool even
     // when its choice-count differs per package (or vice versa).
     const itemCategories =
-      merged.packages.length > 1
-        ? [...new Set(merged.packages.flatMap((p) => Object.keys(p.categoryItems || {})))].filter((cat) =>
-            merged.packages.every((p) => (p.categoryItems?.[cat]?.length || 0) > 0)
+      formulaPkgs.length > 1
+        ? [...new Set(formulaPkgs.flatMap((p) => Object.keys(p.categoryItems || {})))].filter((cat) =>
+            formulaPkgs.every((p) => (p.categoryItems?.[cat]?.length || 0) > 0)
           )
         : [];
     merged.commonCategoryItems = Object.fromEntries(
       itemCategories.map((cat) => {
-        const itemSets = merged.packages.map((p) => new Set(p.categoryItems[cat].map((it) => it.id)));
+        const itemSets = formulaPkgs.map((p) => new Set(p.categoryItems[cat].map((it) => it.id)));
         const commonIds = [...itemSets[0]].filter((itemId) => itemSets.every((s) => s.has(itemId)));
-        return [cat, merged.packages[0].categoryItems[cat].filter((it) => commonIds.includes(it.id))];
+        return [cat, formulaPkgs[0].categoryItems[cat].filter((it) => commonIds.includes(it.id))];
       })
     );
 
-    const minGuestsValues = merged.packages.map((p) => Number(p.minGuests) || null);
+    const minGuestsValues = formulaPkgs.map((p) => Number(p.minGuests) || null);
     merged.commonMinGuests =
-      merged.packages.length > 1 && minGuestsValues.every((v) => v && v === minGuestsValues[0]) ? String(minGuestsValues[0]) : '';
+      formulaPkgs.length > 1 && minGuestsValues.every((v) => v && v === minGuestsValues[0]) ? String(minGuestsValues[0]) : '';
 
     return merged;
   });
@@ -187,6 +199,10 @@ export function CatererForm({ initial, catererId }) {
         }
       ]
     }));
+  }
+
+  function addAlaCartePackage() {
+    setForm((prev) => ({ ...prev, packages: [...prev.packages, blankAlaCartePackage()] }));
   }
 
   function removePackage(pkgIndex) {
@@ -254,11 +270,14 @@ export function CatererForm({ initial, catererId }) {
   // menu category or add-on that's the same across all formulas only needs
   // to be defined/edited in one place instead of per-package.
 
+  // The "common to all formulas" bulk helpers below only ever touch formula-type packages -
+  // à-la-carte packages (blankAlaCartePackage) don't participate in includedCategories/
+  // categoryLimits/commonAddons at all, so they're left untouched by every mapper here.
   function setCommonMinGuests(value) {
     setForm((prev) => ({
       ...prev,
       commonMinGuests: value,
-      packages: prev.packages.map((pkg) => ({ ...pkg, minGuests: value }))
+      packages: prev.packages.map((pkg) => (pkg.type === 'a_la_carte' ? pkg : { ...pkg, minGuests: value }))
     }));
   }
 
@@ -271,6 +290,7 @@ export function CatererForm({ initial, catererId }) {
         commonCategories: isCommon ? prev.commonCategories.filter((c) => c !== cat) : [...prev.commonCategories, cat],
         commonCategoryLimits: isCommon ? restCommonLimits : prev.commonCategoryLimits,
         packages: prev.packages.map((pkg) => {
+          if (pkg.type === 'a_la_carte') return pkg;
           if (isCommon) {
             const { [cat]: _removed, ...restLimits } = pkg.categoryLimits || {};
             return { ...pkg, includedCategories: pkg.includedCategories.filter((c) => c !== cat), categoryLimits: restLimits };
@@ -286,7 +306,9 @@ export function CatererForm({ initial, catererId }) {
       ...prev,
       commonCategoryLimits: { ...prev.commonCategoryLimits, [cat]: value },
       packages: prev.packages.map((pkg) =>
-        pkg.includedCategories.includes(cat) ? { ...pkg, categoryLimits: { ...pkg.categoryLimits, [cat]: value } } : pkg
+        pkg.type !== 'a_la_carte' && pkg.includedCategories.includes(cat)
+          ? { ...pkg, categoryLimits: { ...pkg.categoryLimits, [cat]: value } }
+          : pkg
       )
     }));
   }
@@ -296,7 +318,7 @@ export function CatererForm({ initial, catererId }) {
     setForm((prev) => ({
       ...prev,
       commonAddons: [...prev.commonAddons, addon],
-      packages: prev.packages.map((pkg) => ({ ...pkg, addons: [...pkg.addons, { ...addon }] }))
+      packages: prev.packages.map((pkg) => (pkg.type === 'a_la_carte' ? pkg : { ...pkg, addons: [...pkg.addons, { ...addon }] }))
     }));
   }
 
@@ -304,7 +326,9 @@ export function CatererForm({ initial, catererId }) {
     setForm((prev) => ({
       ...prev,
       commonAddons: prev.commonAddons.filter((a) => a.id !== id),
-      packages: prev.packages.map((pkg) => ({ ...pkg, addons: pkg.addons.filter((a) => a.id !== id) }))
+      packages: prev.packages.map((pkg) =>
+        pkg.type === 'a_la_carte' ? pkg : { ...pkg, addons: pkg.addons.filter((a) => a.id !== id) }
+      )
     }));
   }
 
@@ -312,10 +336,9 @@ export function CatererForm({ initial, catererId }) {
     setForm((prev) => ({
       ...prev,
       commonAddons: prev.commonAddons.map((a) => (a.id === id ? { ...a, ...patch } : a)),
-      packages: prev.packages.map((pkg) => ({
-        ...pkg,
-        addons: pkg.addons.map((a) => (a.id === id ? { ...a, ...patch } : a))
-      }))
+      packages: prev.packages.map((pkg) =>
+        pkg.type === 'a_la_carte' ? pkg : { ...pkg, addons: pkg.addons.map((a) => (a.id === id ? { ...a, ...patch } : a)) }
+      )
     }));
   }
 
@@ -325,7 +348,7 @@ export function CatererForm({ initial, catererId }) {
       ...prev,
       commonCategoryItems: { ...prev.commonCategoryItems, [cat]: [...(prev.commonCategoryItems[cat] || []), item] },
       packages: prev.packages.map((pkg) =>
-        pkg.includedCategories.includes(cat)
+        pkg.type !== 'a_la_carte' && pkg.includedCategories.includes(cat)
           ? { ...pkg, categoryItems: { ...pkg.categoryItems, [cat]: [...(pkg.categoryItems?.[cat] || []), { ...item }] } }
           : pkg
       )
@@ -483,6 +506,14 @@ export function CatererForm({ initial, catererId }) {
   const commonCategoryItems = form.commonCategoryItems;
   const commonMinGuests = form.commonMinGuests;
 
+  // Formulas (fixed-price, choose-N-per-category) and à-la-carte catalogs (flat, individually
+  // priced items) are edited as two separate lists in the UI even though they share one
+  // `packages` array on the record - each entry keeps its original index so the existing
+  // per-package callbacks (updatePackage, removePackage, ...) still address the right item.
+  const indexedPackages = form.packages.map((pkg, i) => ({ pkg, i }));
+  const formulaPackages = indexedPackages.filter(({ pkg }) => pkg.type !== 'a_la_carte');
+  const alaCartePackages = indexedPackages.filter(({ pkg }) => pkg.type === 'a_la_carte');
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8 bg-white/70 border-4 border-teal rounded-blob p-6 sm:p-8">
       <div>
@@ -537,190 +568,240 @@ export function CatererForm({ initial, catererId }) {
         <CheckboxGroup name={dict.form.eventTypes} options={EVENT_TYPES} labels={dict.eventTypes} values={form.eventTypes} onChange={(v) => set('eventTypes', v)} />
       </FieldBlock>
 
-      <FieldBlock label={dict.form.menuCategories}>
-        <CheckboxGroup name={dict.form.menuCategories} options={MENU_CATEGORIES} labels={dict.menuCategories} values={form.menuCategories} onChange={(v) => set('menuCategories', v)} />
-      </FieldBlock>
-
-      <FieldBlock label={dict.form.alaCarteCategories}>
-        <CheckboxGroup name={dict.form.alaCarteCategories} options={ALACARTE_CATEGORIES} labels={dict.alaCarteCategories} values={form.alaCarteCategories} onChange={(v) => set('alaCarteCategories', v)} />
-      </FieldBlock>
-
       <FieldBlock label={dict.form.services}>
         <CheckboxGroup name={dict.form.services} options={ADDITIONAL_SERVICES} labels={dict.services} values={form.services} onChange={(v) => set('services', v)} />
       </FieldBlock>
 
-      <InlineNumberField label={dict.form.priceFrom} value={form.priceFrom} onChange={(v) => set('priceFrom', v)} />
+      <div className="border-4 border-tealGreen/30 rounded-blob p-4 sm:p-5 space-y-5 bg-tealGreen/5">
+        <h2 className="font-display font-extrabold text-lg text-tealGreen">{dict.form.packages.title}</h2>
 
-      <FieldBlock label={dict.form.packages.title}>
-        <p className="text-sm text-ink/70 -mt-1">{dict.form.packages.subtitle}</p>
+        <FieldBlock label={dict.form.menuCategories}>
+          <CheckboxGroup name={dict.form.menuCategories} options={MENU_CATEGORIES} labels={dict.menuCategories} values={form.menuCategories} onChange={(v) => set('menuCategories', v)} />
+        </FieldBlock>
 
-        <details className="mt-2 border-2 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-4">
-          <summary className="font-display font-semibold text-teal text-sm cursor-pointer focus-ring rounded">
-            {dict.profile.packages.commonToAll}
-          </summary>
+        <InlineNumberField label={dict.form.priceFrom} value={form.priceFrom} onChange={(v) => set('priceFrom', v)} />
 
-          <InlineNumberField label={dict.form.packages.minGuests} value={commonMinGuests} onChange={setCommonMinGuests} />
+        <FieldBlock>
+          <p className="text-sm text-ink/70 -mt-1">{dict.form.packages.subtitle}</p>
 
-          <FieldBlock label={dict.form.packages.includedCategories}>
-            <CheckboxGroup
-              name={dict.form.packages.includedCategories}
-              options={MENU_CATEGORIES}
-              labels={dict.menuCategories}
-              values={commonCategories}
-              onChange={(next) => {
-                const cat =
-                  next.length > commonCategories.length
-                    ? next.find((c) => !commonCategories.includes(c))
-                    : commonCategories.find((c) => !next.includes(c));
-                if (cat) toggleCommonCategory(cat);
-              }}
-            />
-            {commonCategories.length > 0 && (
-              <div className="flex flex-wrap gap-4 pt-1">
-                {commonCategories.map((cat) => (
-                  <InlineNumberField
-                    key={cat}
-                    label={dict.menuCategories[cat]}
-                    value={commonCategoryLimit(cat) ?? ''}
-                    onChange={(v) => setCommonCategoryLimit(cat, v)}
-                  />
-                ))}
-              </div>
-            )}
-          </FieldBlock>
+          <details className="mt-2 border-2 border-teal/20 rounded-blob p-4 bg-cream/50 space-y-4">
+            <summary className="font-display font-semibold text-teal text-sm cursor-pointer focus-ring rounded">
+              {dict.profile.packages.commonToAll}
+            </summary>
 
-          <div className="space-y-3">
-            {[...new Set([...commonCategories, ...Object.keys(commonCategoryItems)])].map((cat) => (
-              <details key={`${cat}-common-items`} className="border-2 border-teal/20 rounded-blob p-2">
-                <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
-                  {dict.menuCategories[cat]} · {dict.form.packages.menuItems}
-                  {(commonCategoryItems[cat]?.length || 0) > 0 && ` (${commonCategoryItems[cat].length})`}
-                </summary>
-                <div className="space-y-1 mt-2">
-                  {(commonCategoryItems[cat] || []).map((item) => (
-                    <div key={item.id} className="grid grid-cols-[1fr,auto] gap-2 items-center">
+            <InlineNumberField label={dict.form.packages.minGuests} value={commonMinGuests} onChange={setCommonMinGuests} />
+
+            <FieldBlock label={dict.form.packages.includedCategories}>
+              <CheckboxGroup
+                name={dict.form.packages.includedCategories}
+                options={MENU_CATEGORIES}
+                labels={dict.menuCategories}
+                values={commonCategories}
+                onChange={(next) => {
+                  const cat =
+                    next.length > commonCategories.length
+                      ? next.find((c) => !commonCategories.includes(c))
+                      : commonCategories.find((c) => !next.includes(c));
+                  if (cat) toggleCommonCategory(cat);
+                }}
+              />
+              {commonCategories.length > 0 && (
+                <div className="flex flex-wrap gap-4 pt-1">
+                  {commonCategories.map((cat) => (
+                    <InlineNumberField
+                      key={cat}
+                      label={dict.menuCategories[cat]}
+                      value={commonCategoryLimit(cat) ?? ''}
+                      onChange={(v) => setCommonCategoryLimit(cat, v)}
+                    />
+                  ))}
+                </div>
+              )}
+            </FieldBlock>
+
+            <div className="space-y-3">
+              {[...new Set([...commonCategories, ...Object.keys(commonCategoryItems)])].map((cat) => (
+                <details key={`${cat}-common-items`} className="border-2 border-teal/20 rounded-blob p-2">
+                  <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
+                    {dict.menuCategories[cat]} · {dict.form.packages.menuItems}
+                    {(commonCategoryItems[cat]?.length || 0) > 0 && ` (${commonCategoryItems[cat].length})`}
+                  </summary>
+                  <div className="space-y-1 mt-2">
+                    {(commonCategoryItems[cat] || []).map((item) => (
+                      <div key={item.id} className="grid grid-cols-[1fr,auto] gap-2 items-center">
+                        <TextField
+                          label={dict.form.packages.menuItemName}
+                          hideLabel
+                          value={item[locale] || ''}
+                          onChange={(v) => updateCommonCategoryItem(cat, item.id, v)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeCommonCategoryItem(cat, item.id)}
+                          aria-label={dict.form.packages.removeMenuItem}
+                          className="text-red-600 hover:text-red-700 font-bold text-lg leading-none focus-ring rounded h-fit px-1"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => addCommonCategoryItem(cat)}
+                    className="mt-1 text-teal text-sm font-display font-semibold underline focus-ring rounded"
+                  >
+                    + {dict.form.packages.addMenuItem}
+                  </button>
+                </details>
+              ))}
+            </div>
+
+            <details className="border-2 border-teal/20 rounded-blob p-2">
+              <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
+                {dict.form.packages.addons}
+                {commonAddons.length > 0 && ` (${commonAddons.length})`}
+              </summary>
+              {commonAddons.length > 0 && (
+                <div className="grid gap-2 sm:grid-cols-[3fr,auto,5rem,auto] items-center">
+                  <AddonsHeaderRow d={dict.form.packages} />
+                  {commonAddons.map((addon) => (
+                    <Fragment key={addon.id}>
                       <TextField
-                        label={dict.form.packages.menuItemName}
+                        label={dict.form.packages.addonName}
                         hideLabel
-                        value={item[locale] || ''}
-                        onChange={(v) => updateCommonCategoryItem(cat, item.id, v)}
+                        value={addon.name[locale]}
+                        onChange={(v) => updateCommonAddon(addon.id, { name: { ...addon.name, [locale]: v } })}
+                      />
+                      <select
+                        aria-label={dict.form.packages.addonPriceType}
+                        value={addon.priceType}
+                        onChange={(e) => updateCommonAddon(addon.id, { priceType: e.target.value })}
+                        className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
+                      >
+                        {ADDON_PRICE_TYPES.map((pt) => (
+                          <option key={pt} value={pt}>
+                            {priceTypeLabel(pt, dict.form.packages)}
+                          </option>
+                        ))}
+                      </select>
+                      <TextField
+                        label={dict.form.packages.addonAmount}
+                        hideLabel
+                        type="number"
+                        value={addon.amount}
+                        onChange={(v) => updateCommonAddon(addon.id, { amount: v })}
                       />
                       <button
                         type="button"
-                        onClick={() => removeCommonCategoryItem(cat, item.id)}
-                        aria-label={dict.form.packages.removeMenuItem}
+                        onClick={() => removeCommonAddon(addon.id)}
+                        aria-label={dict.form.packages.removeAddon}
                         className="text-red-600 hover:text-red-700 font-bold text-lg leading-none focus-ring rounded h-fit px-1"
                       >
                         ×
                       </button>
-                    </div>
+                    </Fragment>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => addCommonCategoryItem(cat)}
-                  className="mt-1 text-teal text-sm font-display font-semibold underline focus-ring rounded"
-                >
-                  + {dict.form.packages.addMenuItem}
-                </button>
+              )}
+              <button
+                type="button"
+                onClick={addCommonAddon}
+                className="mt-2 text-teal text-sm font-display font-semibold underline focus-ring rounded"
+              >
+                + {dict.form.packages.addAddon}
+              </button>
+            </details>
+          </details>
+
+          <div className="space-y-4 mt-4">
+            {formulaPackages.map(({ pkg, i: pkgIndex }) => (
+              <details key={pkg.id} className="rounded-blob open:bg-cream/30">
+                <summary className="font-display font-bold text-teal cursor-pointer focus-ring rounded px-1 py-1">
+                  {pkg.name[locale] || `${dict.form.packages.name} ${pkgIndex + 1}`}
+                </summary>
+                <PackageEditor
+                  pkg={pkg}
+                  dict={dict}
+                  locale={locale}
+                  commonCategories={commonCategories}
+                  commonAddonIds={commonAddonIds}
+                  commonCategoryItems={commonCategoryItems}
+                  commonMinGuests={commonMinGuests}
+                  onNameChange={(text) => setPackageName(pkgIndex, text)}
+                  onFieldChange={(patch) => updatePackage(pkgIndex, patch)}
+                  onRemove={() => removePackage(pkgIndex)}
+                  onAddAddon={() => addAddon(pkgIndex)}
+                  onRemoveAddon={(addonIndex) => removeAddon(pkgIndex, addonIndex)}
+                  onAddonFieldChange={(addonIndex, patch) => updateAddon(pkgIndex, addonIndex, patch)}
+                  onAddonNameChange={(addonIndex, text) => setAddonName(pkgIndex, addonIndex, text)}
+                  onAddCategoryItem={(cat) => addCategoryItem(pkgIndex, cat)}
+                  onRemoveCategoryItem={(cat, id) => removeCategoryItem(pkgIndex, cat, id)}
+                  onCategoryItemNameChange={(cat, id, text) => setCategoryItemName(pkgIndex, cat, id, text)}
+                />
               </details>
             ))}
+            {formulaPackages.length === 0 && <p className="text-sm text-ink/50">{dict.form.packages.empty}</p>}
           </div>
+          <button
+            type="button"
+            onClick={addPackage}
+            className="mt-3 bg-tealGreen text-cream px-4 py-2 rounded-full font-display font-semibold focus-ring"
+          >
+            + {dict.form.packages.addPackage}
+          </button>
+        </FieldBlock>
+      </div>
 
-          <details className="border-2 border-teal/20 rounded-blob p-2">
-            <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
-              {dict.form.packages.addons}
-              {commonAddons.length > 0 && ` (${commonAddons.length})`}
-            </summary>
-            {commonAddons.length > 0 && (
-              <div className="grid gap-2 sm:grid-cols-[3fr,auto,5rem,auto] items-center">
-                <AddonsHeaderRow d={dict.form.packages} />
-                {commonAddons.map((addon) => (
-                  <Fragment key={addon.id}>
-                    <TextField
-                      label={dict.form.packages.addonName}
-                      hideLabel
-                      value={addon.name[locale]}
-                      onChange={(v) => updateCommonAddon(addon.id, { name: { ...addon.name, [locale]: v } })}
-                    />
-                    <select
-                      aria-label={dict.form.packages.addonPriceType}
-                      value={addon.priceType}
-                      onChange={(e) => updateCommonAddon(addon.id, { priceType: e.target.value })}
-                      className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
-                    >
-                      {ADDON_PRICE_TYPES.map((pt) => (
-                        <option key={pt} value={pt}>
-                          {priceTypeLabel(pt, dict.form.packages)}
-                        </option>
-                      ))}
-                    </select>
-                    <TextField
-                      label={dict.form.packages.addonAmount}
-                      hideLabel
-                      type="number"
-                      value={addon.amount}
-                      onChange={(v) => updateCommonAddon(addon.id, { amount: v })}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeCommonAddon(addon.id)}
-                      aria-label={dict.form.packages.removeAddon}
-                      className="text-red-600 hover:text-red-700 font-bold text-lg leading-none focus-ring rounded h-fit px-1"
-                    >
-                      ×
-                    </button>
-                  </Fragment>
-                ))}
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={addCommonAddon}
-              className="mt-2 text-teal text-sm font-display font-semibold underline focus-ring rounded"
-            >
-              + {dict.form.packages.addAddon}
-            </button>
-          </details>
-        </details>
+      <div className="border-4 border-orange/30 rounded-blob p-4 sm:p-5 space-y-5 bg-orange/5">
+        <h2 className="font-display font-extrabold text-lg text-orangeDark">{dict.form.packages.alaCarteTitle}</h2>
 
-        <div className="space-y-4 mt-4">
-          {form.packages.map((pkg, pkgIndex) => (
-            <details key={pkg.id} className="rounded-blob open:bg-cream/30">
-              <summary className="font-display font-bold text-teal cursor-pointer focus-ring rounded px-1 py-1">
-                {pkg.name[locale] || `${dict.form.packages.name} ${pkgIndex + 1}`}
-              </summary>
-              <PackageEditor
-                pkg={pkg}
-                dict={dict}
-                locale={locale}
-                commonCategories={commonCategories}
-                commonAddonIds={commonAddonIds}
-                commonCategoryItems={commonCategoryItems}
-                commonMinGuests={commonMinGuests}
-                onNameChange={(text) => setPackageName(pkgIndex, text)}
-                onFieldChange={(patch) => updatePackage(pkgIndex, patch)}
-                onRemove={() => removePackage(pkgIndex)}
-                onAddAddon={() => addAddon(pkgIndex)}
-                onRemoveAddon={(addonIndex) => removeAddon(pkgIndex, addonIndex)}
-                onAddonFieldChange={(addonIndex, patch) => updateAddon(pkgIndex, addonIndex, patch)}
-                onAddonNameChange={(addonIndex, text) => setAddonName(pkgIndex, addonIndex, text)}
-                onAddCategoryItem={(cat) => addCategoryItem(pkgIndex, cat)}
-                onRemoveCategoryItem={(cat, id) => removeCategoryItem(pkgIndex, cat, id)}
-                onCategoryItemNameChange={(cat, id, text) => setCategoryItemName(pkgIndex, cat, id, text)}
-              />
-            </details>
-          ))}
-          {form.packages.length === 0 && <p className="text-sm text-ink/50">{dict.form.packages.empty}</p>}
-        </div>
-        <button
-          type="button"
-          onClick={addPackage}
-          className="mt-3 bg-tealGreen text-cream px-4 py-2 rounded-full font-display font-semibold focus-ring"
-        >
-          + {dict.form.packages.addPackage}
-        </button>
-      </FieldBlock>
+        <FieldBlock label={dict.form.alaCarteCategories}>
+          <CheckboxGroup name={dict.form.alaCarteCategories} options={ALACARTE_CATEGORIES} labels={dict.alaCarteCategories} values={form.alaCarteCategories} onChange={(v) => set('alaCarteCategories', v)} />
+        </FieldBlock>
+
+        <FieldBlock>
+          <p className="text-sm text-ink/70 -mt-1">{dict.form.packages.alaCarteSubtitle}</p>
+
+          <div className="space-y-4 mt-4">
+            {alaCartePackages.map(({ pkg, i: pkgIndex }) => (
+              <details key={pkg.id} className="rounded-blob open:bg-cream/30">
+                <summary className="font-display font-bold text-orangeDark cursor-pointer focus-ring rounded px-1 py-1">
+                  {pkg.name[locale] || `${dict.form.packages.name} ${pkgIndex + 1}`}
+                </summary>
+                <PackageEditor
+                  pkg={pkg}
+                  dict={dict}
+                  locale={locale}
+                  alaCarte
+                  commonCategories={[]}
+                  commonAddonIds={[]}
+                  commonCategoryItems={{}}
+                  commonMinGuests=""
+                  onNameChange={(text) => setPackageName(pkgIndex, text)}
+                  onFieldChange={(patch) => updatePackage(pkgIndex, patch)}
+                  onRemove={() => removePackage(pkgIndex)}
+                  onAddAddon={() => addAddon(pkgIndex)}
+                  onRemoveAddon={(addonIndex) => removeAddon(pkgIndex, addonIndex)}
+                  onAddonFieldChange={(addonIndex, patch) => updateAddon(pkgIndex, addonIndex, patch)}
+                  onAddonNameChange={(addonIndex, text) => setAddonName(pkgIndex, addonIndex, text)}
+                  onAddCategoryItem={(cat) => addCategoryItem(pkgIndex, cat)}
+                  onRemoveCategoryItem={(cat, id) => removeCategoryItem(pkgIndex, cat, id)}
+                  onCategoryItemNameChange={(cat, id, text) => setCategoryItemName(pkgIndex, cat, id, text)}
+                />
+              </details>
+            ))}
+            {alaCartePackages.length === 0 && <p className="text-sm text-ink/50">{dict.form.packages.emptyAlaCarte}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={addAlaCartePackage}
+            className="mt-3 bg-orangeDark text-cream px-4 py-2 rounded-full font-display font-semibold focus-ring"
+          >
+            + {dict.form.packages.addAlaCarte}
+          </button>
+        </FieldBlock>
+      </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <TextField label={dict.form.phone} value={form.phone} onChange={(v) => set('phone', v)} />
@@ -789,7 +870,7 @@ export function CatererForm({ initial, catererId }) {
         >
           {saving ? dict.form.saving : dict.form.save}
         </button>
-        <button type="button" onClick={() => router.push('/dashboard')} className="text-teal font-display font-semibold px-4 py-2.5 hover:text-orange focus-ring rounded">
+        <button type="button" onClick={() => router.back()} className="text-teal font-display font-semibold px-4 py-2.5 hover:text-orange focus-ring rounded">
           {dict.form.cancel}
         </button>
       </div>
@@ -846,6 +927,7 @@ function PackageEditor({
   pkg,
   dict,
   locale,
+  alaCarte,
   commonCategories,
   commonAddonIds,
   commonCategoryItems,
@@ -878,28 +960,32 @@ function PackageEditor({
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-4">
-        <InlineNumberField label={d.pricePerGuest} value={pkg.pricePerGuest} onChange={(v) => onFieldChange({ pricePerGuest: v })} />
-        {!commonMinGuests && (
-          <InlineNumberField label={d.minGuests} value={pkg.minGuests} onChange={(v) => onFieldChange({ minGuests: v })} />
-        )}
-      </div>
+      {!alaCarte && (
+        <div className="flex flex-wrap gap-4">
+          <InlineNumberField label={d.pricePerGuest} value={pkg.pricePerGuest} onChange={(v) => onFieldChange({ pricePerGuest: v })} />
+          {!commonMinGuests && (
+            <InlineNumberField label={d.minGuests} value={pkg.minGuests} onChange={(v) => onFieldChange({ minGuests: v })} />
+          )}
+        </div>
+      )}
 
-      <FieldBlock label={d.includedCategories}>
-        <CheckboxGroup
-          name={d.includedCategories}
-          options={MENU_CATEGORIES.filter((cat) => !commonCategories.includes(cat))}
-          labels={dict.menuCategories}
-          values={ownIncludedCategories}
-          onChange={(v) => {
-            const nextIncluded = [...commonCategories, ...v];
-            onFieldChange({
-              includedCategories: nextIncluded,
-              categoryLimits: Object.fromEntries(Object.entries(pkg.categoryLimits || {}).filter(([cat]) => nextIncluded.includes(cat)))
-            });
-          }}
-        />
-      </FieldBlock>
+      {!alaCarte && (
+        <FieldBlock label={d.includedCategories}>
+          <CheckboxGroup
+            name={d.includedCategories}
+            options={MENU_CATEGORIES.filter((cat) => !commonCategories.includes(cat))}
+            labels={dict.menuCategories}
+            values={ownIncludedCategories}
+            onChange={(v) => {
+              const nextIncluded = [...commonCategories, ...v];
+              onFieldChange({
+                includedCategories: nextIncluded,
+                categoryLimits: Object.fromEntries(Object.entries(pkg.categoryLimits || {}).filter(([cat]) => nextIncluded.includes(cat)))
+              });
+            }}
+          />
+        </FieldBlock>
+      )}
 
       <FieldBlock label={d.eventTypes}>
         <CheckboxGroup
@@ -911,7 +997,7 @@ function PackageEditor({
         />
       </FieldBlock>
 
-      {ownIncludedCategories.length > 0 && (
+      {!alaCarte && ownIncludedCategories.length > 0 && (
         <FieldBlock label={d.categoryLimits}>
           <div className="flex flex-wrap gap-4">
             {ownIncludedCategories.map((cat) => (
@@ -926,7 +1012,7 @@ function PackageEditor({
         </FieldBlock>
       )}
 
-      {pkg.includedCategories.length > 0 && (
+      {!alaCarte && pkg.includedCategories.length > 0 && (
         <div className="space-y-3">
           {pkg.includedCategories.map((cat) => {
             const commonIds = new Set((commonCategoryItems?.[cat] || []).map((it) => it.id));
@@ -970,20 +1056,35 @@ function PackageEditor({
         </div>
       )}
 
-      <details className="border-2 border-teal/20 rounded-blob p-2">
+      <details className="border-2 border-teal/20 rounded-blob p-2" open={alaCarte}>
         <summary className="text-sm font-display font-semibold text-teal cursor-pointer focus-ring rounded">
-          {d.addons}
+          {alaCarte ? d.items : d.addons}
           {pkg.addons.filter((a) => !commonAddonIds.includes(a.id)).length > 0 &&
             ` (${pkg.addons.filter((a) => !commonAddonIds.includes(a.id)).length})`}
         </summary>
         {pkg.addons.some((a) => !commonAddonIds.includes(a.id)) && (
-          <div className="grid gap-2 sm:grid-cols-[3fr,auto,5rem,auto] items-center">
-            <AddonsHeaderRow d={d} />
+          <div className={`grid gap-2 items-center ${alaCarte ? 'sm:grid-cols-[2fr,9rem,auto,5rem,auto]' : 'sm:grid-cols-[3fr,auto,5rem,auto]'}`}>
+            <AddonsHeaderRow d={d} alaCarte={alaCarte} />
             {pkg.addons.map((addon, addonIndex) => {
               if (commonAddonIds.includes(addon.id)) return null;
               return (
                 <Fragment key={addon.id}>
                   <TextField label={d.addonName} hideLabel value={addon.name[locale]} onChange={(v) => onAddonNameChange(addonIndex, v)} />
+                  {alaCarte && (
+                    <select
+                      aria-label={d.itemCategory}
+                      value={addon.categoryId || ''}
+                      onChange={(e) => onAddonFieldChange(addonIndex, { categoryId: e.target.value })}
+                      className="rounded-full border-2 border-teal/40 px-3 py-2 bg-cream focus-ring"
+                    >
+                      <option value="">—</option>
+                      {ALACARTE_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {dict.alaCarteCategories[cat]}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   <select
                     aria-label={d.addonPriceType}
                     value={addon.priceType}
@@ -1021,17 +1122,18 @@ function PackageEditor({
           onClick={onAddAddon}
           className="mt-2 text-teal text-sm font-display font-semibold underline focus-ring rounded"
         >
-          + {d.addAddon}
+          + {alaCarte ? d.addItem : d.addAddon}
         </button>
       </details>
     </div>
   );
 }
 
-function AddonsHeaderRow({ d }) {
+function AddonsHeaderRow({ d, alaCarte }) {
   return (
     <>
       <span className="hidden sm:block text-sm font-display font-semibold text-teal">{d.addonName}</span>
+      {alaCarte && <span className="hidden sm:block text-sm font-display font-semibold text-teal">{d.itemCategory}</span>}
       <span className="hidden sm:block text-sm font-display font-semibold text-teal">{d.addonPriceType}</span>
       <span className="hidden sm:block text-sm font-display font-semibold text-teal">{d.addonAmount}</span>
       <span className="hidden sm:block" />
@@ -1042,7 +1144,7 @@ function AddonsHeaderRow({ d }) {
 function FieldBlock({ label, children }) {
   return (
     <div className="space-y-2">
-      <p className="font-display font-bold text-teal">{label}</p>
+      {label && <p className="font-display font-bold text-teal">{label}</p>}
       {children}
     </div>
   );
