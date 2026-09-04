@@ -18,7 +18,10 @@ export function CatererCard({ caterer, guestCount, matchCount, keyword }) {
       className="group block bg-white border-4 border-teal rounded-blob overflow-hidden shadow-card hover:shadow-cardHover hover:-translate-y-1 transition-transform focus-ring"
     >
       <div className="h-40 bg-limeLight overflow-hidden">
-        {photo ? (
+        {caterer.logo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={caterer.logo} alt={caterer.businessName} className="w-full h-full object-contain p-4" />
+        ) : photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photo} alt={caterer.businessName} className="w-full h-full object-cover" />
         ) : (
