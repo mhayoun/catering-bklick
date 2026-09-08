@@ -609,12 +609,21 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                   };
 
                   // Menu-item catalogs (e.g. an à-la-carte holiday menu) tag every addon with the
-                  // category it came from - group those into nested accordions instead of one long
-                  // flat list. Packages with untagged addons (e.g. hand-authored formulas) keep the
-                  // original single flat list.
-                  const allCategorized = shownAddons.every((a) => a.category);
+                  // ALACARTE_CATEGORIES id it came from (see CatererForm.js's addon.categoryId
+                  // select) - group those into accordions instead of one long flat list. Some
+                  // catalogs scraped from a caterer's own site also carry addon.menuSection (the
+                  // caterer's own menu-tab label, e.g. "מגשים לקידוש" / "מגשים פרווה" - not one of
+                  // the fixed ALACARTE_CATEGORIES, since a source site's own menu structure is
+                  // caterer-specific), which takes priority as the more meaningful grouping when
+                  // every addon has one. Packages with untagged addons (e.g. hand-authored
+                  // formulas, which have neither field) keep the original single flat list.
+                  const groupField = shownAddons.every((a) => a.menuSection)
+                    ? 'menuSection'
+                    : shownAddons.every((a) => a.categoryId)
+                      ? 'categoryId'
+                      : null;
 
-                  if (!allCategorized) {
+                  if (!groupField) {
                     return (
                       <details
                         open={hasMatch(shownAddons.map((a) => pickLocalized(a.name, locale)).join(', '))}
@@ -628,60 +637,37 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                     );
                   }
 
-                  // Groups a flat addon list by a localized-label field (e.g. addon.category or
-                  // addon.subcategory), preserving first-seen order. Shared by both nesting levels
-                  // below - a meal (category) can itself be broken down into dish types (subcategory).
-                  const groupByLabel = (list, getLabel) => {
-                    const out = [];
-                    const indexByKey = {};
-                    list.forEach((addon) => {
-                      const label = getLabel(addon);
-                      const key = label.en || pickLocalized(label, locale);
-                      if (!(key in indexByKey)) {
-                        indexByKey[key] = out.length;
-                        out.push({ label, items: [] });
-                      }
-                      out[indexByKey[key]].items.push(addon);
-                    });
-                    return out;
-                  };
+                  const groupLabel = (addon) =>
+                    groupField === 'menuSection' ? pickLocalized(addon.menuSection, locale) : dict.alaCarteCategories[addon.categoryId];
+                  const groupKey = (addon) => (groupField === 'menuSection' ? addon.menuSection.he : addon.categoryId);
 
-                  const groups = groupByLabel(shownAddons, (a) => a.category);
+                  // Groups the flat addon list by the chosen field, preserving first-seen order
+                  // (scraped catalogs are stored pre-sorted into their source site's menu order).
+                  const groups = [];
+                  const indexByKey = {};
+                  shownAddons.forEach((addon) => {
+                    const key = groupKey(addon);
+                    if (!(key in indexByKey)) {
+                      indexByKey[key] = groups.length;
+                      groups.push({ key, label: groupLabel(addon), items: [] });
+                    }
+                    groups[indexByKey[key]].items.push(addon);
+                  });
 
                   return (
                     <div className="pt-2 border-t-2 border-teal/10 space-y-1">
-                      {groups.map(({ label: category, items }) => {
-                        const allSubcategorized = items.every((a) => a.subcategory);
-                        return (
-                          <details
-                            key={category.en}
-                            open={hasMatch(items.map((a) => pickLocalized(a.name, locale)).join(', '))}
-                            className="text-xs text-ink/60"
-                          >
-                            <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
-                              {pickLocalized(category, locale)} ({items.length})
-                            </summary>
-                            {allSubcategorized ? (
-                              <div className="pt-1 space-y-1 ps-2">
-                                {groupByLabel(items, (a) => a.subcategory).map(({ label: subcategory, items: subItems }) => (
-                                  <details
-                                    key={subcategory.en}
-                                    open={hasMatch(subItems.map((a) => pickLocalized(a.name, locale)).join(', '))}
-                                    className="text-xs text-ink/60"
-                                  >
-                                    <summary className="cursor-pointer text-teal/80 font-display font-semibold focus-ring rounded">
-                                      {pickLocalized(subcategory, locale)} ({subItems.length})
-                                    </summary>
-                                    <ul className="pt-1 space-y-0.5 ps-2">{subItems.map(renderAddonLine)}</ul>
-                                  </details>
-                                ))}
-                              </div>
-                            ) : (
-                              <ul className="pt-1 space-y-0.5 ps-2">{items.map(renderAddonLine)}</ul>
-                            )}
-                          </details>
-                        );
-                      })}
+                      {groups.map(({ key, label, items }) => (
+                        <details
+                          key={key}
+                          open={hasMatch(items.map((a) => pickLocalized(a.name, locale)).join(', '))}
+                          className="text-xs text-ink/60"
+                        >
+                          <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
+                            {label} ({items.length})
+                          </summary>
+                          <ul className="pt-1 space-y-0.5 ps-2">{items.map(renderAddonLine)}</ul>
+                        </details>
+                      ))}
                     </div>
                   );
                 })()}
