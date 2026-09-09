@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useLanguage } from './LanguageProvider';
+import { toggleFilterValue } from '../lib/search';
 import {
   DISTRICTS,
   KASHRUT_LEVELS,
@@ -14,25 +15,24 @@ import {
   MIN_ORDER_BRACKETS
 } from '../lib/constants';
 
-export function FilterSidebar({ filters, setFilters, onReset }) {
+// `optionCounts` (see app/page.js) maps "key:value" -> how many results a click on that option
+// would leave you with, given every other filter as currently set. Undefined while the full
+// catalog is still loading - every count below falls back to omitting the parenthetical rather
+// than flashing "(0)".
+export function FilterSidebar({ filters, setFilters, onReset, optionCounts }) {
   const { dict } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   function toggle(key, value) {
-    setFilters((prev) => {
-      const set = new Set(prev[key]);
-      if (set.has(value)) set.delete(value);
-      else set.add(value);
-      return { ...prev, [key]: Array.from(set) };
-    });
+    setFilters((prev) => toggleFilterValue(prev, key, value));
   }
 
   function setGuests(value) {
-    setFilters((prev) => ({ ...prev, minGuests: prev.minGuests === value ? '' : value }));
+    toggle('minGuests', value);
   }
 
   function setMaxMinOrder(value) {
-    setFilters((prev) => ({ ...prev, maxMinOrder: prev.maxMinOrder === value ? '' : value }));
+    toggle('maxMinOrder', value);
   }
 
   const activeCount =
@@ -86,34 +86,56 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
 
         <div className="overflow-y-auto divide-y divide-teal/10">
           <FilterSection title={dict.search.location}>
-            <CheckList options={DISTRICTS} labels={dict.districts} values={filters.districts} onToggle={(v) => toggle('districts', v)} />
+            <CheckList
+              filterKey="districts"
+              options={DISTRICTS}
+              labels={dict.districts}
+              values={filters.districts}
+              onToggle={(v) => toggle('districts', v)}
+              optionCounts={optionCounts}
+            />
           </FilterSection>
 
           <FilterSection title={dict.search.cateringType}>
-            <CheckList options={CATERING_TYPES} labels={dict.cateringType} values={filters.cateringTypes} onToggle={(v) => toggle('cateringTypes', v)} />
+            <CheckList
+              filterKey="cateringTypes"
+              options={CATERING_TYPES}
+              labels={dict.cateringType}
+              values={filters.cateringTypes}
+              onToggle={(v) => toggle('cateringTypes', v)}
+              optionCounts={optionCounts}
+            />
           </FilterSection>
 
           <FilterSection title={dict.search.kashrut}>
-            <CheckList options={KASHRUT_LEVELS} labels={dict.kashrut} values={filters.kashrutLevels} onToggle={(v) => toggle('kashrutLevels', v)} />
+            <CheckList
+              filterKey="kashrutLevels"
+              options={KASHRUT_LEVELS}
+              labels={dict.kashrut}
+              values={filters.kashrutLevels}
+              onToggle={(v) => toggle('kashrutLevels', v)}
+              optionCounts={optionCounts}
+            />
           </FilterSection>
 
           <FilterSection title={dict.search.eventType}>
-            <CheckList options={EVENT_TYPES} labels={dict.eventTypes} values={filters.eventTypes} onToggle={(v) => toggle('eventTypes', v)} />
+            <CheckList
+              filterKey="eventTypes"
+              options={EVENT_TYPES}
+              labels={dict.eventTypes}
+              values={filters.eventTypes}
+              onToggle={(v) => toggle('eventTypes', v)}
+              optionCounts={optionCounts}
+            />
           </FilterSection>
 
           <FilterSection title={dict.search.guests}>
             <div className="space-y-1.5">
               {GUEST_COUNT_BRACKETS.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-teal">
-                  <input
-                    type="radio"
-                    name="guests"
-                    checked={String(filters.minGuests) === String(g.max)}
-                    onChange={() => setGuests(String(g.max))}
-                    className="accent-orange h-4 w-4"
-                  />
+                <OptionLabel key={g.id} name="guests" checked={String(filters.minGuests) === String(g.max)} onChange={() => setGuests(String(g.max))}>
                   {dict.guestBrackets[g.id]}
-                </label>
+                  <OptionCount optionCounts={optionCounts} countKey={`minGuests:${g.max}`} />
+                </OptionLabel>
               ))}
             </div>
           </FilterSection>
@@ -121,30 +143,45 @@ export function FilterSidebar({ filters, setFilters, onReset }) {
           <FilterSection title={dict.search.minOrder}>
             <div className="space-y-1.5">
               {MIN_ORDER_BRACKETS.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-teal">
-                  <input
-                    type="radio"
-                    name="minOrder"
-                    checked={String(filters.maxMinOrder) === String(g.max)}
-                    onChange={() => setMaxMinOrder(String(g.max))}
-                    className="accent-orange h-4 w-4"
-                  />
+                <OptionLabel key={g.id} name="minOrder" checked={String(filters.maxMinOrder) === String(g.max)} onChange={() => setMaxMinOrder(String(g.max))}>
                   {dict.minOrderBrackets[g.id]}
-                </label>
+                  <OptionCount optionCounts={optionCounts} countKey={`maxMinOrder:${g.max}`} />
+                </OptionLabel>
               ))}
             </div>
           </FilterSection>
 
           <FilterSection title={dict.search.menu}>
-            <CheckList options={MENU_CATEGORIES} labels={dict.menuCategories} values={filters.menuCategories} onToggle={(v) => toggle('menuCategories', v)} />
+            <CheckList
+              filterKey="menuCategories"
+              options={MENU_CATEGORIES}
+              labels={dict.menuCategories}
+              values={filters.menuCategories}
+              onToggle={(v) => toggle('menuCategories', v)}
+              optionCounts={optionCounts}
+            />
           </FilterSection>
 
           <FilterSection title={dict.search.alaCarteMenu}>
-            <CheckList options={ALACARTE_CATEGORIES} labels={dict.alaCarteCategories} values={filters.alaCarteCategories} onToggle={(v) => toggle('alaCarteCategories', v)} />
+            <CheckList
+              filterKey="alaCarteCategories"
+              options={ALACARTE_CATEGORIES}
+              labels={dict.alaCarteCategories}
+              values={filters.alaCarteCategories}
+              onToggle={(v) => toggle('alaCarteCategories', v)}
+              optionCounts={optionCounts}
+            />
           </FilterSection>
 
           <FilterSection title={dict.search.services}>
-            <CheckList options={ADDITIONAL_SERVICES} labels={dict.services} values={filters.services} onToggle={(v) => toggle('services', v)} />
+            <CheckList
+              filterKey="services"
+              options={ADDITIONAL_SERVICES}
+              labels={dict.services}
+              values={filters.services}
+              onToggle={(v) => toggle('services', v)}
+              optionCounts={optionCounts}
+            />
           </FilterSection>
         </div>
       </div>
@@ -164,20 +201,42 @@ function FilterSection({ title, children, defaultOpen = false }) {
   );
 }
 
-function CheckList({ options, labels, values, onToggle }) {
+function CheckList({ filterKey, options, labels, values, onToggle, optionCounts }) {
   return (
     <div className="space-y-1.5">
       {options.map((opt) => (
-        <label key={opt} className="flex items-center gap-2 cursor-pointer text-sm text-ink/80 hover:text-teal">
-          <input
-            type="checkbox"
-            checked={values.includes(opt)}
-            onChange={() => onToggle(opt)}
-            className="accent-orange h-4 w-4 rounded"
-          />
+        <OptionLabel key={opt} checked={values.includes(opt)} onChange={() => onToggle(opt)}>
           {labels[opt]}
-        </label>
+          <OptionCount optionCounts={optionCounts} countKey={`${filterKey}:${opt}`} />
+        </OptionLabel>
       ))}
     </div>
   );
+}
+
+// Shared row for both a checkbox facet option (CheckList) and a radio-bracket option
+// (guest count / minimum order) - same layout either way, just a different input type.
+function OptionLabel({ name, checked, onChange, children }) {
+  return (
+    <label
+      className={`flex items-center gap-2 cursor-pointer text-sm hover:text-teal ${checked ? 'text-teal font-semibold' : 'text-ink/80'}`}
+    >
+      <input
+        type={name ? 'radio' : 'checkbox'}
+        name={name}
+        checked={checked}
+        onChange={onChange}
+        className={`accent-orange h-4 w-4 ${name ? '' : 'rounded'}`}
+      />
+      {children}
+    </label>
+  );
+}
+
+// Renders " (N)" once counts have loaded; a selected-but-now-0-result option still shows "(0)"
+// rather than disappearing, since unchecking it is exactly how you'd get back to results.
+function OptionCount({ optionCounts, countKey }) {
+  if (!optionCounts) return null;
+  const count = optionCounts[countKey] ?? 0;
+  return <span className={count === 0 ? 'text-ink/40' : 'text-ink/50'}> ({count})</span>;
 }

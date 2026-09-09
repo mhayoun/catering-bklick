@@ -1,11 +1,42 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../components/LanguageProvider';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { CatererCard } from '../components/CatererCard';
 import { FormulaCard } from '../components/FormulaCard';
-import { buildPackageHaystack, countOccurrencesMulti, parseKeywords } from '../lib/search';
+import {
+  buildCatererHaystack,
+  buildPackageHaystack,
+  countOccurrencesMulti,
+  matchesFilters,
+  parseKeywords,
+  toggleFilterValue
+} from '../lib/search';
+import {
+  DISTRICTS,
+  KASHRUT_LEVELS,
+  CATERING_TYPES,
+  EVENT_TYPES,
+  MENU_CATEGORIES,
+  ALACARTE_CATEGORIES,
+  ADDITIONAL_SERVICES,
+  GUEST_COUNT_BRACKETS,
+  MIN_ORDER_BRACKETS
+} from '../lib/constants';
+
+// One entry per checkbox facet: [filters key, its full option list]. Walked once to build both
+// the "if I also click this, how many results" counts and (implicitly) the full set of possible
+// filter keys - see optionCounts below.
+const CHECKBOX_FACETS = [
+  ['districts', DISTRICTS],
+  ['cateringTypes', CATERING_TYPES],
+  ['kashrutLevels', KASHRUT_LEVELS],
+  ['eventTypes', EVENT_TYPES],
+  ['menuCategories', MENU_CATEGORIES],
+  ['alaCarteCategories', ALACARTE_CATEGORIES],
+  ['services', ADDITIONAL_SERVICES]
+];
 
 const EMPTY_FILTERS = {
   keyword: '',
@@ -24,9 +55,18 @@ export default function HomePage() {
   const { dict, t, locale } = useLanguage();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [searchMode, setSearchMode] = useState('caterers');
-  const [results, setResults] = useState([]);
+  // The full approved catalog, fetched once - small enough (well under a hundred caterers) that
+  // every filter change/facet count is just a synchronous pass over it in the browser, instead of
+  // a network round-trip per click.
+  const [allCaterers, setAllCaterers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const debounceRef = useRef(null);
+
+  useEffect(() => {
+    fetch('/api/caterers')
+      .then((r) => r.json())
+      .then((data) => setAllCaterers(data.results || []))
+      .finally(() => setLoading(false));
+  }, []);
 
   // When an event-type filter is active, only packages individually tagged with one of the
   // selected event types are kept (the caterer-level match in searchCaterers is broader - it
@@ -34,6 +74,46 @@ export default function HomePage() {
   // the matching ones).
   const keyword = filters.keyword?.trim();
   const keywordTerms = useMemo(() => parseKeywords(keyword), [keyword]);
+
+  // filters as the search API/matchesFilters expect them - keyword matching is locale-scoped
+  // (see lib/search.js), but locale lives in LanguageProvider rather than filter state.
+  const activeFilters = useMemo(() => ({ ...filters, locale }), [filters, locale]);
+
+  // Same ranking searchCaterers() used to do server-side (lib/store.js) - kept here so a keyword
+  // still surfaces the most-mentioned caterers first, just computed client-side now.
+  const results = useMemo(() => {
+    const filtered = allCaterers.filter((c) => matchesFilters(c, activeFilters));
+    if (keywordTerms.length === 0) return filtered;
+    return filtered
+      .map((c) => ({ ...c, matchCount: countOccurrencesMulti(buildCatererHaystack(c, locale), keywordTerms) }))
+      .sort((a, b) => b.matchCount - a.matchCount);
+  }, [allCaterers, activeFilters, keywordTerms, locale]);
+
+  // For every option in every checkbox/radio facet: how many results you'd have with that option
+  // selected, holding every other active filter fixed. For an option that's already selected,
+  // that's just the current result count (not "what unselecting it would do" - toggling would
+  // make an already-checked "ירושלים" show the count for every OTHER district removed, which
+  // reads as a bug, not a feature). So this always ensures the option is INCLUDED rather than
+  // literally toggling it - toggleFilterValue is still what an actual click runs through.
+  const optionCounts = useMemo(() => {
+    if (allCaterers.length === 0) return undefined;
+    const counts = {};
+    const countWithChecked = (key, value) => {
+      const already = filters[key].includes(value);
+      const hypothetical = { ...(already ? filters : toggleFilterValue(filters, key, value)), locale };
+      return allCaterers.filter((c) => matchesFilters(c, hypothetical)).length;
+    };
+    const countWithRadio = (key, value) => {
+      const hypothetical = { ...filters, [key]: value, locale };
+      return allCaterers.filter((c) => matchesFilters(c, hypothetical)).length;
+    };
+    for (const [key, options] of CHECKBOX_FACETS) {
+      for (const opt of options) counts[`${key}:${opt}`] = countWithChecked(key, opt);
+    }
+    for (const g of GUEST_COUNT_BRACKETS) counts[`minGuests:${g.max}`] = countWithRadio('minGuests', String(g.max));
+    for (const g of MIN_ORDER_BRACKETS) counts[`maxMinOrder:${g.max}`] = countWithRadio('maxMinOrder', String(g.max));
+    return counts;
+  }, [allCaterers, filters, locale]);
 
   // Flattens every caterer's packages into individual results, optionally restricted to one
   // package "type" - true fixed-price formulas vs à-la-carte menus (build-your-own item catalogs,
@@ -71,40 +151,6 @@ export default function HomePage() {
   const formulas = useMemo(() => rankPackages(flattenPackages('formula')), [flattenPackages, rankPackages]);
   const alaCarte = useMemo(() => rankPackages(flattenPackages('a_la_carte')), [flattenPackages, rankPackages]);
 
-  const runSearch = useCallback(async (f, loc) => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (f.keyword) params.set('keyword', f.keyword);
-    params.set('locale', loc || 'he');
-    if (f.minGuests) params.set('minGuests', f.minGuests);
-    if (f.maxMinOrder) params.set('maxMinOrder', f.maxMinOrder);
-    f.districts.forEach((v) => params.append('districts', v));
-    f.kashrutLevels.forEach((v) => params.append('kashrutLevels', v));
-    f.cateringTypes.forEach((v) => params.append('cateringTypes', v));
-    f.eventTypes.forEach((v) => params.append('eventTypes', v));
-    f.menuCategories.forEach((v) => params.append('menuCategories', v));
-    f.alaCarteCategories.forEach((v) => params.append('alaCarteCategories', v));
-    f.services.forEach((v) => params.append('services', v));
-
-    try {
-      const res = await fetch(`/api/caterers?${params.toString()}`);
-      const data = await res.json();
-      setResults(data.results || []);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Auto-apply: every filter change (checkbox click or keyword typing), or a language switch
-  // (which changes which locale keyword matching/ranking is scoped to), re-runs the search
-  // after a short debounce, no submit button needed.
-  useEffect(() => {
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => runSearch(filters, locale), 250);
-    return () => clearTimeout(debounceRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, locale]);
-
   return (
     <div>
       <section className="bg-teal text-cream">
@@ -124,7 +170,12 @@ export default function HomePage() {
       </section>
 
       <div className="mx-auto max-w-6xl px-4 py-6 flex flex-col lg:flex-row gap-6">
-        <FilterSidebar filters={filters} setFilters={setFilters} onReset={() => setFilters(EMPTY_FILTERS)} />
+        <FilterSidebar
+          filters={filters}
+          setFilters={setFilters}
+          onReset={() => setFilters(EMPTY_FILTERS)}
+          optionCounts={optionCounts}
+        />
 
         <section className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
