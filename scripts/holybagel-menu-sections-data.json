@@ -1,0 +1,950 @@
+[
+ {
+  "id": "neOcWWG6",
+  "name": "מגש ירקות (סטנדרט)",
+  "amount": "149",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "kMPW7WVg",
+  "name": "מגש ירקות וסלטים",
+  "amount": "220",
+  "menuSection": "פלטות קרות"
+ },
+ {
+  "id": "Sz_p5zfG",
+  "name": "מגש ים תיכוני",
+  "amount": "199",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "3Yr8Lqtq",
+  "name": "מגש ממרחים מגוון (7 סוגים)",
+  "amount": "140",
+  "menuSection": "פלטות קרות"
+ },
+ {
+  "id": "10pliw2Z",
+  "name": "מגש קפריזה",
+  "amount": "155",
+  "menuSection": "פלטות קרות"
+ },
+ {
+  "id": "igL-nrxJ",
+  "name": "סלמון אפוי שלם",
+  "amount": "359",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "rMZ7_oOx",
+  "name": "מגש עלי גפן",
+  "amount": "170",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "D7XsnSUM",
+  "name": "מגש קרואסון",
+  "amount": "240",
+  "menuSection": "פלטות קרות"
+ },
+ {
+  "id": "JS2XLqBQ",
+  "name": "בורקס פינוקים",
+  "amount": "210",
+  "menuSection": "פלטות קרות"
+ },
+ {
+  "id": "ulP7jmZm",
+  "name": "מגש לחם שום עם מטבלים",
+  "amount": "160",
+  "menuSection": "פלטות קרות"
+ },
+ {
+  "id": "hto7XLvo",
+  "name": "מגש סביח גדול",
+  "amount": "320",
+  "menuSection": "פלטות קרות"
+ },
+ {
+  "id": "G4ywfdiw",
+  "name": "מגש פירות",
+  "amount": "210",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "zur2Bcme",
+  "name": "עוגת שמרים קרנץ חלבי",
+  "amount": "50",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "dKaso63q",
+  "name": "כוסיות עוגה פרווה (25 יח')",
+  "amount": "210",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "slBEd1D0",
+  "name": "מגש מיני מאפינס",
+  "amount": "90",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "RyWIvoCO",
+  "name": "מגש ריבועים",
+  "amount": "90",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "1Bmv-HpB",
+  "name": "מגש קוקיס",
+  "amount": "90",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "_yGxctqB",
+  "name": "מגש בראוניז",
+  "amount": "90",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "jH8hNnQv",
+  "name": "פטיפור גבינה",
+  "amount": "95",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "iakdRM40",
+  "name": "מגש פחזניות שמנת",
+  "amount": "169",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "Y1SoBHV3",
+  "name": "פרנז'יפאן (24 יח')",
+  "amount": "159",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "ASYbhehT",
+  "name": "מגש פטיפורים מיוחדים",
+  "amount": "160",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "OJnGXl7D",
+  "name": "מגש מאפי שמרים מגוון",
+  "amount": "95",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "wgwk8QFh",
+  "name": "מיני פאי חלבי (16 יח')",
+  "amount": "145",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "eK2EHr4k",
+  "name": "מגש כדורי שוקולד (45 יח')",
+  "amount": "145",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "_VDGy_0w",
+  "name": "מגש שוקולדים",
+  "amount": "195",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "WUA2NviA",
+  "name": "מגש מיני אקלר מגוון חלבי (16 יח')",
+  "amount": "135",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "7JxzZuhd",
+  "name": "מגש קינוחים מעורב",
+  "amount": "195",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "N_x-Wasm",
+  "name": "מגש ביס פטיפור גבינה אפויה",
+  "amount": "195",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "1QBwzaDP",
+  "name": "עוגת גבינה ניו-יורק",
+  "amount": "180",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "xds6hQdB",
+  "name": "טארט שוקולד קרמל",
+  "amount": "150",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "sqUvLcd9",
+  "name": "עוגת שוקולד שכבות",
+  "amount": "180",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "htw-qrUf",
+  "name": "פס גבינה פירורים",
+  "amount": "69",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "-bXVrPUx",
+  "name": "מגש טראפלס על מקל גדול",
+  "amount": "200",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "F-ozwiG2",
+  "name": "וופל בלגי (20 יח')",
+  "amount": "140",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "FgC5iAHl",
+  "name": "כוסיות עוגה (25 יח')",
+  "amount": "210",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "IaZAXOuz",
+  "name": "סלט פירות",
+  "amount": "199",
+  "menuSection": "סלטים"
+ },
+ {
+  "id": "r9XpkRgX",
+  "name": "כוסיות מוזלי (25 יח')",
+  "amount": "210",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "Q8_GwIOv",
+  "name": "שטרודל תמרים ללא גלוטן",
+  "amount": "12",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "MJar3Q2L",
+  "name": "עוגה ללא גלוטן (עוגת שיש אישית)",
+  "amount": "12",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "FWI3SLCx",
+  "name": "מגש מסיבה (כריכים)",
+  "amount": "265",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "cNcU6Rv7",
+  "name": "מגש טורטייה",
+  "amount": "269",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "VrsiyOtG",
+  "name": "טוניסאי (20 יח')",
+  "amount": "240",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "UOqRfyhj",
+  "name": "מגש פיתות סביח (28 יח')",
+  "amount": "240",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "Ek_nT4RX",
+  "name": "מגש כריכונים (20 יח')",
+  "amount": "265",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "a6uRytGH",
+  "name": "כריכי ביס (20 יח')",
+  "amount": "240",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "IQc6n4Xr",
+  "name": "מגש כריכי מזונות (20 יח')",
+  "amount": "240",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "McrpHmJs",
+  "name": "מגש מיני בייגל סלמון (12 יח')",
+  "amount": "185",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "7LVFOHhU",
+  "name": "מגש מסיבה טבעוני",
+  "amount": "260",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "eX-3_X7p",
+  "name": "מגש מסיבה ללא גלוטן (10 חצאי בייגל)",
+  "amount": "159",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "iH5qhT7n",
+  "name": "טורטייה ללא גלוטן (6 חצאים)",
+  "amount": "100",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "8UHQ1OVk",
+  "name": "קיש עגול - בצל",
+  "amount": "159",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "1DhRtPFo",
+  "name": "פשטידה ללא קמח - בצל",
+  "amount": "89",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "8U_Vw_33",
+  "name": "מגש לביבות - סלק (15 יח')",
+  "amount": "135",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "Ytc-qqYv",
+  "name": "דג אמנון",
+  "amount": "189",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "f4Rl7mIx",
+  "name": "סלט בטטות ומוצרלה - קטן",
+  "amount": "130",
+  "menuSection": "סלטים"
+ },
+ {
+  "id": "eky443qj",
+  "name": "פס עוגת גבינה ללא סוכר",
+  "amount": "69",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "ZKzM7VeT",
+  "name": "סלט יווני - קטן",
+  "amount": "120",
+  "menuSection": "סלטים"
+ },
+ {
+  "id": "oVTgyfv_",
+  "name": "סלט יווני טבעוני - גדול",
+  "amount": "210",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "xJ9R2_Lf",
+  "name": "סלט נודלס אסיאתי - גדול",
+  "amount": "230",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "CV6PgzmF",
+  "name": "מגש מסיבה (כריכים) - גדול",
+  "amount": "485",
+  "menuSection": "מגשי כריכים"
+ },
+ {
+  "id": "CWHbVzf_",
+  "name": "מגש מסיבה טבעוני - גדול (40 חצאים)",
+  "amount": "485",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "pEZWmznz",
+  "name": "סלט פסטה ללא גלוטן טבעוני",
+  "amount": "145",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "qHpoQVhc",
+  "name": "כדור שוקולד על מקל",
+  "amount": "140",
+  "menuSection": "קינוחים"
+ },
+ {
+  "id": "nNDoxSAb",
+  "name": "עוגת קרמשניט טבעוני",
+  "amount": "69",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "rsuYErNh",
+  "name": "מרק של בית (4 ליטר)",
+  "amount": "199",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "DIFGQOxF",
+  "name": "בייגל",
+  "amount": "8",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "bVZfO5HD",
+  "name": "גבינות שמנת - טבעי (250 גרם)",
+  "amount": "30",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "KTXDKMdH",
+  "name": "גבינות שמנת - זיתים (250 גרם)",
+  "amount": "30",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "EGVlIk7Y",
+  "name": "מיני קישים (16 יחידות)",
+  "amount": "149",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "gVUUXsz3",
+  "name": "בורקס מיני (40 יח')",
+  "amount": "110",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "nR4n3vh_",
+  "name": "קוגעל תפו\"א",
+  "amount": "230",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "CpXwiU4h",
+  "name": "קוגעל ירושלמי",
+  "amount": "230",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "DbE9wA69",
+  "name": "בייגלס מיני",
+  "amount": "5",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "LCuvi3oW",
+  "name": "מגש ממרחים טבעוני (7 סוגים)",
+  "amount": "140",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "GfRy_KBn",
+  "name": "מגש טורטיות טבעוני",
+  "amount": "249",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "ZGetGL0J",
+  "name": "פסטה ברוטב טבעוני",
+  "amount": "139",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "53WPeDUj",
+  "name": "מגש תפוחי אדמה אפוי",
+  "amount": "85",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "XKsVmjpe",
+  "name": "מגש ירקות וסלטים טבעוני",
+  "amount": "220",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "d33jJjph",
+  "name": "סלט יווני טבעוני",
+  "amount": "140",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "WYoAw7c_",
+  "name": "סלט ישראלי",
+  "amount": "120",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "L0h1ExVD",
+  "name": "סלט בייבי שרי",
+  "amount": "120",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "tXzKJIpU",
+  "name": "עלי בייבי עם פרי",
+  "amount": "120",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "AHbwA59I",
+  "name": "סלט כרוב אסיאתי",
+  "amount": "120",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "2SApUmgF",
+  "name": "סלט פסטה טבעוני",
+  "amount": "130",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "U7DbUJMq",
+  "name": "סלט ניסואז",
+  "amount": "120",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "hLnr5kTT",
+  "name": "סלט נודלס אסיאתי",
+  "amount": "130",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "6X1EE0yW",
+  "name": "סלט בורגול מתובל",
+  "amount": "130",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "KF2aWvaZ",
+  "name": "סלט קולסלאו",
+  "amount": "120",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "f7wjK1yG",
+  "name": "מגש אנטיפסטי",
+  "amount": "135",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "KFLpusFO",
+  "name": "מגש לביבות",
+  "amount": "135",
+  "menuSection": "מגשים פרווה"
+ },
+ {
+  "id": "L8CAuNtj",
+  "name": "מגש מיני פשטידות",
+  "amount": "229",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "yXM9S8l4",
+  "name": "מגש מיני לזניה",
+  "amount": "165",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "Ql9eRtjf",
+  "name": "מגש רביולי",
+  "amount": "139",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "elTzrWJh",
+  "name": "פסטה ללא גלוטן",
+  "amount": "139",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "sKsFq4lK",
+  "name": "קישואים ממולאים",
+  "amount": "139",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "KZqRoh4g",
+  "name": "פלפל ממולא",
+  "amount": "139",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "zkknBRuH",
+  "name": "חציל פרמזן",
+  "amount": "139",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "51IdgT4N",
+  "name": "מגש שבלולי פיצות",
+  "amount": "99",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "N_4R7GuO",
+  "name": "בטטה אפויה",
+  "amount": "135",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "h9M32NWG",
+  "name": "מגש שקשוקה פיקנטית",
+  "amount": "100",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "DPGcB08r",
+  "name": "סלט יווני",
+  "amount": "120",
+  "menuSection": "סלטים"
+ },
+ {
+  "id": "gEHyw7kb",
+  "name": "סלט פסטה",
+  "amount": "130",
+  "menuSection": "סלטים"
+ },
+ {
+  "id": "0OahX1OQ",
+  "name": "סלט פסטה ללא גלוטן",
+  "amount": "145",
+  "menuSection": "סלטים"
+ },
+ {
+  "id": "BkemjW_6",
+  "name": "מארז בייגל מזונות (12 יחידות)",
+  "amount": "84",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "WzpOtuqY",
+  "name": "מארז בייגל קינמון וצימוקים (6 יחידות)",
+  "amount": "48",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "st-e9DoB",
+  "name": "בייגל ללא גלוטן (2 יחידות)",
+  "amount": "18",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "MR8FNF3u",
+  "name": "סלט טונה",
+  "amount": "32",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "RQGjUe_1",
+  "name": "סלט ביצים",
+  "amount": "30",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "o4Fd9LPj",
+  "name": "מארז טורטיה ללא גלוטן (3 יח')",
+  "amount": "34",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "J-9R1mpj",
+  "name": "גבינה צהובה טבעונית",
+  "amount": "30",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "NOk6EpQK",
+  "name": "מיץ טבעי גדול (2 ליטר)",
+  "amount": "35",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "WBMw5c1A",
+  "name": "שתיה גדולה (1.5 ליטר)",
+  "amount": "12",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "IU-BqHns",
+  "name": "חלב / תחליפי חלב",
+  "amount": "8",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "uUPtsUSl",
+  "name": "חלב סויה/ שקדים/ שיבולת שועל",
+  "amount": "18",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "El4itLu1",
+  "name": "מים מינרלים (1.5 ליטר)",
+  "amount": "8",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "Z0GWH36B",
+  "name": "כף הגשה",
+  "amount": "6",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "_Y_W30Wj",
+  "name": "מגש סלמון חם",
+  "amount": "259",
+  "menuSection": "דגים"
+ },
+ {
+  "id": "376YoN7l",
+  "name": "כריך בייגל ארוז",
+  "amount": "31",
+  "menuSection": "מנות ארוזות וארוחות קומבו"
+ },
+ {
+  "id": "cwGnJnyP",
+  "name": "ארוחה חמה+ סלט אישי+ שתיה",
+  "amount": "59",
+  "menuSection": "מנות ארוזות וארוחות קומבו"
+ },
+ {
+  "id": "dsbvxbNY",
+  "name": "קומבו סלט+ בייגל+ מאפין+ שתיה",
+  "amount": "51",
+  "menuSection": "מנות ארוזות וארוחות קומבו"
+ },
+ {
+  "id": "M5AmXjh7",
+  "name": "קומבו בייגל סלמון מעושן+ סלט אישי+ מאפה/מאפין+ שתיה",
+  "amount": "59",
+  "menuSection": "מנות ארוזות וארוחות קומבו"
+ },
+ {
+  "id": "B1FxNksK",
+  "name": "קומבו כריך בייגל + סלט אישי+ מאפה/מאפינס+ שתיה",
+  "amount": "49",
+  "menuSection": "מנות ארוזות וארוחות קומבו"
+ },
+ {
+  "id": "2dH-NLfb",
+  "name": "קומבו בייגל סלמון מעושן הכולל כריך+ מאפין+ שתיה",
+  "amount": "49",
+  "menuSection": "מנות ארוזות וארוחות קומבו"
+ },
+ {
+  "id": "gfPIhDv4",
+  "name": "קומבו בסיסי הכולל כריך בייגל + מאפין+ שתיה",
+  "amount": "42",
+  "menuSection": "מנות ארוזות וארוחות קומבו"
+ },
+ {
+  "id": "02rgKbF7",
+  "name": "פשטידה ללא קמח (20 ס\"מ)",
+  "amount": "89",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "c1L6bkwt",
+  "name": "חומוס טבעוני",
+  "amount": "16",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "dQFCv2r-",
+  "name": "טחינה טבעונית",
+  "amount": "18",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "BJ7dvK5F",
+  "name": "קיש טבעוני (20 ס\"מ)",
+  "amount": "89",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "iJvAU05R",
+  "name": "עוגת פיסטוקים טבעונית",
+  "amount": "169",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "sJIEwElB",
+  "name": "עוגת נוצ'לטו טבעונית",
+  "amount": "169",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "VFY9jLOD",
+  "name": "עוגת \"גבינה\" טבעונית פרווה",
+  "amount": "169",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "2ZN0mNId",
+  "name": "פאי פקאן טבעוני",
+  "amount": "169",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "WUHg3x5x",
+  "name": "פאי תפוחים קראמבל טבעוני",
+  "amount": "169",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "UHSovDwI",
+  "name": "עוגה בחושה בננה ושוקולד טבעוני",
+  "amount": "45",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "7EZwxoBS",
+  "name": "מארז מאפינס בננה אישי טבעוני (4 יח')",
+  "amount": "56",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "WoAEaygb",
+  "name": "מיני בר סניקרס טבעוני פרווה (48 יח')",
+  "amount": "315",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "97pGsKpP",
+  "name": "מיני בול רושה טבעוני פרווה",
+  "amount": "180",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "vSAW3yEd",
+  "name": "מיני בול פיסטוק טבעוני פרווה",
+  "amount": "180",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "XAoXcgog",
+  "name": "סוויט רולס טבעוני פרווה על מקל (20 יח')",
+  "amount": "120",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "lNRK1c-2",
+  "name": "כדורי תמרים טבעוני",
+  "amount": "200",
+  "menuSection": "תפריט טבעוני"
+ },
+ {
+  "id": "owP2Vg5j",
+  "name": "סלמון מעושן (קופסא 100 גרם)",
+  "amount": "26",
+  "menuSection": "בייגל וממרחים"
+ },
+ {
+  "id": "yhTXW0NT",
+  "name": "דג סול מטוגן (20 יח')",
+  "amount": "300",
+  "menuSection": "דגים"
+ },
+ {
+  "id": "hWBirE57",
+  "name": "מגש פסטה",
+  "amount": "139",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "w31bD6tp",
+  "name": "קיש עגול בינוני (קוטר 20)",
+  "amount": "89",
+  "menuSection": "פלטות חמות"
+ },
+ {
+  "id": "QZhctGpf",
+  "name": "מפת אל-בד",
+  "amount": "10",
+  "menuSection": "שונות"
+ },
+ {
+  "id": "OxRAL73o",
+  "name": "מגש ירקות עם מטבל-דיפ (קטן)",
+  "amount": "115",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "_fbRJjDJ",
+  "name": "מגש ירקות עם מטבל-דיפ (גדול)",
+  "amount": "210",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "-Qgo8ykj",
+  "name": "מגש גבינות קשות (קטן)",
+  "amount": "199",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "tKF6I2Dv",
+  "name": "מגש גבינות קשות (גדול)",
+  "amount": "295",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "4dQVvMVD",
+  "name": "מגש סלמון מעושן (קטן)",
+  "amount": "210",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "KE95tR9p",
+  "name": "מגש סלמון מעושן (גדול)",
+  "amount": "360",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "vefmfM2B",
+  "name": "מגש דגים מעושנים (קטן)",
+  "amount": "220",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "nLlMJuCk",
+  "name": "מגש דגים מעושנים (גדול)",
+  "amount": "375",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "Q5tpdqhQ",
+  "name": "מגש בורקסים מגוון (קטן)",
+  "amount": "99",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "HmjMaezO",
+  "name": "מגש בורקסים מגוון (גדול)",
+  "amount": "159",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "M-wJNtQp",
+  "name": "מגש פיצות אישיות (רגיל)",
+  "amount": "129",
+  "menuSection": "מגשים לקידוש"
+ },
+ {
+  "id": "BEuHKBpO",
+  "name": "מגש פיצות אישיות (עם תוספות מגוונות)",
+  "amount": "160",
+  "menuSection": "מגשים לקידוש"
+ }
+]
