@@ -25,17 +25,25 @@ import {
   MIN_ORDER_BRACKETS
 } from '../lib/constants';
 
-// One entry per checkbox facet: [filters key, its full option list]. Walked once to build both
-// the "if I also click this, how many results" counts and (implicitly) the full set of possible
-// filter keys - see optionCounts below.
+// One entry per checkbox facet: [filters key, its full option list, match mode]. Match mode has
+// to mirror matchesFilters() in lib/search.js exactly, since it decides how each option's count
+// is simulated below:
+//   - 'or'  (districts/kashrutLevels/cateringTypes/eventTypes/alaCarteCategories): a caterer needs
+//     ANY selected value. Selecting a second option in the same facet only ever ADDS caterers, so
+//     an option's count is shown on its own (as if it were the only one picked) - otherwise
+//     checking "בשרי" then "חלבי" would make "חלבי (26)" look like "26 dairy caterers" when only
+//     12 actually are, the other 14 being meat caterers pulled in by the OR with "בשרי".
+//   - 'and' (menuCategories/services): a caterer needs EVERY selected value. Here a second
+//     selection only ever narrows, which is what people expect a checkbox count to mean - so an
+//     option's count is shown compounded with whatever else is already checked in that facet.
 const CHECKBOX_FACETS = [
-  ['districts', DISTRICTS],
-  ['cateringTypes', CATERING_TYPES],
-  ['kashrutLevels', KASHRUT_LEVELS],
-  ['eventTypes', EVENT_TYPES],
-  ['menuCategories', MENU_CATEGORIES],
-  ['alaCarteCategories', ALACARTE_CATEGORIES],
-  ['services', ADDITIONAL_SERVICES]
+  ['districts', DISTRICTS, 'or'],
+  ['cateringTypes', CATERING_TYPES, 'or'],
+  ['kashrutLevels', KASHRUT_LEVELS, 'or'],
+  ['eventTypes', EVENT_TYPES, 'or'],
+  ['menuCategories', MENU_CATEGORIES, 'and'],
+  ['alaCarteCategories', ALACARTE_CATEGORIES, 'or'],
+  ['services', ADDITIONAL_SERVICES, 'and']
 ];
 
 const EMPTY_FILTERS = {
@@ -89,16 +97,22 @@ export default function HomePage() {
       .sort((a, b) => b.matchCount - a.matchCount);
   }, [allCaterers, activeFilters, keywordTerms, locale]);
 
-  // For every option in every checkbox/radio facet: how many results you'd have with that option
-  // selected, holding every other active filter fixed. For an option that's already selected,
-  // that's just the current result count (not "what unselecting it would do" - toggling would
-  // make an already-checked "ירושלים" show the count for every OTHER district removed, which
-  // reads as a bug, not a feature). So this always ensures the option is INCLUDED rather than
-  // literally toggling it - toggleFilterValue is still what an actual click runs through.
+  // For every option in every checkbox/radio facet: how many results that option represents,
+  // holding every other FACET fixed but treating this one specially per its match mode (see
+  // CHECKBOX_FACETS above). Never a literal toggle - toggleFilterValue is still what an actual
+  // click runs through, but "what would toggling do" makes a poor count to display: for an
+  // already-selected option it would show what UNselecting it does (looks like a bug), and for an
+  // 'or' facet with a sibling already checked it would show their inflated union (looks like a
+  // wrong count). Either way, showing each option's own count independent of its siblings is what
+  // people actually read a facet count as meaning.
   const optionCounts = useMemo(() => {
     if (allCaterers.length === 0) return undefined;
     const counts = {};
-    const countWithChecked = (key, value) => {
+    const countWithOr = (key, value) => {
+      const hypothetical = { ...filters, [key]: [value], locale };
+      return allCaterers.filter((c) => matchesFilters(c, hypothetical)).length;
+    };
+    const countWithAnd = (key, value) => {
       const already = filters[key].includes(value);
       const hypothetical = { ...(already ? filters : toggleFilterValue(filters, key, value)), locale };
       return allCaterers.filter((c) => matchesFilters(c, hypothetical)).length;
@@ -107,8 +121,9 @@ export default function HomePage() {
       const hypothetical = { ...filters, [key]: value, locale };
       return allCaterers.filter((c) => matchesFilters(c, hypothetical)).length;
     };
-    for (const [key, options] of CHECKBOX_FACETS) {
-      for (const opt of options) counts[`${key}:${opt}`] = countWithChecked(key, opt);
+    for (const [key, options, mode] of CHECKBOX_FACETS) {
+      const countFor = mode === 'and' ? countWithAnd : countWithOr;
+      for (const opt of options) counts[`${key}:${opt}`] = countFor(key, opt);
     }
     for (const g of GUEST_COUNT_BRACKETS) counts[`minGuests:${g.max}`] = countWithRadio('minGuests', String(g.max));
     for (const g of MIN_ORDER_BRACKETS) counts[`maxMinOrder:${g.max}`] = countWithRadio('maxMinOrder', String(g.max));
