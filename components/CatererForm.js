@@ -24,33 +24,25 @@ function makeId() {
 const LOGO_WIDTH = 796;
 const LOGO_HEIGHT = 476;
 
-// Center-crops (like CSS object-fit: cover) then downsizes the given image file to exactly
-// LOGO_WIDTH x LOGO_HEIGHT, entirely client-side via canvas - no server-side image processing
-// dependency needed. Resolves to a JPEG Blob.
+// Downsizes the given image file to fit within LOGO_WIDTH x LOGO_HEIGHT (never upscales),
+// preserving its original aspect ratio so no part of the logo is cropped - CatererCard.js then
+// displays it with object-contain, which relies on the full logo actually being present in the
+// stored file. Entirely client-side via canvas - no server-side image processing dependency
+// needed. Resolves to a JPEG Blob.
 function resizeImageToLogo(file) {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
+      const scale = Math.min(1, LOGO_WIDTH / img.width, LOGO_HEIGHT / img.height);
+      const width = Math.round(img.width * scale);
+      const height = Math.round(img.height * scale);
       const canvas = document.createElement('canvas');
-      canvas.width = LOGO_WIDTH;
-      canvas.height = LOGO_HEIGHT;
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
-      const targetRatio = LOGO_WIDTH / LOGO_HEIGHT;
-      const srcRatio = img.width / img.height;
-      let sx = 0;
-      let sy = 0;
-      let sWidth = img.width;
-      let sHeight = img.height;
-      if (srcRatio > targetRatio) {
-        sWidth = img.height * targetRatio;
-        sx = (img.width - sWidth) / 2;
-      } else {
-        sHeight = img.width / targetRatio;
-        sy = (img.height - sHeight) / 2;
-      }
-      ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, LOGO_WIDTH, LOGO_HEIGHT);
+      ctx.drawImage(img, 0, 0, width, height);
       canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('resize failed'))), 'image/jpeg', 0.9);
     };
     img.onerror = () => {
@@ -885,13 +877,9 @@ export function CatererForm({ initial, catererId }) {
         <p className="text-xs text-ink/60 mt-1">{dict.form.logoHint}</p>
         {uploadingLogo && <p className="text-sm text-ink/60 mt-1">{dict.form.saving}</p>}
         {form.logo && (
-          <div className="relative mt-2 w-48">
+          <div className="relative mt-2 w-48 h-28 bg-limeLight rounded-lg border-2 border-teal/40 overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={form.logo}
-              alt=""
-              className="w-48 aspect-[796/476] object-cover rounded-lg border-2 border-teal/40"
-            />
+            <img src={form.logo} alt="" className="w-full h-full object-contain p-2" />
             <button
               type="button"
               onClick={removeLogo}
