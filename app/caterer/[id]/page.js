@@ -352,8 +352,10 @@ function PackagesSection({ caterer, dict, locale, guestCount, setGuestCount, hl,
         </div>
       </details>
     ) : (
+      // Only one of the two groups exists, so there's nothing for `heading` to disambiguate -
+      // showing it here would just be a redundant "תפריטים" sitting on top of "התפריט" and the
+      // package's own name right below it.
       <div className="mb-4">
-        <h3 className="font-display font-bold text-lg text-teal/80 mb-2">{heading}</h3>
         {extraContent}
         <PackageGroup packages={packages} {...groupProps} />
       </div>
