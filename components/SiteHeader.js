@@ -25,9 +25,6 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-5 font-display font-medium text-teal">
-          <Link href="/" className="hover:text-orange focus-ring rounded">
-            {dict.nav.search}
-          </Link>
           {session && (
             <Link href="/dashboard" className="hover:text-orange focus-ring rounded">
               {dict.nav.dashboard}
@@ -107,9 +104,6 @@ export function SiteHeader() {
             ))}
           </select>
 
-          <Link href="/" className="hover:text-orange focus-ring rounded" onClick={() => setMenuOpen(false)}>
-            {dict.nav.search}
-          </Link>
           {session && (
             <Link href="/dashboard" className="hover:text-orange focus-ring rounded" onClick={() => setMenuOpen(false)}>
               {dict.nav.dashboard}
