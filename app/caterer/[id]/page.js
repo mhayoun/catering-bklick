@@ -10,6 +10,12 @@ import { Highlight } from '../../../components/Highlight';
 import { pickLocalized, toArrayField } from '../../../lib/localized';
 import { estimatePackageTotal, cheapestPackageEstimate } from '../../../lib/pricing';
 import { buildPackageHaystack, countOccurrences, parseKeywords } from '../../../lib/search';
+import { MENU_CATEGORIES } from '../../../lib/constants';
+
+// Renders menu categories in the fixed order editors/search use (salads, starters, main_courses,
+// hot_sides, breads, desserts, beverages_non_alcoholic, beverages_alcoholic) rather than whatever
+// order a package's own includedCategories array / categoryItems keys happen to be in.
+const byMenuCategoryOrder = (a, b) => MENU_CATEGORIES.indexOf(a) - MENU_CATEGORIES.indexOf(b);
 
 // useSearchParams() must be read inside a Suspense boundary, or Next.js's production build can
 // silently freeze it (it read fine in `next dev`, which skips that optimization) - this is what
@@ -396,21 +402,23 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
   };
   const commonCategories =
     comparable && categorySets.length > 0
-      ? [...categorySets[0]].filter((cat) => {
-          if (!dict.menuCategories[cat] || !categorySets.every((s) => s.has(cat))) return false;
-          const values = packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
-          const varies = values.some((v) => v !== null) && !values.every((v) => v === values[0]);
-          return !varies;
-        })
+      ? [...categorySets[0]]
+          .filter((cat) => {
+            if (!dict.menuCategories[cat] || !categorySets.every((s) => s.has(cat))) return false;
+            const values = packages.map((p) => Number(p.categoryLimits?.[cat]) || null);
+            const varies = values.some((v) => v !== null) && !values.every((v) => v === values[0]);
+            return !varies;
+          })
+          .sort(byMenuCategoryOrder)
       : [];
 
   // Specific menu items (e.g. individual salads) present in every package's own item list for a
   // given category - shown once in "common to all" instead of repeated on each card. Only computed
   // for categories where EVERY package actually lists items (not just a choice count).
   const itemizedCategories = comparable
-    ? [...new Set(packages.flatMap((p) => Object.keys(p.categoryItems || {})))].filter((cat) =>
-        packages.every((p) => (p.categoryItems?.[cat]?.length || 0) > 0)
-      )
+    ? [...new Set(packages.flatMap((p) => Object.keys(p.categoryItems || {})))]
+        .filter((cat) => packages.every((p) => (p.categoryItems?.[cat]?.length || 0) > 0))
+        .sort(byMenuCategoryOrder)
     : [];
   const commonItemIdsByCategory = Object.fromEntries(
     itemizedCategories.map((cat) => {
@@ -546,7 +554,10 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
 
               {pkg.includedCategories?.filter((m) => dict.menuCategories[m] && !commonCategories.includes(m)).length > 0 && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {pkg.includedCategories.filter((m) => dict.menuCategories[m] && !commonCategories.includes(m)).map((m) => (
+                  {pkg.includedCategories
+                    .filter((m) => dict.menuCategories[m] && !commonCategories.includes(m))
+                    .sort(byMenuCategoryOrder)
+                    .map((m) => (
                     <span key={m} className="bg-limeLight border-2 border-teal/40 rounded-full px-2.5 py-0.5 text-xs">
                       <Highlight text={dict.menuCategories[m]} query={hl} />
                       {pkg.categoryLimits?.[m] && ` · ${d.categoryChoiceCount.replace('{n}', pkg.categoryLimits[m])}`}
@@ -557,6 +568,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
 
               {pkg.includedCategories
                 ?.filter((m) => pkg.categoryItems?.[m]?.length > 0)
+                .sort(byMenuCategoryOrder)
                 .map((m) => {
                   const commonIds = commonItemIdsByCategory[m];
                   const items = commonIds ? pkg.categoryItems[m].filter((it) => !commonIds.has(it.id)) : pkg.categoryItems[m];
