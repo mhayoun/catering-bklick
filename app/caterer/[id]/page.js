@@ -456,9 +456,13 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                   <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
                     {dict.menuCategories[cat]} ({commonItemsByCategory[cat].length})
                   </summary>
-                  <p className="pt-1 leading-relaxed">
-                    <Highlight text={text} query={hl} />
-                  </p>
+                  <ul className="pt-1 space-y-0.5 list-disc ps-4 leading-relaxed">
+                    {commonItemsByCategory[cat].map((item) => (
+                      <li key={item.id}>
+                        <Highlight text={pickLocalized(item, locale)} query={hl} />
+                      </li>
+                    ))}
+                  </ul>
                 </details>
               );
             })}
@@ -579,9 +583,13 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                       <summary className="cursor-pointer text-teal font-display font-semibold underline focus-ring rounded">
                         {dict.menuCategories[m]} · {commonIds ? d.extraOptions : d.viewOptions}
                       </summary>
-                      <p className="pt-1 leading-relaxed">
-                        <Highlight text={text} query={hl} />
-                      </p>
+                      <ul className="pt-1 space-y-0.5 list-disc ps-4 leading-relaxed">
+                        {items.map((item) => (
+                          <li key={item.id}>
+                            <Highlight text={pickLocalized(item, locale)} query={hl} />
+                          </li>
+                        ))}
+                      </ul>
                     </details>
                   );
                 })}
