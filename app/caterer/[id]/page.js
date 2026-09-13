@@ -7,6 +7,7 @@ import { useLanguage } from '../../../components/LanguageProvider';
 import { Logo } from '../../../components/Logo';
 import { ProposalModal } from '../../../components/ProposalModal';
 import { Highlight } from '../../../components/Highlight';
+import { LoadingScreen } from '../../../components/Spinner';
 import { pickLocalized, toArrayField } from '../../../lib/localized';
 import { estimatePackageTotal, cheapestPackageEstimate } from '../../../lib/pricing';
 import { buildPackageHaystack, countOccurrences, parseKeywords } from '../../../lib/search';
@@ -22,7 +23,7 @@ const byMenuCategoryOrder = (a, b) => MENU_CATEGORIES.indexOf(a) - MENU_CATEGORI
 // broke the "?hl=" highlight/auto-open-accordion feature specifically in production.
 export default function CatererProfilePage(props) {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>}>
+    <Suspense fallback={<LoadingScreen />}>
       <CatererProfilePageInner {...props} />
     </Suspense>
   );
@@ -61,7 +62,7 @@ function CatererProfilePageInner({ params }) {
   }, [lightboxIndex, photoCount]);
 
   if (caterer === undefined) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
+    return <LoadingScreen />;
   }
   if (caterer === null) {
     return (
@@ -474,14 +475,14 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
               <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
                 {d.addonsIncluded} ({commonAddons.length})
               </summary>
-              <ul className="pt-1 space-y-0.5">
+              <ul className="pt-1 space-y-0.5 list-disc ps-4">
                 {commonAddons.map((addon) => {
                   const hasPrice = Number(addon.amount) > 0;
                   const estimatedAmount =
                     addon.priceType === 'per_guest' ? Number(addon.amount) * commonBilledGuests : Number(addon.amount);
                   return (
                     <li key={addon.id}>
-                      + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />
+                      <Highlight text={pickLocalized(addon.name, locale)} query={hl} />
                       {hasPrice ? (
                         <>
                           :{' '}
@@ -611,7 +612,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                     const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
                     return (
                       <li key={addon.id}>
-                        + <Highlight text={pickLocalized(addon.name, locale)} query={hl} />
+                        <Highlight text={pickLocalized(addon.name, locale)} query={hl} />
                         {hasPrice ? (
                           <>
                             :{' '}
@@ -654,7 +655,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                         <summary className="cursor-pointer text-ink/50 font-display font-semibold focus-ring rounded">
                           {pkg.type === 'a_la_carte' ? d.allProducts : d.addonsIncluded} ({shownAddons.length})
                         </summary>
-                        <ul className="pt-1 space-y-0.5">{shownAddons.map(renderAddonLine)}</ul>
+                        <ul className="pt-1 space-y-0.5 list-disc ps-4">{shownAddons.map(renderAddonLine)}</ul>
                       </details>
                     );
                   }
@@ -687,7 +688,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                           <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
                             {label} ({items.length})
                           </summary>
-                          <ul className="pt-1 space-y-0.5 ps-2">{items.map(renderAddonLine)}</ul>
+                          <ul className="pt-1 space-y-0.5 list-disc ps-6">{items.map(renderAddonLine)}</ul>
                         </details>
                       ))}
                     </div>

@@ -5,6 +5,7 @@ import { useLanguage } from '../components/LanguageProvider';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { CatererCard } from '../components/CatererCard';
 import { FormulaCard } from '../components/FormulaCard';
+import { Spinner } from '../components/Spinner';
 import {
   buildCatererHaystack,
   buildPackageHaystack,
@@ -196,7 +197,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
             <p className="font-display font-semibold text-teal">
               {loading
-                ? '…'
+                ? ''
                 : searchMode === 'formulas'
                   ? t('search.resultsCountFormulas', { n: formulas.length })
                   : searchMode === 'a_la_carte'
@@ -237,6 +238,12 @@ export default function HomePage() {
               </button>
             </div>
           </div>
+
+          {loading && (
+            <div className="flex justify-center py-16">
+              <Spinner className="h-10 w-10" />
+            </div>
+          )}
 
           {!loading && searchMode === 'formulas' && formulas.length === 0 && (
             <p className="text-ink/70 bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center">

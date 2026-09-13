@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '../../components/LanguageProvider';
 import { Logo } from '../../components/Logo';
+import { LoadingScreen, Spinner } from '../../components/Spinner';
 import { pickLocalized } from '../../lib/localized';
 
 export default function AdminPage() {
@@ -50,7 +51,7 @@ export default function AdminPage() {
   }
 
   if (status === 'loading' || (status === 'authenticated' && session?.user?.isAdmin === undefined)) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
+    return <LoadingScreen />;
   }
 
   if (status === 'authenticated' && !session?.user?.isAdmin) {
@@ -84,7 +85,7 @@ export default function AdminPage() {
   }
 
   if (pending === null) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
+    return <LoadingScreen />;
   }
 
   return (
@@ -144,7 +145,11 @@ export default function AdminPage() {
       <div className="pt-4 border-t-2 border-teal/10">
         <h2 className="font-display font-bold text-xl text-teal mb-3">{dict.admin.allTitle}</h2>
 
-        {all === null && <p className="text-teal text-center py-6">…</p>}
+        {all === null && (
+          <div className="flex justify-center py-6">
+            <Spinner className="h-6 w-6" />
+          </div>
+        )}
 
         {all?.length === 0 && (
           <p className="bg-limeLight/60 border-2 border-teal/30 rounded-blob p-6 text-center text-ink/70">

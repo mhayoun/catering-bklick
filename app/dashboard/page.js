@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '../../components/LanguageProvider';
+import { LoadingScreen } from '../../components/Spinner';
 import { pickLocalized } from '../../lib/localized';
 
 export default function DashboardPage() {
@@ -32,7 +33,7 @@ export default function DashboardPage() {
   }
 
   if (status === 'loading' || caterers === null) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
+    return <LoadingScreen />;
   }
 
   return (

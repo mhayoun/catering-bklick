@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { CatererForm } from '../../../../components/CatererForm';
+import { LoadingScreen } from '../../../../components/Spinner';
 
 export default function EditCatererPage({ params }) {
   const { status } = useSession();
@@ -21,7 +22,7 @@ export default function EditCatererPage({ params }) {
   }, [params.id]);
 
   if (status !== 'authenticated' || initial === undefined) {
-    return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">…</div>;
+    return <LoadingScreen />;
   }
   if (initial === null) {
     return <div className="mx-auto max-w-4xl px-4 py-16 text-center text-teal">404</div>;
