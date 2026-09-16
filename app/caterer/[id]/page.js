@@ -582,7 +582,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                   return (
                     <details key={`${m}-items`} open={hasMatch(text)} className="text-xs text-ink/60">
                       <summary className="cursor-pointer text-teal font-display font-semibold underline focus-ring rounded">
-                        {dict.menuCategories[m]} · {commonIds ? d.extraOptions : d.viewOptions}
+                        {dict.menuCategories[m]} ({items.length})
                       </summary>
                       <ul className="pt-1 space-y-0.5 list-disc ps-4 leading-relaxed">
                         {items.map((item) => (
@@ -607,19 +607,32 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
               {pkg.addons?.some((a) => !commonAddonIds.includes(a.id)) &&
                 (() => {
                   const shownAddons = pkg.addons.filter((a) => !commonAddonIds.includes(a.id));
-                  const renderAddonLine = (addon) => {
+
+                  // When every item in a list shares the same price (e.g. "₪10 per guest" on every
+                  // salad), showing it on each line is pure repetition - hoist it into the list's
+                  // own title instead and suppress it per line.
+                  const commonPrice = (items) =>
+                    items.length > 0 &&
+                    Number(items[0].amount) > 0 &&
+                    items.every((a) => a.priceType === items[0].priceType && Number(a.amount) === Number(items[0].amount))
+                      ? items[0]
+                      : null;
+                  const formatPrice = (addon) =>
+                    `₪${Number(addon.amount).toLocaleString()} ${addon.priceType === 'per_guest' ? d.perGuest : `(${dict.form.packages.priceTypeFlat})`}`;
+
+                  const renderAddonLine = (addon, { hidePrice } = {}) => {
                     const hasPrice = Number(addon.amount) > 0;
                     const computed = estimate?.availableAddons.find((a) => a.id === addon.id);
                     return (
                       <li key={addon.id}>
                         <Highlight text={pickLocalized(addon.name, locale)} query={hl} />
                         {hasPrice ? (
-                          <>
-                            :{' '}
-                            ₪{Number(addon.amount).toLocaleString()}
-                            {addon.priceType === 'per_guest' ? ` ${d.perGuest}` : ` (${dict.form.packages.priceTypeFlat})`}
-                            {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
-                          </>
+                          hidePrice ? null : (
+                            <>
+                              : {formatPrice(addon)}
+                              {computed && ` — ₪${Math.round(computed.estimatedAmount).toLocaleString()} ${d.estimatedTotal}`}
+                            </>
+                          )
                         ) : addon.priceType === 'included' ? (
                           ` (${dict.form.packages.priceTypeIncluded})`
                         ) : addon.priceType === 'note' ? (
@@ -647,6 +660,7 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                       : null;
 
                   if (!groupField) {
+                    const shared = commonPrice(shownAddons);
                     return (
                       <details
                         open={hasMatch(shownAddons.map((a) => pickLocalized(a.name, locale)).join(', '))}
@@ -654,8 +668,11 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
                       >
                         <summary className="cursor-pointer text-ink/50 font-display font-semibold focus-ring rounded">
                           {pkg.type === 'a_la_carte' ? d.allProducts : d.addonsIncluded} ({shownAddons.length})
+                          {shared && ` · ${formatPrice(shared)}`}
                         </summary>
-                        <ul className="pt-1 space-y-0.5 list-disc ps-4">{shownAddons.map(renderAddonLine)}</ul>
+                        <ul className="pt-1 space-y-0.5 list-disc ps-4">
+                          {shownAddons.map((a) => renderAddonLine(a, { hidePrice: !!shared }))}
+                        </ul>
                       </details>
                     );
                   }
@@ -679,18 +696,24 @@ function PackageGroup({ packages, dict, d, locale, hl, hasMatch, guestCount, che
 
                   return (
                     <div className="pt-2 border-t-2 border-teal/10 space-y-1">
-                      {groups.map(({ key, label, items }) => (
-                        <details
-                          key={key}
-                          open={hasMatch(items.map((a) => pickLocalized(a.name, locale)).join(', '))}
-                          className="text-xs text-ink/60"
-                        >
-                          <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
-                            {label} ({items.length})
-                          </summary>
-                          <ul className="pt-1 space-y-0.5 list-disc ps-6">{items.map(renderAddonLine)}</ul>
-                        </details>
-                      ))}
+                      {groups.map(({ key, label, items }) => {
+                        const shared = commonPrice(items);
+                        return (
+                          <details
+                            key={key}
+                            open={hasMatch(items.map((a) => pickLocalized(a.name, locale)).join(', '))}
+                            className="text-xs text-ink/60"
+                          >
+                            <summary className="cursor-pointer text-teal font-display font-semibold focus-ring rounded">
+                              {label} ({items.length})
+                              {shared && ` · ${formatPrice(shared)}`}
+                            </summary>
+                            <ul className="pt-1 space-y-0.5 list-disc ps-6">
+                              {items.map((a) => renderAddonLine(a, { hidePrice: !!shared }))}
+                            </ul>
+                          </details>
+                        );
+                      })}
                     </div>
                   );
                 })()}
